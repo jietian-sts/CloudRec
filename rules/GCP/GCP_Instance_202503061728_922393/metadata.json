@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["网络访问"],"code":"GCP_Instance_202503061728_922393","context":"{$.have_unrestricted_range}","description":"Instance 拥有public ip，同时通过 Firewalls策略暴露高危服务默认端口","level":"High","link":null,"linkedDataList":null,"name":"GCP-Compute Engine-Instance通过 Firewalls策略暴露高危服务默认端口","platform":"GCP","resourceType":"Instance"}

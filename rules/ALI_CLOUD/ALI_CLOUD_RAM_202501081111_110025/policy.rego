@@ -1,0 +1,10 @@
+package ram_allow_to_login_console_has_ak_2200012_199
+import rego.v1
+
+default risk := false
+
+## 根据下文的检查规则判断是否存在风险
+risk if {
+    input.ConsoleLogin == true
+    input.ExistAccessKey == true
+}

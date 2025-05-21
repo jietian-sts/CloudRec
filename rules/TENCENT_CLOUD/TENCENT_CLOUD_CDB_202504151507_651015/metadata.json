@@ -1,0 +1,1 @@
+{"advice":"","categoryList":["日志审计"],"code":"TENCENT_CLOUD_CDB_202504151507_651015","context":"描述：{$.messages[0].Description}\nID：{$.ResourceId}\n名称：{$.ResourceName}","description":"CDB 未启用审计","level":"Low","link":"","linkedDataList":null,"name":"腾讯云-CDB-未启用审计","platform":"TENCENT_CLOUD","resourceType":"CDB"}

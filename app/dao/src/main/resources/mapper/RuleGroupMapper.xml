@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alipay.dao.mapper.RuleGroupMapper">
+    <resultMap id="BaseResultMap" type="com.alipay.dao.po.RuleGroupPO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="group_name" jdbcType="VARCHAR" property="groupName"/>
+        <result column="group_desc" jdbcType="VARCHAR" property="groupDesc"/>
+        <result column="username" jdbcType="VARCHAR" property="username"/>
+        <result column="last_scan_start_time" jdbcType="TIMESTAMP" property="lastScanStartTime"/>
+        <result column="last_scan_end_time" jdbcType="TIMESTAMP" property="lastScanEndTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , gmt_create, gmt_modified, group_name, group_desc, username, last_scan_start_time,
+    last_scan_end_time, high_level_risk_count, medium_level_risk_count, low_level_risk_count
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from rule_group
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from rule_group
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <insert id="insertSelective" parameterType="com.alipay.dao.po.RuleGroupPO" useGeneratedKeys="true" keyProperty="id">
+        insert into rule_group
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create,
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified,
+            </if>
+            <if test="groupName != null">
+                group_name,
+            </if>
+            <if test="groupDesc != null">
+                group_desc,
+            </if>
+            <if test="username != null">
+                username,
+            </if>
+            <if test="lastScanStartTime != null">
+                last_scan_start_time,
+            </if>
+            <if test="lastScanEndTime != null">
+                last_scan_end_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="gmtCreate != null">
+                #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="groupName != null">
+                #{groupName,jdbcType=VARCHAR},
+            </if>
+            <if test="groupDesc != null">
+                #{groupDesc,jdbcType=VARCHAR},
+            </if>
+            <if test="username != null">
+                #{username,jdbcType=VARCHAR},
+            </if>
+            <if test="lastScanStartTime != null">
+                #{lastScanStartTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="lastScanEndTime != null">
+                #{lastScanEndTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.alipay.dao.po.RuleGroupPO">
+        update rule_group
+        <set>
+            <if test="gmtCreate != null">
+                gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="groupName != null">
+                group_name = #{groupName,jdbcType=VARCHAR},
+            </if>
+            <if test="groupDesc != null">
+                group_desc = #{groupDesc,jdbcType=VARCHAR},
+            </if>
+            <if test="lastScanStartTime != null">
+                last_scan_start_time = #{lastScanStartTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="lastScanEndTime != null">
+                last_scan_end_time = #{lastScanEndTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="findCount" resultType="java.lang.Integer">
+        SELECT COUNT(DISTINCT(rg.id)) FROM rule_group rg
+        INNER JOIN rule_group_rel rgr ON rgr.rule_group_id = rg.id
+        INNER JOIN rule r ON rgr.rule_id = r.id
+        <include refid="getListWhere"></include>
+    </select>
+    <select id="findList" resultMap="BaseResultMap">
+        SELECT
+        rg.*
+        FROM rule_group rg INNER JOIN rule_group_rel rgr ON rgr.rule_group_id = rg.id
+        INNER JOIN rule r ON rgr.rule_id = r.id
+        <include refid="getListWhere"></include>
+        GROUP BY rg.id
+        ORDER BY rg.id DESC
+        <include refid="com.alipay.dao.mapper.RuleMapper.getListLimit"></include>
+    </select>
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM rule_group
+    </select>
+    <select id="findOne" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"></include>
+        FROM rule_group
+        WHERE group_name = #{groupName}
+    </select>
+
+    <sql id="getListWhere">
+        <where>
+            rg.username != "System"
+            <if test="ruleGroupIdList != null and ruleGroupIdList.size > 0">
+                AND rg.id IN
+                <foreach collection="ruleGroupIdList" item="ruleGroupId" open="(" separator="," close=")">
+                    #{ruleGroupId}
+                </foreach>
+            </if>
+            <if test="groupName != null">
+                AND rg.group_name = #{groupName}
+            </if>
+            <if test="username != null">
+                AND rg.username like CONCAT('%',#{username},'%')
+            </if>
+            <if test="ruleIdList != null and ruleIdList.size() > 0">
+                AND r.id IN
+                <foreach collection="ruleIdList" item="ruleId" open="(" separator="," close=")">
+                    #{ruleId}
+                </foreach>
+            </if>
+        </where>
+    </sql>
+
+</mapper>

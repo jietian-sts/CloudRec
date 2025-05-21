@@ -1,0 +1,1 @@
+{"advice":"","categoryList":["网络访问"],"code":"AWS_RDS_202504101456_983487","context":"描述：{$.messages[0].Description}\nID：{$.ResourceId}\n名称：{$.ResourceName}\n问题VPC安全组：{$.messages[0].Misconfigrations}","description":"集群启用公网地址，同时安全组规则中配置了 0.0.0.0/0","level":"High","link":"","linkedDataList":null,"name":"AWS-RDS-集群允许全网访问","platform":"AWS","resourceType":"RDS"}

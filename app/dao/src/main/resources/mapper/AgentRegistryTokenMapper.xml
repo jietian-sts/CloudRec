@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alipay.dao.mapper.AgentRegistryTokenMapper">
+    <resultMap id="BaseResultMap" type="com.alipay.dao.po.AgentRegistryTokenPO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="once_token" jdbcType="VARCHAR" property="onceToken"/>
+        <result column="used" jdbcType="INTEGER" property="used"/>
+        <result column="once_token_create_time" jdbcType="TIMESTAMP" property="onceTokenCreateTime"/>
+        <result column="agent_registry_id" jdbcType="BIGINT" property="agentRegistryId"/>
+        <result column="user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="once_token_expire_time" jdbcType="TIMESTAMP" property="onceTokenExpireTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , gmt_create, gmt_modified, once_token, used, once_token_create_time,
+    agent_registry_id, user_id, once_token_expire_time
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from agent_registry_token
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from agent_registry_token
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <insert id="insertSelective" parameterType="com.alipay.dao.po.AgentRegistryTokenPO">
+        insert into agent_registry_token
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create,
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified,
+            </if>
+            <if test="onceToken != null">
+                once_token,
+            </if>
+            <if test="used != null">
+                used,
+            </if>
+            <if test="onceTokenCreateTime != null">
+                once_token_create_time,
+            </if>
+            <if test="agentRegistryId != null">
+                agent_registry_id,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="onceTokenExpireTime != null">
+                once_token_expire_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="gmtCreate != null">
+                #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="onceToken != null">
+                #{onceToken,jdbcType=VARCHAR},
+            </if>
+            <if test="used != null">
+                #{used,jdbcType=INTEGER},
+            </if>
+            <if test="onceTokenCreateTime != null">
+                #{onceTokenCreateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="agentRegistryId != null">
+                #{agentRegistryId,jdbcType=BIGINT},
+            </if>
+            <if test="userId != null">
+                #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="onceTokenExpireTime != null">
+                #{onceTokenExpireTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.alipay.dao.po.AgentRegistryTokenPO">
+        update agent_registry_token
+        <set>
+            <if test="gmtCreate != null">
+                gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="onceToken != null">
+                once_token = #{onceToken,jdbcType=VARCHAR},
+            </if>
+            <if test="used != null">
+                used = #{used,jdbcType=INTEGER},
+            </if>
+            <if test="onceTokenCreateTime != null">
+                once_token_create_time = #{onceTokenCreateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="agentRegistryId != null">
+                agent_registry_id = #{agentRegistryId,jdbcType=BIGINT},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="onceTokenExpireTime != null">
+                once_token_expire_time = #{onceTokenExpireTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="findNotUsedToken" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM agent_registry_token
+        WHERE used = 0 and user_id = #{userId,jdbcType=VARCHAR} LIMIT 1
+    </select>
+    <select id="findOne" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM agent_registry_token
+        WHERE once_token = #{token,jdbcType=VARCHAR}
+    </select>
+
+</mapper>

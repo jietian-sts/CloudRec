@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["网络访问"],"code":"HUAWEI_CLOUD_PRIVATE_ELB_202503051055_178760","context":"{$.msg_to_user}","description":"华为云专有云-ELB-高危端口暴露","level":"High","link":null,"linkedDataList":null,"name":"华为云专有云-ELB-高危端口暴露","platform":"HUAWEI_CLOUD_PRIVATE","resourceType":"ELB"}

@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["网络访问"],"code":"AWS_RDS_202501151739_834728","context":null,"description":"RDS 数据库向公网开放了 3306 端口，该规则会先判断 RDS 安全组和所属的 VPC 安全组","level":"High","link":null,"linkedDataList":null,"name":"AWS-RDS-云数据库公网暴露","platform":"AWS","resourceType":"RDS"}

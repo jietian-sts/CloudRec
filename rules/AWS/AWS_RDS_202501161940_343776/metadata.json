@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["数据保护"],"code":"AWS_RDS_202501161940_343776","context":null,"description":"检查RDS实例的磁盘加密属性是否为空。当磁盘加密ID为空时，表示不符合规范。可能的影响是数据在传输和存储过程中缺乏加密保护，存在数据泄露的风险。","level":"High","link":null,"linkedDataList":null,"name":"AWS-RDS-实例未加密","platform":"AWS","resourceType":"RDS"}

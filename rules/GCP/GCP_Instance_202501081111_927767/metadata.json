@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["网络访问"],"code":"GCP_Instance_202501081111_927767","context":"{$.msg_to_user}","description":"实例配置了错误的VPC firewall rule，通过Public IP 将自身全部端口暴露至公网","level":"High","link":null,"linkedDataList":null,"name":"GCP-Compute Engine-Instance通过Public IP 公网暴露","platform":"GCP","resourceType":"Instance"}

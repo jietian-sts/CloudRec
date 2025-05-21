@@ -1,0 +1,660 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alipay.dao.mapper.RuleScanResultMapper">
+    <resultMap id="BaseResultMap" type="com.alipay.dao.po.RuleScanResultPO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="rule_id" jdbcType="BIGINT" property="ruleId"/>
+        <result column="cloud_account_id" jdbcType="VARCHAR" property="cloudAccountId"/>
+        <result column="resource_id" jdbcType="VARCHAR" property="resourceId"/>
+        <result column="resource_name" jdbcType="VARCHAR" property="resourceName"/>
+        <result column="update_time" jdbcType="VARCHAR" property="updateTime"/>
+        <result column="platform" jdbcType="VARCHAR" property="platform"/>
+        <result column="resource_type" jdbcType="VARCHAR" property="resourceType"/>
+        <result column="region" jdbcType="VARCHAR" property="region"/>
+        <result column="tenant_id" jdbcType="BIGINT" property="tenantId"/>
+        <result column="version" jdbcType="BIGINT" property="version"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="ignore_reason_type" jdbcType="VARCHAR" property="ignoreReasonType"/>
+        <result column="ignore_reason" jdbcType="VARCHAR" property="ignoreReason"/>
+        <result column="is_new" jdbcType="INTEGER" property="isNew"/>
+        <result column="cloud_resource_instance_id" jdbcType="BIGINT" property="cloudResourceInstanceId"/>
+        <result column="resource_status" jdbcType="VARCHAR" property="resourceStatus"/>
+        <result column="whited_id" jdbcType="BIGINT" property="whitedId"/>
+    </resultMap>
+    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.alipay.dao.po.RuleScanResultPO">
+        <result column="result" jdbcType="LONGVARCHAR" property="result"/>
+        <result column="rule_snapshoot" jdbcType="LONGVARCHAR" property="ruleSnapshoot"/>
+        <result column="resource_snapshoot" jdbcType="LONGVARCHAR" property="resourceSnapshoot"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , gmt_create, gmt_modified, rule_id, cloud_account_id, resource_id, resource_name,
+    update_time, platform, resource_type, region, tenant_id,version, status,ignore_reason_type,ignore_reason,is_new,cloud_resource_instance_id,resource_status,whited_id
+    </sql>
+    <sql id="Blob_Column_List">
+        result
+        ,rule_snapshoot,resource_snapshoot
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from rule_scan_result
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from rule_scan_result
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+
+    <insert id="insertSelective" parameterType="com.alipay.dao.po.RuleScanResultPO" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into rule_scan_result
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create,
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified,
+            </if>
+            <if test="ruleId != null">
+                rule_id,
+            </if>
+            <if test="cloudAccountId != null">
+                cloud_account_id,
+            </if>
+            <if test="resourceId != null">
+                resource_id,
+            </if>
+            <if test="resourceName != null">
+                resource_name,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+            <if test="platform != null">
+                platform,
+            </if>
+            <if test="resourceType != null">
+                resource_type,
+            </if>
+            <if test="region != null">
+                region,
+            </if>
+            <if test="tenantId != null">
+                tenant_id,
+            </if>
+            <if test="version != null">
+                version,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="ignoreReasonType != null">
+                ignore_reason_type,
+            </if>
+            <if test="ignoreReason != null">
+                ignore_reason,
+            </if>
+            <if test="isNew != null">
+                is_new,
+            </if>
+            <if test="cloudResourceInstanceId != null">
+                cloud_resource_instance_id,
+            </if>
+            <if test="resourceStatus != null">
+                resource_status,
+            </if>
+            <if test="result != null">
+                result,
+            </if>
+            <if test="ruleSnapshoot != null">
+                rule_snapshoot,
+            </if>
+            <if test="resourceSnapshoot != null">
+                resource_snapshoot,
+            </if>
+            <if test="whitedId != null">
+                whited_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="gmtCreate != null">
+                #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="ruleId != null">
+                #{ruleId,jdbcType=BIGINT},
+            </if>
+            <if test="cloudAccountId != null">
+                #{cloudAccountId,jdbcType=VARCHAR},
+            </if>
+            <if test="resourceId != null">
+                #{resourceId,jdbcType=VARCHAR},
+            </if>
+            <if test="resourceName != null">
+                #{resourceName,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=VARCHAR},
+            </if>
+            <if test="platform != null">
+                #{platform,jdbcType=VARCHAR},
+            </if>
+            <if test="resourceType != null">
+                #{resourceType,jdbcType=VARCHAR},
+            </if>
+            <if test="region != null">
+                #{region,jdbcType=VARCHAR},
+            </if>
+            <if test="tenantId != null">
+                #{tenantId,jdbcType=BIGINT},
+            </if>
+            <if test="version != null">
+                #{version,jdbcType=BIGINT},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=VARCHAR},
+            </if>
+
+            <if test="ignoreReasonType != null">
+                #{ignoreReasonType,jdbcType=VARCHAR},
+            </if>
+            <if test="ignoreReason != null">
+                #{ignoreReason,jdbcType=VARCHAR},
+            </if>
+            <if test="isNew != null">
+                #{isNew,jdbcType=VARCHAR},
+            </if>
+            <if test="cloudResourceInstanceId != null">
+                #{cloudResourceInstanceId,jdbcType=BIGINT},
+            </if>
+            <if test="resourceStatus != null">
+                #{resourceStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="result != null">
+                #{result,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="ruleSnapshoot != null">
+                #{ruleSnapshoot,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="resourceSnapshoot != null">
+                #{resourceSnapshoot,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="whitedId != null">
+                #{whitedId,jdbcType=BIGINT},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.alipay.dao.po.RuleScanResultPO">
+        update rule_scan_result
+        <set>
+            <if test="gmtCreate != null">
+                gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="ruleId != null">
+                rule_id = #{ruleId,jdbcType=BIGINT},
+            </if>
+            <if test="cloudAccountId != null">
+                cloud_account_id = #{cloudAccountId,jdbcType=VARCHAR},
+            </if>
+            <if test="resourceId != null">
+                resource_id = #{resourceId,jdbcType=VARCHAR},
+            </if>
+            <if test="resourceName != null">
+                resource_name = #{resourceName,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=VARCHAR},
+            </if>
+            <if test="platform != null">
+                platform = #{platform,jdbcType=VARCHAR},
+            </if>
+            <if test="resourceType != null">
+                resource_type = #{resourceType,jdbcType=VARCHAR},
+            </if>
+            <if test="region != null">
+                region = #{region,jdbcType=VARCHAR},
+            </if>
+            <if test="tenantId != null">
+                tenant_id = #{tenantId,jdbcType=BIGINT},
+            </if>
+            <if test="version != null">
+                version = #{version,jdbcType=BIGINT},
+            </if>
+            <if test="status != null">
+                status = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="ignoreReasonType != null">
+                ignore_reason_type = #{ignoreReasonType,jdbcType=VARCHAR},
+            </if>
+            <if test="ignoreReason != null">
+                ignore_reason = #{ignoreReason,jdbcType=VARCHAR},
+            </if>
+            <if test="isNew != null">
+                is_new = #{isNew,jdbcType=VARCHAR},
+            </if>
+            <if test="cloudResourceInstanceId != null">
+                cloud_resource_instance_id = #{cloudResourceInstanceId,jdbcType=BIGINT},
+            </if>
+            <if test="resourceStatus != null">
+                resource_status = #{resourceStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="result != null">
+                result = #{result,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="ruleSnapshoot != null">
+                rule_snapshoot = #{ruleSnapshoot,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="resourceSnapshoot != null">
+                resource_snapshoot = #{resourceSnapshoot,jdbcType=LONGVARCHAR},
+            </if>
+            <choose>
+                <when test="whitedId != null">
+                    whited_id = #{whitedId,jdbcType=BIGINT},
+                </when>
+                <otherwise>
+                    whited_id = NULL,
+                </otherwise>
+            </choose>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="fineOne" resultMap="ResultMapWithBLOBs">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        ,
+        <include refid="Blob_Column_List"></include>
+        FROM rule_scan_result
+        WHERE resource_id = #{resourceId} AND cloud_account_id = #{cloudAccountId} AND rule_id = #{ruleId}
+    </select>
+
+
+    <select id="findCount" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM rule_scan_result rsr INNER JOIN rule r on r.id = rsr.rule_id
+        <include refid="findListWhere"></include>
+    </select>
+    <select id="findList" resultMap="ResultMapWithBLOBs">
+        SELECT
+        rsr.*
+        FROM rule_scan_result rsr INNER JOIN rule r on r.id = rsr.rule_id
+        <include refid="findListWhere"></include>
+        ORDER BY rsr.id DESC
+        <include refid="com.alipay.dao.mapper.RuleMapper.getListLimit"></include>
+    </select>
+
+    <select id="findIdList" resultMap="BaseResultMap">
+        SELECT id
+        FROM rule_scan_result
+        WHERE platform = #{platform}
+          AND resource_type = #{resourceType}
+    </select>
+
+    <select id="findMaxVersion" resultType="java.lang.Long">
+        SELECT MAX(version)
+        FROM rule_scan_result
+        WHERE rule_id = #{ruleId}
+          AND cloud_account_id = #{cloudAccountId}
+    </select>
+
+    <select id="find" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM rule_scan_result
+        WHERE rule_Id = #{ruleId} AND cloud_account_id = #{cloudAccountId} AND status IN (
+        <foreach collection="statusList" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        )
+        AND version &lt; #{nextVersion,jdbcType=BIGINT}
+    </select>
+    <select id="findRiskCountGroupByRuleType" resultType="com.alipay.dao.dto.HomeTopRiskDTO">
+        SELECT rsr.rule_id AS ruleId,rsr.platform AS platform,
+        r.rule_name AS ruleName,
+        r.rule_code AS ruleCode,
+        r.risk_level AS riskLevel,
+        COUNT(*) AS count
+        FROM rule_scan_result rsr
+        INNER JOIN rule r ON rsr.rule_id = r.id
+        WHERE
+        1=1
+        <if test="tenantId != null">
+            AND rsr.tenant_id = #{tenantId}
+        </if>
+        AND r.risk_level = #{riskLevel}
+        AND r.status = "valid"
+        AND rsr.status IN
+        <foreach collection="statusList" close=")" item="item" open="(" index="index">#{item}</foreach>
+        GROUP BY rsr.rule_id
+        HAVING COUNT > 0
+        ORDER BY COUNT DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="findRiskCount" resultType="com.alipay.dao.dto.RiskCountDTO">
+        SELECT /*+ query_timeout(30000000)*/
+        COUNT(*) AS totalRiskCount,
+        SUM(CASE WHEN r.risk_level = 'High' THEN 1 ELSE 0 END) AS highLevelRiskCount,
+        SUM(CASE WHEN r.risk_level = 'Medium' THEN 1 ELSE 0 END) AS mediumLevelRiskCount,
+        SUM(CASE WHEN r.risk_level = 'Low' THEN 1 ELSE 0 END) AS lowLevelRiskCount
+        FROM rule_scan_result rsr
+        INNER JOIN
+        rule r
+        ON
+        r.id = rsr.rule_id
+        WHERE r.status = 'valid'
+        <if test="resourceType != null and resourceType != ''">
+            AND rsr.resource_type = #{resourceType}
+        </if>
+        <if test="platform != null and platform != ''">
+            AND rsr.platform = #{platform}
+        </if>
+        <if test="cloudAccountIdList != null and cloudAccountIdList.size() > 0">
+            AND rsr.cloud_account_id IN
+            <foreach collection="cloudAccountIdList" item="cloudAccountId" open="(" separator="," close=")">
+                #{cloudAccountId}
+            </foreach>
+        </if>
+        <if test="tenantId != null">
+            AND rsr.tenant_id = #{tenantId}
+        </if>
+        <if test="resourceId != null">
+            AND rsr.resource_id = #{resourceId}
+        </if>
+        <if test="resourceIdOrName != null and resourceIdOrName != ''">
+            AND (rsr.resource_id LIKE CONCAT(#{resourceIdOrName},'%') OR rsr.resource_name LIKE
+            CONCAT(#{resourceIdOrName},'%'))
+        </if>
+        <if test="status != null and status != ''">
+            AND rsr.status = #{status}
+        </if>
+    </select>
+
+    <sql id="findListWhere">
+        <where>
+            r.status = "valid"
+            <if test="cloudAccountIdList != null and cloudAccountIdList.size() > 0">
+                AND rsr.cloud_account_id IN
+                <foreach collection="cloudAccountIdList" item="cloudAccountId" open="(" separator="," close=")">
+                    #{cloudAccountId}
+                </foreach>
+            </if>
+            <if test="ruleId != null">
+                AND rsr.rule_id = #{ruleId,jdbcType=BIGINT}
+            </if>
+            <if test="ruleIdList != null and ruleIdList.size > 0">
+                AND rsr.rule_id IN
+                <foreach collection="ruleIdList" item="ruleId" open="(" separator="," close=")">
+                    #{ruleId}
+                </foreach>
+            </if>
+            <if test="version != null">
+                AND rsr.version = #{version}
+            </if>
+            <if test="resourceId != null">
+                AND rsr.resource_id = #{resourceId,jdbcType=VARCHAR}
+            </if>
+            <if test="resourceName != null and resourceName != ''">
+                AND rsr.resource_name LIKE CONCAT('%',#{resourceName},'%')
+            </if>
+            <if test="platform != null and platform != ''">
+                AND rsr.platform = #{platform,jdbcType=VARCHAR}
+            </if>
+            <if test="platformList != null and platformList.size() > 0">
+                AND rsr.platform IN
+                <foreach collection="platformList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="resourceType != null and resourceType != ''">
+                AND rsr.resource_type = #{resourceType,jdbcType=VARCHAR}
+            </if>
+            <if test="resourceTypeList != null and resourceTypeList.size() > 0">
+                AND rsr.resource_type IN
+                <foreach collection="resourceTypeList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="region != null and region != ''">
+                AND rsr.region = #{region,jdbcType=VARCHAR}
+            </if>
+            <if test="tenantId != null">
+                AND rsr.tenant_id = #{tenantId,jdbcType=BIGINT}
+            </if>
+            <if test="status != null and status != ''">
+                AND rsr.status = #{status,jdbcType=VARCHAR}
+            </if>
+            <if test="statusList != null and statusList.size() > 0 ">
+                AND rsr.status IN
+                <foreach collection="statusList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="isNew != null">
+                AND rsr.is_new = #{isNew,jdbcType=VARCHAR}
+            </if>
+            <if test="ignoreReasonType != null and ignoreReasonType != ''">
+                AND rsr.ignore_reason_type = #{ignoreReasonType,jdbcType=VARCHAR}
+            </if>
+            <if test="ignoreReasonTypeList != null and ignoreReasonTypeList.size() > 0">
+                AND rsr.ignore_reason_type IN
+                <foreach collection="ignoreReasonTypeList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="ignoreReason != null and ignoreReason != ''">
+                AND rsr.ignore_reason = #{ignoreReason,jdbcType=VARCHAR}
+            </if>
+            <if test="ruleName != null and ruleName != ''">
+                AND r.rule_name LIKE CONCAT('%', #{ruleName}, '%')
+            </if>
+            <if test="ruleCodeList != null and ruleCodeList.size > 0">
+                AND r.rule_code IN
+                <foreach collection="ruleCodeList" item="item" open="(" separator="," close=")">#{item}</foreach>
+            </if>
+            <if test="riskLevelList != null and riskLevelList.size() > 0">
+                AND r.risk_level IN
+                <foreach collection="riskLevelList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="ruleGroupIdList != null and ruleGroupIdList.size > 0">
+                AND EXISTS
+                (SELECT rg.id
+                FROM rule_group_rel rgr
+                INNER JOIN rule_group rg ON rgr.rule_group_id = rg.id
+                WHERE rgr.rule_id = r.id and rg.id IN
+                <foreach collection="ruleGroupIdList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+                )
+            </if>
+            <if test="ruleTypeIdList != null and ruleTypeIdList.size() > 0">
+                AND EXISTS
+                (SELECT rt.id
+                FROM rule_type_rel rtr
+                INNER JOIN rule_type rt ON rtr.rule_type_id = rt.id
+                WHERE rtr.rule_id = r.id and rt.id IN
+                <foreach collection="ruleTypeIdList" item="ruleTypeId" open="(" separator="," close=")">
+                    #{ruleTypeId}
+                </foreach>
+                )
+            </if>
+            <if test="gmtCreateStart != null and gmtCreateEnd != null">
+                AND (rsr.gmt_create &gt;= #{gmtCreateStart} AND rsr.gmt_create &lt;= #{gmtCreateEnd})
+            </if>
+            <if test="gmtModifiedStart != null and gmtModifiedEnd != null">
+                AND (rsr.gmt_modified &gt;= #{gmtModifiedStart} AND rsr.gmt_modified &lt;= #{gmtModifiedEnd})
+            </if>
+            <if test="resourceStatus != null and resourceStatus != ''">
+                AND rsr.resource_status = #{resourceStatus}
+            </if>
+        </where>
+    </sql>
+
+    <delete id="deleteByCloudAccountId">
+        DELETE
+        FROM rule_scan_result
+        WHERE cloud_account_id = #{cloudAccountId}
+    </delete>
+    <delete id="cancelIgnoreRisk">
+        UPDATE rule_scan_result
+        SET ignore_reason_type = null,
+            ignore_reason      = null,
+            status             = #{status}
+        WHERE id = #{id}
+    </delete>
+    <delete id="deleteByRuleId">
+        DELETE
+        FROM rule_scan_result
+        WHERE rule_id = #{ruleId}
+    </delete>
+    <delete id="deleteRisk">
+        DELETE
+        FROM rule_scan_result
+        WHERE platform = #{platform}
+          AND resource_type = #{resourceType} LIMIT 1000
+    </delete>
+
+    <select id="findListWithScrollId" resultMap="ResultMapWithBLOBs">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        ,
+        <include refid="Blob_Column_List"></include>
+        FROM rule_scan_result
+        <where>
+            1 = 1
+            <if test="scrollId != null and scrollId != ''">
+                AND id > #{scrollId}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="tenantId != null">
+                AND tenant_id = #{tenantId}
+            </if>
+            <if test="cloudAccountId != null">
+                AND cloud_account_id = #{cloudAccountId}
+            </if>
+            <if test="platform != null and platform != ''">
+                AND platform = #{platform,jdbcType=VARCHAR}
+            </if>
+            <if test="resourceType != null and resourceType != ''">
+                AND resource_type = #{resourceType,jdbcType=VARCHAR}
+            </if>
+            <if test="ruleId != null">
+                AND rule_id = #{ruleId}
+            </if>
+            <if test="ruleIdList != null and ruleIdList.size > 0">
+                AND rule_id IN
+                <foreach collection="ruleIdList" item="ruleId" open="(" separator="," close=")">
+                    #{ruleId}
+                </foreach>
+            </if>
+            <if test="createStartTime != null and createEndTime != null">
+                AND gmt_create between #{createStartTime} AND #{createEndTime}
+            </if>
+            <if test="gmtModifiedStart != null and gmtModifiedEnd != null">
+                AND (gmt_modified &gt;= #{gmtModifiedStart} AND gmt_modified &lt;= #{gmtModifiedEnd})
+            </if>
+        </where>
+        ORDER BY id ASC
+        limit #{limit}
+    </select>
+    <select id="findOneJoinRule" resultMap="BaseResultMap">
+        SELECT rsr.id
+        FROM rule_scan_result rsr
+                 INNER JOIN rule r ON rsr.rule_id = r.id
+        WHERE rsr.resource_id = #{resourceId}
+          AND rsr.cloud_account_id = #{cloudAccountId}
+          AND r.rule_code = #{ruleCode}
+    </select>
+    <select id="findCountByTenant" resultType="java.lang.Integer">
+        SELECT count(1)
+        FROM rule_scan_result
+        WHERE rule_id = #{ruleId}
+          AND status = #{status}
+          AND tenant_id = #{tenantId}
+    </select>
+    <update id="updateResourceStatus">
+        UPDATE rule_scan_result
+        SET resource_status = #{resourceStatus}
+        WHERE cloud_resource_instance_id IN
+        <foreach collection="cloudResourceInstanceIds" item="cloudResourceInstanceId" open="(" separator="," close=")">
+            #{cloudResourceInstanceId}
+        </foreach>
+
+    </update>
+
+    <select id="listRuleStatistics" resultType="com.alipay.dao.dto.RuleStatisticsDTO">
+        SELECT
+        rsr.rule_id AS ruleId,r.rule_name AS ruleName,count(rsr.id) as count,r.rule_desc AS ruleDesc,r.risk_level AS
+        riskLevel
+        FROM rule_scan_result rsr INNER JOIN rule r on r.id = rsr.rule_id
+        <include refid="findListWhere"/>
+        GROUP BY r.id
+        HAVING count > 0
+        ORDER BY count DESC
+    </select>
+    <select id="findBaseInfoWithScrollId" resultMap="ResultMapWithBLOBs">
+        SELECT
+        id, gmt_create, gmt_modified, rule_id, cloud_account_id, resource_id, resource_name,
+        platform, resource_type
+        FROM rule_scan_result
+        <where>
+            1 = 1
+            <if test="scrollId != null and scrollId != ''">
+                AND id > #{scrollId}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="tenantId != null">
+                AND tenant_id = #{tenantId}
+            </if>
+            <if test="cloudAccountId != null">
+                AND cloud_account_id = #{cloudAccountId}
+            </if>
+            <if test="platform != null and platform != ''">
+                AND platform = #{platform,jdbcType=VARCHAR}
+            </if>
+            <if test="resourceType != null and resourceType != ''">
+                AND resource_type = #{resourceType,jdbcType=VARCHAR}
+            </if>
+            <if test="ruleId != null">
+                AND rule_id = #{ruleId}
+            </if>
+            <if test="ruleIdList != null and ruleIdList.size > 0">
+                AND rule_id IN
+                <foreach collection="ruleIdList" item="ruleId" open="(" separator="," close=")">
+                    #{ruleId}
+                </foreach>
+            </if>
+            <if test="createStartTime != null and createEndTime != null">
+                AND gmt_create between #{createStartTime} AND #{createEndTime}
+            </if>
+            <if test="gmtModifiedStart != null and gmtModifiedEnd != null">
+                AND (gmt_modified &gt;= #{gmtModifiedStart} AND gmt_modified &lt;= #{gmtModifiedEnd})
+            </if>
+        </where>
+        ORDER BY id ASC
+        limit #{limit}
+    </select>
+
+</mapper>

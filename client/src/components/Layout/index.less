@@ -1,0 +1,56 @@
+.tenantListItem {
+  border-block-end: none !important;
+  padding: 4px 0 4px 4px !important;
+  font-size: 13px;
+  &:hover {
+    background-color: #fafafa;
+    border-radius: 3px;
+  }
+  :global {
+    .ant-list-item-action {
+      > li {
+        padding: 0 !important;
+      }
+    }
+  }
+  .switchButton {
+    padding: 4px;
+    font-size: 13px;
+  }
+
+  .tenantName {
+    max-width: 100%;
+    white-space: nowrap;   /* no wrap */
+    overflow: hidden;      /* Hide excess parts */
+    text-overflow: ellipsis; /* Exceeding the limit displays ellipsis */
+  }
+}
+
+.currentTenant {
+  padding: 4px 10px;
+  min-width: 104px;
+  color: rgba(51, 102, 255, 1);
+  .tenantIcon {
+    height: 16px;
+    width: 15px;
+  }
+}
+
+.currentLanguage {
+  padding: 4px 10px;
+  min-width: 94px;
+  color: rgba(51, 102, 255, 1);
+}
+
+.username {
+  margin: 0 4px;
+  color: rgba(51,51,51,1);
+  font-size: 14px;
+}
+
+.viewMoreTip {
+  font-size: 12px;
+  color: rgb(153, 153, 153);
+  text-align: center;
+  padding-top: 4px;
+}

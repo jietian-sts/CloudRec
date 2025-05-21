@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["日志审计"],"code":"ALI_CLOUD_ActionTrail_202505091554_896609","context":"实例：{$.ResourceId} ，名称：{$.ResourceName} 存在xxx风险。","description":"未建立日志审计追踪","level":"Medium","link":null,"linkedDataList":null,"name":"阿里云-ActionTrail-未开启日志审计","platform":"ALI_CLOUD","resourceType":"ActionTrail"}

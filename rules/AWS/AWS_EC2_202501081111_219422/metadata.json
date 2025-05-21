@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["网络访问"],"code":"AWS_EC2_202501081111_219422","context":null,"description":"EC2 SSH 服务默认端口暴露","level":"High","link":null,"linkedDataList":null,"name":"AWS-EC2-SSH 服务默认端口暴露","platform":"AWS","resourceType":"EC2"}

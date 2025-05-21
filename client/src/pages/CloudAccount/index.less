@@ -1,0 +1,229 @@
+// Less变量定义
+// 1. Display resolution
+@mac-book-pro-width: 1496px; // 原因：暂定为16寸
+@mac-book-pro-mini-width: 1440px; // 13.6寸
+@ipad-pro-width: 1024px;
+@ipad-pro-max-width: 1264px;
+@ipad-width: 992px;
+@mobile-width: 768px;
+@full-hd-with: 1920px; // 标准
+@extended-monitor-width: 2048px; // 标准
+@extended-monitor-max-width: 2560px; // 标准
+// 2. Element attribute value
+@basic-card-width: 260px;
+@basic-card-height: 336px;
+@basic-card-margin: 60px;
+@basic-card-pro-width: 270px;
+@basic-card-pro-height: 361px;
+@basic-card-pro-margin: 64px;
+@modal-content-image-path: '../../assets/images/MODAL_CONTENT.png'; // 设置图片路径变量
+
+.accountListTable {
+  :global {
+    .ant-pro-card {
+      .ant-pro-card-body {
+        padding-inline: 12px;
+        .ant-pro-table-list-toolbar {
+          .ant-pro-table-list-toolbar-container {
+            padding-block-start: 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+.cloudAccountWrap {
+  :global {
+    .ant-spin-nested-loading {
+      width: 100%;
+      .ant-spin-container {
+        min-height: 356px;
+      }
+    }
+  }
+  .cloudAccountList {
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+
+    // <= 768px
+    @media screen and (max-width: @mobile-width) {
+      width: @basic-card-width !important;
+      .accountCard {
+        margin: 0 0 26px 0 !important;
+      }
+    }
+
+    //  768px < width < 1264px
+    @media screen and (min-width: @mobile-width) and (max-width: @ipad-pro-max-width - 1) {
+      width: calc(@basic-card-width * 2 + @basic-card-pro-margin * 1);
+      .accountCard:not(:nth-child(2n)) {
+        margin: 0 @basic-card-margin 26px 0 !important;
+      }
+      .accountCard:nth-child(2n) {
+        margin: 0 0 24px 0 !important;
+      }
+    }
+
+    // 1264px <= width < 1919px
+    @media screen and (min-width: @ipad-pro-max-width) and (max-width: @full-hd-with - 1) {
+      width: calc(@basic-card-pro-width * 3 + @basic-card-margin * 2);
+      .accountCard:not(:nth-child(3n)) {
+        margin: 0 @basic-card-margin 26px 0 !important;
+      }
+      .accountCard:nth-child(3n) {
+        margin: 0 0 24px 0 !important;
+      }
+      .accountCard {
+        width: @basic-card-pro-width;
+        height: @basic-card-height;
+      }
+    }
+
+    // 1920px <= width < 2047px
+    @media screen and (min-width: @full-hd-with) and (max-width: @extended-monitor-width - 1) {
+      width: calc(@basic-card-pro-width * 4 + @basic-card-margin * 3);
+      .accountCard:not(:nth-child(4n)) {
+        margin: 0 @basic-card-margin 26px 0 !important;
+      }
+      .accountCard:nth-child(4n) {
+        margin: 0 0 26px 0 !important;
+      }
+      .accountCard {
+        width: @basic-card-pro-width;
+        height: @basic-card-height;
+      }
+    }
+
+    // 2048px <= width < 2559px
+    @media screen and (min-width: @extended-monitor-width) and (max-width: @extended-monitor-max-width - 1) {
+      width: calc(@basic-card-pro-width * 4 + @basic-card-pro-margin * 3);
+      .accountCard:not(:nth-child(4n)) {
+        margin: 0 @basic-card-pro-margin 26px 0 !important;
+      }
+      .accountCard:nth-child(4n) {
+        margin: 0 0 24px 0 !important;
+      }
+
+      .accountCard {
+        width: @basic-card-pro-width;
+        height: @basic-card-pro-height;
+        padding: 18px 16px;
+        .divider {
+          margin: 18px 0 !important;
+        }
+        .propertyWrap {
+          .propertyName {
+            margin-bottom: 3px !important;
+          }
+        }
+      }
+    }
+
+    // >= 2560px
+    @media screen and (min-width: @extended-monitor-max-width) {
+      width: calc(@basic-card-pro-width * 6 + @basic-card-pro-margin * 5);
+
+      .accountCard:not(:nth-child(6n)) {
+        margin: 0 @basic-card-pro-margin 26px 0 !important;
+      }
+      .accountCard:nth-child(6n) {
+        margin: 0 0 24px 0 !important;
+      }
+
+      .accountCard {
+        width: @basic-card-pro-width;
+        height: @basic-card-pro-height;
+        padding: 18px 16px;
+        .divider {
+          margin: 18px 0 !important;
+        }
+        .propertyWrap {
+          .propertyName {
+            margin-bottom: 3px !important;
+          }
+        }
+      }
+    }
+  }
+}
+
+.accountCard {
+  width: @basic-card-width;
+  height: @basic-card-height;
+  background: rgba(22, 119, 255, 0.04);
+  margin: 0 @basic-card-margin 24px 0;
+  padding: 12px 16px;
+  border-radius: 2px;
+  .divider {
+    margin: 14px 0;
+  }
+  .propertyWrap {
+    .propertyName {
+      font-size: 13px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 2px;
+    }
+  }
+  .accountNameWrap {
+    margin-left: 10px;
+  }
+}
+
+.accountModal {
+  :global {
+    .ant-modal-content {
+      background-image: url(@modal-content-image-path);
+      background-size: 100% 100%;
+      .ant-modal-header {
+        background: transparent;
+        .ant-modal-title {
+          text-align: center;
+        }
+      }
+    }
+    .ant-modal-footer {
+      text-align: center;
+    }
+  }
+  .iKnow {
+    width: 214px;
+    height: 30px;
+  }
+  .basicInfoRow {
+    background: #f8fbff;
+    border-radius: 6px;
+    position: relative;
+    margin-bottom: 8px;
+    .basicLeftRow::after {
+      position: absolute;
+      content: '';
+      width: 1px;
+      height: 58px;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #dde9f9;
+    }
+    .leftInfoLabel {
+      width: 130px;
+      text-align: right;
+      padding-right: 22px;
+      color: rgba(131, 131, 131, 1);
+      line-height: 44px;
+    }
+    .rightInfoLabel {
+      width: 140px;
+      text-align: right;
+      padding-right: 22px;
+      color: rgba(131, 131, 131, 1);
+      line-height: 44px;
+    }
+    .basicInfoValue {
+      color: rgba(74, 74, 74, 1);
+      line-height: 44px;
+    }
+  }
+}

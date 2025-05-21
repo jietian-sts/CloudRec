@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["数据保护"],"code":"HUAWEI_CLOUD_PRIVATE_Bucket_202503051708_663657","context":"{$.msg_to_user}","description":"敏感操作包括：FULL_CONTROL、READ、WRITE、READ_ACP、WRITE_ACP","level":"High","link":null,"linkedDataList":null,"name":"华为云专有云-OBS-Bucket ACL 允许所有人执行敏感操作","platform":"HUAWEI_CLOUD_PRIVATE","resourceType":"Bucket"}

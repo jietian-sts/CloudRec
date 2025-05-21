@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alipay.dao.mapper.RuleScanRiskCountStatisticsMapper">
+    <resultMap id="BaseResultMap" type="com.alipay.dao.po.RuleScanRiskCountStatisticsPO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="rule_id" jdbcType="BIGINT" property="ruleId"/>
+        <result column="count" jdbcType="INTEGER" property="count"/>
+        <result column="tenant_id" jdbcType="BIGINT" property="tenantId"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , gmt_create, gmt_modified, rule_id, count, tenant_id, update_time
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from rule_scan_risk_count_statistics
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from rule_scan_risk_count_statistics
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <delete id="deleteByRuleIdAndTenantId">
+        delete
+        from rule_scan_risk_count_statistics
+        where rule_id = #{ruleId,jdbcType=BIGINT}
+          and tenant_id = #{tenantId,jdbcType=BIGINT}
+    </delete>
+    <insert id="insert" parameterType="com.alipay.dao.po.RuleScanRiskCountStatisticsPO">
+        insert into rule_scan_risk_count_statistics (id, gmt_create, gmt_modified,
+                                                     rule_id, count, tenant_id,
+                                                     update_time)
+        values (#{id,jdbcType=BIGINT}, #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP},
+                #{ruleId,jdbcType=BIGINT}, #{count,jdbcType=INTEGER}, #{tenantId,jdbcType=BIGINT},
+                #{updateTime,jdbcType=TIMESTAMP})
+    </insert>
+    <insert id="insertSelective" parameterType="com.alipay.dao.po.RuleScanRiskCountStatisticsPO">
+        insert into rule_scan_risk_count_statistics
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create,
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified,
+            </if>
+            <if test="ruleId != null">
+                rule_id,
+            </if>
+            <if test="count != null">
+                count,
+            </if>
+            <if test="tenantId != null">
+                tenant_id,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="gmtCreate != null">
+                #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="ruleId != null">
+                #{ruleId,jdbcType=BIGINT},
+            </if>
+            <if test="count != null">
+                #{count,jdbcType=INTEGER},
+            </if>
+            <if test="tenantId != null">
+                #{tenantId,jdbcType=BIGINT},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.alipay.dao.po.RuleScanRiskCountStatisticsPO">
+        update rule_scan_risk_count_statistics
+        <set>
+            <if test="gmtCreate != null">
+                gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="ruleId != null">
+                rule_id = #{ruleId,jdbcType=BIGINT},
+            </if>
+            <if test="count != null">
+                count = #{count,jdbcType=INTEGER},
+            </if>
+            <if test="tenantId != null">
+                tenant_id = #{tenantId,jdbcType=BIGINT},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.alipay.dao.po.RuleScanRiskCountStatisticsPO">
+        update rule_scan_risk_count_statistics
+        set gmt_create   = #{gmtCreate,jdbcType=TIMESTAMP},
+            gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            rule_id      = #{ruleId,jdbcType=BIGINT},
+            count        = #{count,jdbcType=INTEGER},
+            tenant_id    = #{tenantId,jdbcType=BIGINT},
+            update_time  = #{updateTime,jdbcType=TIMESTAMP}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <select id="findSumCount" resultType="java.lang.Long">
+        select IFNULL(SUM(count), 0) AS total
+        from rule_scan_risk_count_statistics
+        where tenant_id = #{tenantId,jdbcType=BIGINT}
+    </select>
+
+</mapper>

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alipay.dao.mapper.OperationLogMapper">
+    <resultMap id="BaseResultMap" type="com.alipay.dao.po.OperationLogPO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="action" jdbcType="VARCHAR" property="action"/>
+        <result column="type" jdbcType="VARCHAR" property="type"/>
+        <result column="correlation_id" jdbcType="BIGINT" property="correlationId"/>
+    </resultMap>
+    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.alipay.dao.po.OperationLogPO">
+        <result column="notes" jdbcType="LONGVARCHAR" property="notes"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , gmt_create, gmt_modified, user_id, action, type, correlation_id
+    </sql>
+    <sql id="Blob_Column_List">
+        notes
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from operation_log
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from operation_log
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <insert id="insert" parameterType="com.alipay.dao.po.OperationLogPO">
+        insert into operation_log (id, gmt_create, gmt_modified,
+                                   user_id, action, type,
+                                   correlation_id, notes)
+        values (#{id,jdbcType=BIGINT}, #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP},
+                #{userId,jdbcType=VARCHAR}, #{action,jdbcType=VARCHAR}, #{type,jdbcType=VARCHAR},
+                #{correlationId,jdbcType=BIGINT}, #{notes,jdbcType=LONGVARCHAR})
+    </insert>
+    <insert id="insertSelective" parameterType="com.alipay.dao.po.OperationLogPO"  useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+        insert into operation_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create,
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="action != null">
+                action,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="correlationId != null">
+                correlation_id,
+            </if>
+            <if test="notes != null">
+                notes,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="gmtCreate != null">
+                #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="userId != null">
+                #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="action != null">
+                #{action,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=VARCHAR},
+            </if>
+            <if test="correlationId != null">
+                #{correlationId,jdbcType=BIGINT},
+            </if>
+            <if test="notes != null">
+                #{notes,jdbcType=LONGVARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.alipay.dao.po.OperationLogPO">
+        update operation_log
+        <set>
+            <if test="gmtCreate != null">
+                gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="action != null">
+                action = #{action,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                type = #{type,jdbcType=VARCHAR},
+            </if>
+            <if test="correlationId != null">
+                correlation_id = #{correlationId,jdbcType=BIGINT},
+            </if>
+            <if test="notes != null">
+                notes = #{notes,jdbcType=LONGVARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.alipay.dao.po.OperationLogPO">
+        update operation_log
+        set gmt_create     = #{gmtCreate,jdbcType=TIMESTAMP},
+            gmt_modified   = #{gmtModified,jdbcType=TIMESTAMP},
+            user_id        = #{userId,jdbcType=VARCHAR},
+            action         = #{action,jdbcType=VARCHAR},
+            type           = #{type,jdbcType=VARCHAR},
+            correlation_id = #{correlationId,jdbcType=BIGINT},
+            notes          = #{notes,jdbcType=LONGVARCHAR}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.alipay.dao.po.OperationLogPO">
+        update operation_log
+        set gmt_create     = #{gmtCreate,jdbcType=TIMESTAMP},
+            gmt_modified   = #{gmtModified,jdbcType=TIMESTAMP},
+            user_id        = #{userId,jdbcType=VARCHAR},
+            action         = #{action,jdbcType=VARCHAR},
+            type           = #{type,jdbcType=VARCHAR},
+            correlation_id = #{correlationId,jdbcType=BIGINT}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="findCount" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM operation_log
+        <include refid="findListWhere"></include>
+    </select>
+    <select id="findList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        ,
+        <include refid="Blob_Column_List"></include>
+        FROM operation_log
+        <include refid="findListWhere"></include>
+        ORDER BY id DESC
+        LIMIT 100
+    </select>
+
+    <sql id="getListLimit">
+        <if test="offset != null and size != null">
+            LIMIT
+            #{offset},
+            #{size}
+        </if>
+    </sql>
+
+    <sql id="findListWhere">
+        <where>
+            <if test="correlationId != null">
+                AND correlation_id = #{correlationId}
+            </if>
+            <if test="type != null">
+                AND type = #{type}
+            </if>
+        </where>
+    </sql>
+
+</mapper>

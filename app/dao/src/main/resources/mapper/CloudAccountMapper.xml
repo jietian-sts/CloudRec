@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alipay.dao.mapper.CloudAccountMapper">
+    <resultMap id="BaseResultMap" type="com.alipay.dao.po.CloudAccountPO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="cloud_account_id" jdbcType="VARCHAR" property="cloudAccountId"/>
+        <result column="alias" jdbcType="VARCHAR" property="alias"/>
+        <result column="platform" jdbcType="VARCHAR" property="platform"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="tenant_id" jdbcType="BIGINT" property="tenantId"/>
+        <result column="last_scan_time" jdbcType="TIMESTAMP" property="lastScanTime"/>
+        <result column="resource_type_list" jdbcType="VARCHAR" property="resourceTypeList"/>
+        <result column="collector_status" jdbcType="VARCHAR" property="collectorStatus"/>
+        <result column="account_status" jdbcType="VARCHAR" property="accountStatus"/>
+        <result column="credentials_json" jdbcType="VARCHAR" property="credentialsJson"/>
+        <result column="site" jdbcType="VARCHAR" property="site"/>
+        <result column="owner" jdbcType="VARCHAR" property="owner"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , gmt_create, gmt_modified, cloud_account_id,alias, platform, status,
+    user_id, tenant_id, last_scan_time, resource_type_list,collector_status,account_status,credentials_json,site,owner
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from cloud_account
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from cloud_account
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+
+    <insert id="insertSelective" parameterType="com.alipay.dao.po.CloudAccountPO">
+        insert into cloud_account
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create,
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified,
+            </if>
+            <if test="cloudAccountId != null">
+                cloud_account_id,
+            </if>
+            <if test="alias != null">
+                alias,
+            </if>
+            <if test="platform != null">
+                platform,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="tenantId != null">
+                tenant_id,
+            </if>
+            <if test="lastScanTime != null">
+                last_scan_time,
+            </if>
+            <if test="resourceTypeList != null">
+                resource_type_list,
+            </if>
+            <if test="collectorStatus != null">
+                collector_status,
+            </if>
+            <if test="accountStatus != null">
+                account_status,
+            </if>
+            <if test="credentialsJson != null">
+                credentials_json,
+            </if>
+            <if test="site != null">
+                site,
+            </if>
+            <if test="owner != null">
+                owner,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="gmtCreate != null">
+                #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="cloudAccountId != null">
+                #{cloudAccountId,jdbcType=VARCHAR},
+            </if>
+            <if test="alias != null">
+                #{alias,jdbcType=VARCHAR},
+            </if>
+            <if test="platform != null">
+                #{platform,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="userId != null">
+                #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="tenantId != null">
+                #{tenantId,jdbcType=BIGINT},
+            </if>
+            <if test="lastScanTime != null">
+                #{lastScanTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="resourceTypeList != null">
+                #{resourceTypeList,jdbcType=VARCHAR},
+            </if>
+            <if test="collectorStatus != null">
+                #{collectorStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="accountStatus != null">
+                #{accountStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="credentialsJson != null">
+                #{credentialsJson,jdbcType=VARCHAR},
+            </if>
+            <if test="site != null">
+                #{site,jdbcType=VARCHAR},
+            </if>
+            <if test="owner != null">
+                #{owner,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.alipay.dao.po.CloudAccountPO">
+        update cloud_account
+        <set>
+            <if test="gmtCreate != null">
+                gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="cloudAccountId != null">
+                cloud_account_id = #{cloudAccountId,jdbcType=VARCHAR},
+            </if>
+            <if test="alias != null">
+                alias = #{alias,jdbcType=VARCHAR},
+            </if>
+            <if test="platform != null">
+                platform = #{platform,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                status = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="tenantId != null">
+                tenant_id = #{tenantId,jdbcType=BIGINT},
+            </if>
+            <if test="lastScanTime != null">
+                last_scan_time = #{lastScanTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="resourceTypeList != null">
+                resource_type_list = #{resourceTypeList,jdbcType=VARCHAR},
+            </if>
+            <if test="collectorStatus != null">
+                collector_status = #{collectorStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="accountStatus != null">
+                account_status = #{accountStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="credentialsJson != null">
+                credentials_json = #{credentialsJson,jdbcType=VARCHAR},
+            </if>
+            <if test="site != null">
+                site = #{site,jdbcType=VARCHAR},
+            </if>
+            <if test="owner != null">
+                owner = #{owner,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="findCount" resultType="java.lang.Integer">
+        SELECT count(*)
+        FROM cloud_account
+        <include refid="getListWhere"></include>
+    </select>
+    <select id="findList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM cloud_account
+        <include refid="getListWhere"></include>
+        ORDER BY last_scan_time DESC
+        <include refid="getListLimit"></include>
+    </select>
+
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM cloud_account
+    </select>
+
+    <sql id="getListLimit">
+        <if test="offset != null and size != null">
+            LIMIT
+            #{offset},
+            #{size}
+        </if>
+    </sql>
+    <select id="findNotRunningAccount" resultType="com.alipay.dao.po.CloudAccountPO">
+        SELECT id,
+        cloud_account_id AS cloudAccountId,
+        platform,
+        status,
+        resource_type_list AS resourceTypeList,
+        account_status AS accountStatus,
+        credentials_json AS credentialsJson,
+        site AS site
+        FROM cloud_account
+        WHERE platform = #{platform}
+        <if test="sites != null and sites.size > 0">
+            AND site IN
+            <foreach collection="sites" item="site" open="(" separator="," close=")">
+                #{site}
+            </foreach>
+        </if>
+        AND account_status != 'invalid'
+        AND collector_status != 'running'
+        ORDER BY last_scan_time ASC
+    </select>
+
+    <select id="findByCloudAccountId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM cloud_account
+        WHERE cloud_account_id = #{cloudAccountId}
+    </select>
+
+    <select id="findByCloudAccountIdList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM cloud_account
+        WHERE cloud_account_id in
+        <foreach collection="cloudAccountIdList" item="cloudAccountId" open="(" separator="," close=")">
+            #{cloudAccountId}
+        </foreach>
+    </select>
+    <select id="findOne" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM cloud_account
+        WHERE cloud_account_id = #{cloudAccountId} AND platform = #{platform}
+    </select>
+
+    <sql id="getListWhere">
+        <where>
+            1=1
+            <if test="cloudAccountId != null and cloudAccountId != ''">
+                AND (cloud_account_id LIKE CONCAT('%',#{cloudAccountId},'%')
+                OR alias LIKE CONCAT('%',#{cloudAccountId},'%'))
+            </if>
+            <if test="cloudAccountSearch != null and cloudAccountSearch != ''">
+                AND (cloud_account_id LIKE CONCAT('%',#{cloudAccountSearch},'%')
+                OR alias LIKE CONCAT('%',#{cloudAccountSearch},'%'))
+            </if>
+            <if test="platformList != null and platformList.size() > 0">
+                AND platform IN
+                <foreach collection="platformList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="platform != null and platform != ''">
+                AND platform = #{platform}
+            </if>
+            <if test="tenantId != null">
+                AND tenant_id = #{tenantId,jdbcType=BIGINT}
+            </if>
+            <if test="accountStatus != null">
+                AND account_status = #{accountStatus}
+            </if>
+            <if test="collectorStatus != null">
+                AND collector_status = #{collectorStatus}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+            <if test="gmtCreateEnd != null">
+                AND gmt_create &lt;= #{gmtCreateEnd}
+            </if>
+        </where>
+    </sql>
+</mapper>

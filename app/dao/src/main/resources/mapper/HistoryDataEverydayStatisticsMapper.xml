@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alipay.dao.mapper.HistoryDataEverydayStatisticsMapper">
+    <resultMap id="BaseResultMap" type="com.alipay.dao.po.HistoryDataEverydayStatisticsPO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="platform_count" jdbcType="INTEGER" property="platformCount"/>
+        <result column="cloud_account_count" jdbcType="INTEGER" property="cloudAccountCount"/>
+        <result column="risk_count" jdbcType="BIGINT" property="riskCount"/>
+        <result column="resource_count" jdbcType="BIGINT" property="resourceCount"/>
+        <result column="create_date" jdbcType="VARCHAR" property="createDate"/>
+        <result column="tenant_id" jdbcType="BIGINT" property="tenantId"/>
+    </resultMap>
+    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.alipay.dao.po.HistoryDataEverydayStatisticsPO">
+        <result column="detail_json" jdbcType="LONGVARCHAR" property="detailJson"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , gmt_create, gmt_modified, platform_count, cloud_account_count, risk_count, resource_count,
+    create_date, tenant_id
+    </sql>
+    <sql id="Blob_Column_List">
+        detail_json
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from history_data_everyday_statistics
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from history_data_everyday_statistics
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+
+    <insert id="insertSelective" parameterType="com.alipay.dao.po.HistoryDataEverydayStatisticsPO">
+        insert into history_data_everyday_statistics
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create,
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified,
+            </if>
+            <if test="platformCount != null">
+                platform_count,
+            </if>
+            <if test="cloudAccountCount != null">
+                cloud_account_count,
+            </if>
+            <if test="riskCount != null">
+                risk_count,
+            </if>
+            <if test="resourceCount != null">
+                resource_count,
+            </if>
+            <if test="createDate != null">
+                create_date,
+            </if>
+            <if test="tenantId != null">
+                tenant_id,
+            </if>
+            <if test="detailJson != null">
+                detail_json,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="gmtCreate != null">
+                #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="platformCount != null">
+                #{platformCount,jdbcType=INTEGER},
+            </if>
+            <if test="cloudAccountCount != null">
+                #{cloudAccountCount,jdbcType=INTEGER},
+            </if>
+            <if test="riskCount != null">
+                #{riskCount,jdbcType=BIGINT},
+            </if>
+            <if test="resourceCount != null">
+                #{resourceCount,jdbcType=BIGINT},
+            </if>
+            <if test="createDate != null">
+                #{createDate,jdbcType=VARCHAR},
+            </if>
+            <if test="tenantId != null">
+                #{tenantId,jdbcType=BIGINT},
+            </if>
+            <if test="detailJson != null">
+                #{detailJson,jdbcType=LONGVARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.alipay.dao.po.HistoryDataEverydayStatisticsPO">
+        update history_data_everyday_statistics
+        <set>
+            <if test="gmtCreate != null">
+                gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="platformCount != null">
+                platform_count = #{platformCount,jdbcType=INTEGER},
+            </if>
+            <if test="cloudAccountCount != null">
+                cloud_account_count = #{cloudAccountCount,jdbcType=INTEGER},
+            </if>
+            <if test="riskCount != null">
+                risk_count = #{riskCount,jdbcType=BIGINT},
+            </if>
+            <if test="resourceCount != null">
+                resource_count = #{resourceCount,jdbcType=BIGINT},
+            </if>
+            <if test="createDate != null">
+                create_date = #{createDate,jdbcType=VARCHAR},
+            </if>
+            <if test="tenantId != null">
+                tenant_id = #{tenantId,jdbcType=BIGINT},
+            </if>
+            <if test="detailJson != null">
+                detail_json = #{detailJson,jdbcType=LONGVARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="findOne" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM history_data_everyday_statistics
+        WHERE tenant_id = #{tenantId}
+        AND create_date = #{date}
+    </select>
+</mapper>

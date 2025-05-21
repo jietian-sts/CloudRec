@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alipay.dao.mapper.TenantMapper">
+    <resultMap id="BaseResultMap" type="com.alipay.dao.po.TenantPO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="tenant_name" jdbcType="VARCHAR" property="tenantName"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+    </resultMap>
+    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.alipay.dao.po.TenantPO">
+        <result column="tenant_desc" jdbcType="LONGVARCHAR" property="tenantDesc"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , gmt_create, gmt_modified, tenant_name, status
+    </sql>
+    <sql id="Blob_Column_List">
+        tenant_desc
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from tenant
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from tenant
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <insert id="insert" parameterType="com.alipay.dao.po.TenantPO">
+        insert into tenant (id, gmt_create, gmt_modified,
+                            tenant_name, status, tenant_desc)
+        values (#{id,jdbcType=BIGINT}, #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP},
+                #{tenantName,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, #{tenantDesc,jdbcType=LONGVARCHAR})
+    </insert>
+    <insert id="insertSelective" parameterType="com.alipay.dao.po.TenantPO" useGeneratedKeys="true" keyProperty="id">
+        insert into tenant
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create,
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified,
+            </if>
+            <if test="tenantName != null">
+                tenant_name,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="tenantDesc != null">
+                tenant_desc,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="gmtCreate != null">
+                #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="tenantName != null">
+                #{tenantName,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="tenantDesc != null">
+                #{tenantDesc,jdbcType=LONGVARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.alipay.dao.po.TenantPO">
+        update tenant
+        <set>
+            <if test="gmtCreate != null">
+                gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="tenantName != null">
+                tenant_name = #{tenantName,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                status = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="tenantDesc != null">
+                tenant_desc = #{tenantDesc,jdbcType=LONGVARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.alipay.dao.po.TenantPO">
+        update tenant
+        set gmt_create   = #{gmtCreate,jdbcType=TIMESTAMP},
+            gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            tenant_name  = #{tenantName,jdbcType=VARCHAR},
+            status       = #{status,jdbcType=VARCHAR},
+            tenant_desc  = #{tenantDesc,jdbcType=LONGVARCHAR}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.alipay.dao.po.TenantPO">
+        update tenant
+        set gmt_create   = #{gmtCreate,jdbcType=TIMESTAMP},
+            gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            tenant_name  = #{tenantName,jdbcType=VARCHAR},
+            status       = #{status,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <select id="findMemberCountByTenantId" resultType="java.lang.Integer">
+        select count(*)
+        from tenant_user
+        where tenant_id = #{tenantId,jdbcType=BIGINT}
+    </select>
+    <select id="findCount" resultType="java.lang.Integer">
+        select count(*) from tenant
+        <include refid="getListWhere"></include>
+    </select>
+    <select id="findList" resultMap="ResultMapWithBLOBs">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        ,
+        <include refid="Blob_Column_List"></include>
+        FROM tenant
+        <include refid="getListWhere"></include>
+        ORDER BY id DESC
+        <include refid="com.alipay.dao.mapper.RuleMapper.getListLimit"></include>
+    </select>
+    <select id="findListByUserId" resultMap="BaseResultMap">
+        SELECT t.*
+        FROM user u
+                 INNER JOIN tenant_user tu
+                 INNER JOIN tenant t ON u.id = tu.user_id AND tu.tenant_id = t.id
+        WHERE u.user_id = #{userId}
+        ORDER BY u.id DESC
+    </select>
+    <select id="findRecord" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM tenant_user
+        WHERE tenant_id = #{tenantId}
+          AND user_id = #{uid}
+    </select>
+    <select id="findByTenantName" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM tenant where tenant_name = #{tenantName}
+    </select>
+
+    <sql id="getListWhere">
+        <where>
+            <if test="tenantName != null">
+                tenant_name like CONCAT('%',#{tenantName,jdbcType=VARCHAR},'%')
+            </if>
+        </where>
+    </sql>
+</mapper>

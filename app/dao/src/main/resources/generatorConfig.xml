@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration PUBLIC
+        "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+    <context id="sqlGenertor" targetRuntime="MyBatis3">
+        <!-- 配置是否使用注释 -->
+        <commentGenerator>
+            <property name="suppressAllComments" value="true"/>
+        </commentGenerator>
+        <!-- 配置连接信息 -->
+        <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+                        connectionURL="jdbc:mysql://localhost:3306/cloudrec_db"
+                        userId="root"
+                        password="DB_PASSWORD"/>
+
+        <!-- 配置生成的POJO -->
+        <javaModelGenerator targetPackage="com.alipay.dao.po"
+                            targetProject="src/main/java"></javaModelGenerator>
+
+        <!-- 配置生成的Mapper映射文件 -->
+        <sqlMapGenerator targetPackage="mapper"
+                         targetProject="src/main/resources">
+            <property name="enableSubPackages" value="true"/>
+        </sqlMapGenerator>
+
+        <!-- 配置生成的接口类-->
+        <javaClientGenerator type="XMLMAPPER" targetPackage="com.alipay.dao.mapper"
+                             targetProject="src/main/java">
+            <property name="enableSubPackages" value="true"/>
+        </javaClientGenerator>
+
+        <table tableName="security_product_posture" domainObjectName="SecurityProductPosturePO" mapperName="SecurityProductPostureMapper"
+               enableCountByExample="false"
+               enableUpdateByExample="false"
+               enableDeleteByExample="false"
+               enableSelectByExample="false"
+               selectByExampleQueryId="false">
+        </table>
+    </context>
+</generatorConfiguration>

@@ -1,0 +1,393 @@
+@mobile-width: 576px;
+@kernel-height: 286.18px;
+@kernel-height-phone: 890.56px;
+@default-card-header: 39.56px;
+@banner-item-color: #FFF;
+@text-default-color: rgba(51, 51, 51, 1);
+@text-hover-color: rgba(50, 116, 238, 1);
+@text-light-color: rgba(102, 102, 102, 1);
+@text-slight-color: rgba(0, 0, 0, 0.7);
+@text-default-size: 28px;
+@text-large-size: 32px;
+@text-max-size: 40px;
+// custom-device-width
+@mac-book-pro-width: 1496px; // 原因：暂定为16寸
+@mac-book-pro-mini-width: 1440px; // 13.6寸
+@ipad-pro-width: 1024px;
+@ipad-pro-max-width: 1264px;
+@ipad-width: 992px;
+@full-hd-with: 1920px; // 标准
+@extended-monitor-width: 2048px;
+@extended-monitor-max-width: 2560px;
+
+.fullScreenWrap {
+  border-radius: 4px;
+  background: #FFF;
+}
+
+.homePage {
+  min-height: calc(100vh - 56px);
+}
+
+.overviewIconDefault {
+  width: 48px;
+  height: 48px;
+}
+
+.instructViewWrapUp {
+  margin-left: 10px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  position: relative;
+  bottom: 3px;
+  color: #2E8B57;
+  height: 18px;
+  @media screen and (max-width: @mac-book-pro-width) {
+    margin-left: 6px;
+  }
+
+  .instructViewMain {
+    padding: 0 1px;
+    height: 18px;
+    .instructViewIcon {
+      line-height: 18px;
+      height: 14px;
+      font-size: 14px;
+      .upArrowIcon {
+        color: #2E8B57;
+      }
+    }
+    .instructViewCount {
+      height: 18px;
+      line-height: 18px;
+      font-size: 15px;
+      margin-left: 1px;
+      color: #2E8B57;
+    }
+  }
+}
+
+.instructViewWrapDown {
+  margin-left: 10px;
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  position: relative;
+  bottom: 3px;
+  color: rgba(197, 69, 59, 1);
+  height: 18px;
+
+  .instructViewMain {
+    padding: 0 1px;
+    height: 18px;
+    .instructViewIcon {
+      line-height: 18px;
+      height: 14px;
+      font-size: 14px;
+      .downArrowIcon {
+        color: rgba(197, 69, 59, 1);
+      }
+    }
+    .instructViewCount {
+      height: 18px;
+      line-height: 18px;
+      font-size: 15px;
+      margin-left: 1px;
+      color: rgba(197, 69, 59, 1);
+    }
+  }
+}
+
+.overviewCard {
+  border-radius: 4px;
+  :global {
+    .ant-pro-card-body {
+      padding-block: 20px;
+    }
+  }
+  .overviewContent {
+    width: calc(100% - 48px);
+    &Name {
+      color: @text-light-color;
+      font-size: 15px;
+    }
+    &Value {
+      font-size: @text-default-size;
+      color: @text-default-color;
+      @media screen and (max-width: @mac-book-pro-width) {
+        font-size: 24px;
+      }
+    }
+    &:hover {
+      cursor: pointer;
+      .overviewContentName {
+        color: @text-hover-color !important;
+      }
+      .overviewContentValue {
+        color: @text-hover-color !important;
+      }
+    }
+  }
+}
+
+.kernel {
+  height: @kernel-height-phone;
+  margin: 16px 0;
+  @media screen and (max-width: @mobile-width) {
+    height: @kernel-height-phone;
+  }
+  .kernelCol {
+    height: @kernel-height;
+  }
+
+  .riskCard {
+    height: @kernel-height;
+    :global {
+      .ant-pro-card-body {
+        height: calc(100% - @default-card-header);
+      }
+    }
+    .riskLink {
+      cursor: pointer;
+      &:hover {
+        .riskCount {
+          font-size: @text-large-size;
+          font-weight: bold;
+          color: @text-hover-color;
+        }
+      }
+    }
+    .highRiskTitle {
+      color: @text-slight-color;
+      font-weight: 500;
+      font-size: 16px;
+    }
+    .highRiskTitle {
+      color: @text-slight-color;
+      font-weight: 500;
+      font-size: 16px;
+    }
+    .riskCount {
+      font-size: @text-large-size;
+      font-weight: bold;
+      color: rgba(0, 0, 0, 0.88);
+    }
+  }
+  .akCard {
+    height: @kernel-height;
+    :global {
+      .ant-pro-card-body {
+        height: calc(100% - @default-card-header);
+      }
+    }
+    .akCount {
+      font-size: @text-max-size;
+      font-weight: bold;
+      line-height: 70px;
+    }
+    .akTitleText {
+      margin-top: 8px;
+      color: @text-slight-color;
+      font-weight: 500;
+      font-size: 16px;
+    }
+  }
+  .akACLTag {
+    width: 48px;
+    text-align: center;
+    border-radius: 5px;
+    padding: 0 4px;
+  }
+}
+
+.inform {
+  .informCol {
+    min-height: 496px;
+  }
+  .informTable {
+    min-height: calc(100% - 16px - 20px);
+    :global {
+      .ant-table {
+        .ant-table-container {
+          table {
+            thead {
+              > tr {
+                th {
+                  padding: 10px 10px;
+                }
+              }
+            }
+            .ant-table-tbody {
+              .ant-empty {
+                margin-block-start: 128px;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+.g2ChartCard {
+  height: 360px;
+  border-radius: 4px;
+  margin: 16px 0;
+  :global {
+    .ant-pro-card-body {
+      min-height: 260px;
+    }
+  }
+}
+
+.bannerWrap {
+  height: @kernel-height;
+  :global {
+    .ant-pro-card-body {
+      .ant-carousel {
+        .slick-next, .slick-prev {
+          width: 12px;
+          height: 12px;
+          color: gray;
+        }
+        .slick-disabled {
+          opacity: 0 !important;
+        }
+
+        .slick-dots li button {
+          background: rgba(50,116,238,1); /* 修改指示点颜色 */
+        }
+      }
+    }
+  }
+
+  .bannerItem {
+    height: @kernel-height;
+    background-color: @banner-item-color;
+    cursor: pointer;
+    :global {
+      .ant-pro-card-body {
+        height: calc(100% - @default-card-header);
+        overflow-y: auto;
+      }
+    }
+    .bannerItemColCommon {
+      padding-top: 10px;
+      padding-bottom: 10px;
+      border-radius: 4px;
+      color: @text-default-color;
+      &:hover {
+        cursor: pointer;
+        background-color: rgba(0, 0, 0, 2%);
+        color: @text-hover-color;
+      }
+    }
+
+    .bannerItemColLeft {
+      padding-top: 12px;
+      padding-bottom: 12px;
+      border-radius: 4px;
+      position: relative;
+      color: @text-default-color;
+      &:hover {
+        cursor: pointer;
+        background-color: rgba(0, 0, 0, 2%);
+        color: @text-hover-color;
+      }
+      &::after {
+        position: absolute;
+        content: '';
+        width: 2px;
+        height: 100%;
+        background-color: #E6E8EB;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+    }
+
+    .bannerItemColLeftFirst {
+      padding-top: 12px;
+      padding-bottom: 12px;
+      border-radius: 4px;
+      position: relative;
+      color: @text-default-color;
+      &:hover {
+        cursor: pointer;
+        background-color: rgba(0, 0, 0, 2%);
+        color: @text-hover-color;
+      }
+      &::after {
+        position: absolute;
+        content: '';
+        width: 2px;
+        height: 90%;
+        background-color: #E6E8EB;
+        right: 0;
+        bottom: -1px;
+      }
+    }
+
+    .bannerItemColLeftLast {
+      padding-top: 12px;
+      padding-bottom: 12px;
+      border-radius: 4px;
+      position: relative;
+      color: @text-default-color;
+      &:hover {
+        cursor: pointer;
+        background-color: rgba(0, 0, 0, 2%);
+        color: @text-hover-color;
+      }
+      &::after {
+        position: absolute;
+        content: '';
+        width: 2px;
+        height: 90%;
+        background-color: #E6E8EB;
+        right: 0;
+        top: -1px;
+      }
+    }
+
+    .bannerItemLeft {
+      max-width: 100%;
+      width: calc(100% - 32px - 8px);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      overflow: hidden;
+      .agentResourceIcon {
+        width: 18px;
+        height: 18px;
+        display: inline-block;
+      }
+      .agentResourceName {
+        display: inline-block;
+        font-size: 14px;
+        margin-left: 8px;
+        vertical-align: middle;
+      }
+      .agentResourceType {
+        display: inline-block;
+        font-size: 14px;
+        margin-left: 8px;
+        vertical-align: middle;
+      }
+    }
+    .agentResourceCount {
+      width: 49px;
+      font-size: 14px;
+      margin-left: 8px;
+      text-align: left;
+    }
+  }
+
+  .bannerEmpty {
+    height: @kernel-height;
+    background-color: @banner-item-color;
+  }
+}
+
+

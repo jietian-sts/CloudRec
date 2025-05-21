@@ -1,0 +1,8 @@
+!.gitignore
+task
+*.log
+*.json
+deploy.log
+task.log
+*.zip
+cloudrec_collector_hws_private

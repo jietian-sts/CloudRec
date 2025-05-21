@@ -1,0 +1,76 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.alipay.application.service.common;
+
+
+import com.alipay.common.enums.MessageStatus;
+import com.alipay.dao.mapper.MessageMapper;
+import com.alipay.dao.po.MessagePO;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Component;
+
+/*
+ *@title Message
+ *@description
+ *@author jietian
+ *@version 1.0
+ *@create 2025/1/14 14:40
+ */
+@Component
+public class Message {
+
+    @Resource
+    private MessageMapper messageMapper;
+
+
+    /**
+     * Generate a message
+     *
+     * @param userId  userId
+     * @param message message
+     */
+    public void createMessage(String userId, String message) {
+        MessagePO messagePO = new MessagePO();
+        messagePO.setUserId(userId);
+        messagePO.setMessage(message);
+        messagePO.setStatus(MessageStatus.unRead.name());
+        messageMapper.insertSelective(messagePO);
+    }
+
+    /**
+     * Mark as read
+     *
+     * @param id Message id
+     */
+    public void markAsRead(Long id) {
+        MessagePO messagePO = messageMapper.selectByPrimaryKey(id);
+        if (messagePO == null) {
+            return;
+        }
+        messagePO.setStatus(MessageStatus.read.name());
+        messageMapper.updateByPrimaryKeySelective(messagePO);
+    }
+
+    /**
+     * 删除消息
+     *
+     * @param id Message id
+     */
+    public void deleteMessage(Long id) {
+        messageMapper.deleteByPrimaryKey(id);
+    }
+}

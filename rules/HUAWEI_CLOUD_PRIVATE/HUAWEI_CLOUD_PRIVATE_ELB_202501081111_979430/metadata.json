@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["网络访问"],"code":"HUAWEI_CLOUD_PRIVATE_ELB_202501081111_979430","context":"实例 {$.instance_id} 访问控制不当","description":"ELB 全网开放","level":"High","link":null,"linkedDataList":null,"name":"华为云专有云-ELB-实例全网开放","platform":"HUAWEI_CLOUD_PRIVATE","resourceType":"ELB"}

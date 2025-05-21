@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alipay.dao.mapper.RuleRegoMapper">
+    <resultMap id="BaseResultMap" type="com.alipay.dao.po.RuleRegoPO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="is_draft" jdbcType="INTEGER" property="isDraft"/>
+        <result column="version" jdbcType="INTEGER" property="version"/>
+        <result column="platform" jdbcType="VARCHAR" property="platform"/>
+        <result column="resource_type" jdbcType="VARCHAR" property="resourceType"/>
+        <result column="rule_id" jdbcType="BIGINT" property="ruleId"/>
+        <result column="rego_package" jdbcType="VARCHAR" property="regoPackage"/>
+        <result column="user_id" jdbcType="VARCHAR" property="userId"/>
+    </resultMap>
+    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.alipay.dao.po.RuleRegoPO">
+        <result column="rule_rego" jdbcType="LONGVARCHAR" property="ruleRego"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , gmt_create, gmt_modified, is_draft, version, platform, resource_type, rule_id,
+    rego_package,user_id
+    </sql>
+    <sql id="Blob_Column_List">
+        rule_rego
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from rule_rego
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from rule_rego
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <insert id="insertSelective" parameterType="com.alipay.dao.po.RuleRegoPO">
+        insert into rule_rego
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create,
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified,
+            </if>
+            <if test="isDraft != null">
+                is_draft,
+            </if>
+            <if test="version != null">
+                version,
+            </if>
+            <if test="platform != null">
+                platform,
+            </if>
+            <if test="resourceType != null">
+                resource_type,
+            </if>
+            <if test="ruleId != null">
+                rule_id,
+            </if>
+            <if test="regoPackage != null">
+                rego_package,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="ruleRego != null">
+                rule_rego,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="gmtCreate != null">
+                #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="isDraft != null">
+                #{isDraft,jdbcType=INTEGER},
+            </if>
+            <if test="version != null">
+                #{version,jdbcType=INTEGER},
+            </if>
+            <if test="platform != null">
+                #{platform,jdbcType=VARCHAR},
+            </if>
+            <if test="resourceType != null">
+                #{resourceType,jdbcType=VARCHAR},
+            </if>
+            <if test="ruleId != null">
+                #{ruleId,jdbcType=BIGINT},
+            </if>
+            <if test="regoPackage != null">
+                #{regoPackage,jdbcType=VARCHAR},
+            </if>
+            <if test="userId != null">
+                #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="ruleRego != null">
+                #{ruleRego,jdbcType=LONGVARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.alipay.dao.po.RuleRegoPO">
+        update rule_rego
+        <set>
+            <if test="gmtCreate != null">
+                gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="isDraft != null">
+                is_draft = #{isDraft,jdbcType=INTEGER},
+            </if>
+            <if test="version != null">
+                version = #{version,jdbcType=INTEGER},
+            </if>
+            <if test="platform != null">
+                platform = #{platform,jdbcType=VARCHAR},
+            </if>
+            <if test="resourceType != null">
+                resource_type = #{resourceType,jdbcType=VARCHAR},
+            </if>
+            <if test="ruleId != null">
+                rule_id = #{ruleId,jdbcType=BIGINT},
+            </if>
+            <if test="regoPackage != null">
+                rego_package = #{regoPackage,jdbcType=VARCHAR},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="ruleRego != null">
+                rule_rego = #{ruleRego,jdbcType=LONGVARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <select id="findLatestOne" resultMap="ResultMapWithBLOBs">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        ,
+        <include refid="Blob_Column_List"></include>
+        FROM rule_rego WHERE rule_id = #{ruleId} ORDER BY id DESC LIMIT 1
+    </select>
+    <select id="findList" resultMap="ResultMapWithBLOBs">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        ,
+        <include refid="Blob_Column_List"></include>
+        FROM rule_rego WHERE rule_id = #{ruleId} ORDER BY id DESC
+        <include refid="com.alipay.dao.mapper.RuleMapper.getListLimit"></include>
+    </select>
+    <select id="findCount" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM rule_rego
+        WHERE rule_id = #{ruleId}
+    </select>
+
+</mapper>

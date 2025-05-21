@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["数据保护"],"code":"HUAWEI_CLOUD_PRIVATE_ELB_202503041641_604662","context":"{$.msg_to_user2}","description":"ELB使用不安全的监听协议，TCP、UDP、HTTP为不安全的监听协议","level":"Low","link":null,"linkedDataList":null,"name":"华为云专有云-ELB-不安全的监听协议","platform":"HUAWEI_CLOUD_PRIVATE","resourceType":"ELB"}

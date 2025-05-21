@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["网络访问","数据保护"],"code":"GCP_Cloud Storage_202501081111_600657","context":null,"description":"defaultObjectAcl 允许匿名访问/公网访问","level":"Medium","link":null,"linkedDataList":null,"name":"GCP-Cloud Storage-defaultObjectAcl允许匿名访问/公共访问","platform":"GCP","resourceType":"Bucket"}

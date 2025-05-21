@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["网络访问"],"code":"HUAWEI_CLOUD_PRIVATE_ECS_202503042047_668665","context":"{$.msg_to_user}","description":"高危服务默认端口通过安全组暴露","level":"High","link":null,"linkedDataList":null,"name":"华为云专有云-ECS-高危服务默认端口暴露","platform":"HUAWEI_CLOUD_PRIVATE","resourceType":"ECS"}

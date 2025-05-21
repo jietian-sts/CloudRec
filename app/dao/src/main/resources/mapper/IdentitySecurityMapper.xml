@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alipay.dao.mapper.IdentitySecurityMapper">
+  <resultMap id="BaseResultMap" type="com.alipay.dao.po.IdentitySecurityPO">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+    <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified" />
+    <result column="resource_id" jdbcType="VARCHAR" property="resourceId" />
+    <result column="tags" jdbcType="VARCHAR" property="tags" />
+    <result column="access_type" jdbcType="VARCHAR" property="accessType" />
+    <result column="resource_type" jdbcType="VARCHAR" property="resourceType" />
+    <result column="access_infos" jdbcType="VARCHAR" property="accessInfos" />
+    <result column="user_info" jdbcType="VARCHAR" property="userInfo" />
+    <result column="policies" jdbcType="VARCHAR" property="policies" />
+    <result column="activity_logs" jdbcType="VARCHAR" property="activityLogs" />
+    <result column="instance" jdbcType="VARCHAR" property="instance" />
+    <result column="platform" jdbcType="VARCHAR" property="platform" />
+    <result column="cloud_account_id" jdbcType="VARCHAR" property="cloudAccountId" />
+    <result column="rule_ids" jdbcType="VARCHAR" property="ruleIds" />
+    <result column="resource_type_group" jdbcType="VARCHAR" property="resourceTypeGroup" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, gmt_create, gmt_modified, resource_id, tags, access_type, resource_type,
+    access_infos, user_info, policies,  activity_logs, instance, platform,
+    cloud_account_id,  rule_ids,resource_type_group
+  </sql>
+
+  <sql id="getListWhere">
+  <where>
+    1 = 1
+    <if test="cloudAccountId != null">
+      AND cloud_account_id = #{cloudAccountId,jdbcType=VARCHAR}
+    </if>
+    <if test="platform != null">
+      AND platform = #{platform,jdbcType=VARCHAR}
+    </if>
+    <if test="platformList != null and platformList.size > 0">
+      AND platform IN
+      <foreach collection="platformList" item="item" open="(" separator="," close=")">
+        #{item}
+      </foreach>
+    </if>
+    <if test="ruleId != null">
+      AND rule_ids LIKE CONCAT('%', #{ruleId}, '%')
+    </if>
+    <if test="ruleIds != null  and ruleIds.size() > 0">
+      <foreach item="ruleId" collection="ruleIds" open="" separator=" " close="">
+        AND rule_ids LIKE CONCAT('%', #{ruleId}, '%')
+      </foreach>
+    </if>
+    <if test="tags != null">
+      <foreach item="tag" collection="tags" open="" separator=" " close="">
+        AND tags LIKE CONCAT('%', #{tag}, '%')
+      </foreach>
+    </if>
+    <if test="accessKeyIdList != null  and accessKeyIdList.size() > 0">
+    AND
+      <foreach item="item" collection="accessKeyIdList" open="(" separator="or" close=")">
+         access_infos LIKE CONCAT('%', #{item}, '%')
+      </foreach>
+    </if>
+  </where>
+  </sql>
+
+  <sql id="getListLimit">
+    <if test="offset != null and size != null">
+      LIMIT
+      #{offset},
+      #{size}
+    </if>
+  </sql>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from identity_security
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+
+  <select id="queryList" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from identity_security
+    <include refid="getListWhere"/>
+    ORDER BY id DESC
+    <include refid="getListLimit"/>
+  </select>
+  <select id="queryRuIdsList" resultMap="BaseResultMap">
+    select id, rule_ids
+    from identity_security
+    <include refid="getListWhere"/>
+    ORDER BY id DESC
+    <include refid="getListLimit"/>
+  </select>
+  <select id="count" resultType="java.lang.Integer">
+    select count(1)
+    from identity_security
+    <include refid="getListWhere"/>
+    ORDER BY id DESC
+    <include refid="getListLimit"/>
+  </select>
+  <select id="countRuId" resultType="java.lang.Integer">
+    select count(1)
+    from identity_security
+    <include refid="getListWhere"/>
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from identity_security
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteAll">
+    delete from identity_security
+    where 1=1
+  </delete>
+  <insert id="insert" parameterType="com.alipay.dao.po.IdentitySecurityPO">
+    insert into identity_security (id, gmt_create, gmt_modified, 
+      resource_id, tags, access_type,
+      resource_type, access_infos, user_info,
+      policies,  activity_logs,
+      instance, platform, cloud_account_id, 
+       rule_ids, resource_type_group)
+    values (#{id,jdbcType=BIGINT}, #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP}, 
+      #{resourceId,jdbcType=VARCHAR}, #{tags,jdbcType=VARCHAR}, #{accessType,jdbcType=VARCHAR},
+      #{resourceType,jdbcType=VARCHAR}, #{accessInfos,jdbcType=VARCHAR}, #{userInfo,jdbcType=VARCHAR},
+      #{policies,jdbcType=VARCHAR}, #{activityLogs,jdbcType=VARCHAR},
+      #{instance,jdbcType=VARCHAR}, #{platform,jdbcType=VARCHAR}, #{cloudAccountId,jdbcType=VARCHAR}, 
+      #{ruleIds,jdbcType=VARCHAR},#{resourceTypeGroup,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.alipay.dao.po.IdentitySecurityPO">
+    insert into identity_security
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create,
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified,
+      </if>
+      <if test="resourceId != null">
+        resource_id,
+      </if>
+      <if test="tags != null">
+        tags,
+      </if>
+      <if test="accessType != null">
+        access_type,
+      </if>
+      <if test="resourceType != null">
+        resource_type,
+      </if>
+      <if test="accessInfos != null">
+        access_infos,
+      </if>
+      <if test="userInfo != null">
+        user_info,
+      </if>
+      <if test="policies != null">
+        policies,
+      </if>
+      <if test="activityLogs != null">
+        activity_logs,
+      </if>
+      <if test="instance != null">
+        instance,
+      </if>
+      <if test="platform != null">
+        platform,
+      </if>
+      <if test="cloudAccountId != null">
+        cloud_account_id,
+      </if>
+      <if test="ruleIds != null">
+        rule_ids,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="gmtCreate != null">
+        #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="resourceId != null">
+        #{resourceId,jdbcType=VARCHAR},
+      </if>
+      <if test="tags != null">
+        #{tags,jdbcType=VARCHAR},
+      </if>
+      <if test="accessType != null">
+        #{accessType,jdbcType=VARCHAR},
+      </if>
+      <if test="resourceType != null">
+        #{resourceType,jdbcType=VARCHAR},
+      </if>
+      <if test="accessInfos != null">
+        #{accessInfos,jdbcType=VARCHAR},
+      </if>
+      <if test="userInfo != null">
+        #{userInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="policies != null">
+        #{policies,jdbcType=VARCHAR},
+      </if>
+      <if test="activityLogs != null">
+        #{activityLogs,jdbcType=VARCHAR},
+      </if>
+      <if test="instance != null">
+        #{instance,jdbcType=VARCHAR},
+      </if>
+      <if test="platform != null">
+        #{platform,jdbcType=VARCHAR},
+      </if>
+      <if test="cloudAccountId != null">
+        #{cloudAccountId,jdbcType=VARCHAR},
+      </if>
+      <if test="ruleIds != null">
+        #{ruleIds,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <insert id="insertBatch" parameterType="java.util.List">
+    insert into identity_security
+    (gmt_create, gmt_modified,
+    resource_id, tags, access_type,
+    resource_type, access_infos, user_info,
+    policies, activity_logs,
+    instance, platform, cloud_account_id,
+    rule_ids,resource_type_group)
+    VALUES
+    <foreach collection="list" item="item" index="index" separator=",">
+      (
+       #{item.gmtCreate,jdbcType=TIMESTAMP},
+       #{item.gmtModified,jdbcType=TIMESTAMP},
+       #{item.resourceId,jdbcType=VARCHAR},
+       #{item.tags,jdbcType=VARCHAR},
+       #{item.accessType,jdbcType=VARCHAR},
+       #{item.resourceType,jdbcType=VARCHAR},
+       #{item.accessInfos,jdbcType=VARCHAR},
+       #{item.userInfo,jdbcType=VARCHAR},
+       #{item.policies,jdbcType=VARCHAR},
+       #{item.activityLogs,jdbcType=VARCHAR},
+       #{item.instance,jdbcType=VARCHAR},
+       #{item.platform,jdbcType=VARCHAR},
+       #{item.cloudAccountId,jdbcType=VARCHAR},
+       #{item.ruleIds,jdbcType=VARCHAR},
+       #{item.resourceTypeGroup	,jdbcType=VARCHAR}
+       )
+    </foreach>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.alipay.dao.po.IdentitySecurityPO">
+    update identity_security
+    <set>
+      <if test="gmtCreate != null">
+        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="resourceId != null">
+        resource_id = #{resourceId,jdbcType=VARCHAR},
+      </if>
+      <if test="tags != null">
+        tags = #{tags,jdbcType=VARCHAR},
+      </if>
+      <if test="accessType != null">
+        access_type = #{accessType,jdbcType=VARCHAR},
+      </if>
+      <if test="resourceType != null">
+        resource_type = #{resourceType,jdbcType=VARCHAR},
+      </if>
+      <if test="accessInfos != null">
+        access_infos = #{accessInfos,jdbcType=VARCHAR},
+      </if>
+      <if test="userInfo != null">
+        user_info = #{userInfo,jdbcType=VARCHAR},
+      </if>
+      <if test="policies != null">
+        policies = #{policies,jdbcType=VARCHAR},
+      </if>
+      <if test="activityLogs != null">
+        activity_logs = #{activityLogs,jdbcType=VARCHAR},
+      </if>
+      <if test="instance != null">
+        instance = #{instance,jdbcType=VARCHAR},
+      </if>
+      <if test="platform != null">
+        platform = #{platform,jdbcType=VARCHAR},
+      </if>
+      <if test="cloudAccountId != null">
+        cloud_account_id = #{cloudAccountId,jdbcType=VARCHAR},
+      </if>
+      <if test="ruleIds != null">
+        rule_ids = #{ruleIds,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.alipay.dao.po.IdentitySecurityPO">
+    update identity_security
+    set gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      resource_id = #{resourceId,jdbcType=VARCHAR},
+      tags = #{tags,jdbcType=VARCHAR},
+      access_type = #{accessType,jdbcType=VARCHAR},
+      resource_type = #{resourceType,jdbcType=VARCHAR},
+      access_infos = #{accessInfos,jdbcType=VARCHAR},
+      user_info = #{userInfo,jdbcType=VARCHAR},
+      policies = #{policies,jdbcType=VARCHAR},
+      activity_logs = #{activityLogs,jdbcType=VARCHAR},
+      instance = #{instance,jdbcType=VARCHAR},
+      platform = #{platform,jdbcType=VARCHAR},
+      cloud_account_id = #{cloudAccountId,jdbcType=VARCHAR},
+      rule_ids = #{ruleIds,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

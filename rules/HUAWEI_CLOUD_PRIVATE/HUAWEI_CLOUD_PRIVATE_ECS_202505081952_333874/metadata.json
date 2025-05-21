@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["数据保护"],"code":"HUAWEI_CLOUD_PRIVATE_ECS_202505081952_333874","context":"实例ID:{$.instance_id} ，名称:{$.instance_name} 存在数据盘未加密风险","description":"检查ECS实例是否具备未加密的数据盘。当数据盘的未进行加密，表示不合规。可能的影响是，未加密的数据盘可能会导致数据泄露和安全风险","level":"Low","link":null,"linkedDataList":null,"name":"华为云专有云-ECS-数据盘未加密","platform":"HUAWEI_CLOUD_PRIVATE","resourceType":"ECS"}

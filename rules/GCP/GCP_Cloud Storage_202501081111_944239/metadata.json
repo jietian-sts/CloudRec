@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["网络访问","数据保护"],"code":"GCP_Cloud Storage_202501081111_944239","context":null,"description":"Bucket 未启用 Uniform访问控制","level":"Low","link":null,"linkedDataList":null,"name":"GCP-Cloud Storage-Bucket 未启用 Uniform访问控制","platform":"GCP","resourceType":"Bucket"}

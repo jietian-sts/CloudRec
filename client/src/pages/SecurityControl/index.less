@@ -1,0 +1,64 @@
+@default-light-color: rgba(0, 0, 0, 0.45);
+@default-success-color: rgb(55, 158, 14);
+
+.securityStatistic {
+  .divider {
+    height: 20px;
+    margin: 0 12px;
+    border-inline-start: 2px solid #f0f0f0;
+  }
+}
+
+.capacityCard {
+  .capacityCardLeft {
+    position: relative;
+    padding-right: 64px;
+    flex-shrink: 0;
+    min-width: 122px;
+    &::after {
+      position: absolute;
+      width: 1.3px;
+      right: 32px;
+      height: 80%;
+      top: 50%;
+      transform: translateY(-50%);
+      content: '';
+      background:  #f0f0f0;
+      margin-left: 32px;
+    }
+    .capacityCardLeftTitle {
+      color: @default-light-color;
+    }
+    .capacityCardLeftType {
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.88);
+      margin-bottom: 2px;
+    }
+  }
+  .capacityCardRight {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+
+    .capacityCardRightContent {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+
+      .capacityCardRightLabel {
+        color: @default-light-color;
+      }
+
+      .capacityCardRightValue {
+        color: #3D3D3D;
+        .range {
+          color: @default-success-color;
+        }
+        .separator {
+          margin: 0 6px;
+        }
+      }
+    }
+
+  }
+}

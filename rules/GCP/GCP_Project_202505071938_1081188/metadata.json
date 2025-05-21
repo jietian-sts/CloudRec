@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["身份安全"],"code":"GCP_Project_202505071938_1081188","context":"以下账号拥有 Project {$.messages[0].Project} 的基础角色权限（Owner, Editor, and Viewer）\n{$.messages[0].Bindings}","description":"账号拥有project 级别的Owner, Editor, Viewer 权限","level":"Medium","link":null,"linkedDataList":null,"name":"GCP-Project-账号拥有基础角色权限","platform":"GCP","resourceType":"Project"}

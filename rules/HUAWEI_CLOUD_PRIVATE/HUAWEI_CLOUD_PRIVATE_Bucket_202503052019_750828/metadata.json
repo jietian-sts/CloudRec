@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["数据保护"],"code":"HUAWEI_CLOUD_PRIVATE_Bucket_202503052019_750828","context":"{$.msg_to_user}","description":"华为云专有云-OBS-Bucket允许公共读操作","level":"High","link":null,"linkedDataList":null,"name":"华为云专有云-OBS-Bucket允许公共读操作","platform":"HUAWEI_CLOUD_PRIVATE","resourceType":"Bucket"}

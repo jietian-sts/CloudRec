@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alipay.dao.mapper.AgentRegistryCloudAccountMapper">
+    <resultMap id="BaseResultMap" type="com.alipay.dao.po.AgentRegistryCloudAccountPO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="registry_value" jdbcType="VARCHAR" property="registryValue"/>
+        <result column="agent_registry_id" jdbcType="BIGINT" property="agentRegistryId"/>
+        <result column="cloud_account_id" jdbcType="VARCHAR" property="cloudAccountId"/>
+        <result column="platform" jdbcType="VARCHAR" property="platform"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , gmt_create, gmt_modified, registry_value, agent_registry_id, cloud_account_id,
+    platform
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from agent_registry_cloud_account
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from agent_registry_cloud_account
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+
+    <insert id="insertSelective" parameterType="com.alipay.dao.po.AgentRegistryCloudAccountPO">
+        insert into agent_registry_cloud_account
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create,
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified,
+            </if>
+            <if test="registryValue != null">
+                registry_value,
+            </if>
+            <if test="agentRegistryId != null">
+                agent_registry_id,
+            </if>
+            <if test="cloudAccountId != null">
+                cloud_account_id,
+            </if>
+            <if test="platform != null">
+                platform,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="gmtCreate != null">
+                #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="registryValue != null">
+                #{registryValue,jdbcType=VARCHAR},
+            </if>
+            <if test="agentRegistryId != null">
+                #{agentRegistryId,jdbcType=BIGINT},
+            </if>
+            <if test="cloudAccountId != null">
+                #{cloudAccountId,jdbcType=VARCHAR},
+            </if>
+            <if test="platform != null">
+                #{platform,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.alipay.dao.po.AgentRegistryCloudAccountPO">
+        update agent_registry_cloud_account
+        <set>
+            <if test="gmtCreate != null">
+                gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="registryValue != null">
+                registry_value = #{registryValue,jdbcType=VARCHAR},
+            </if>
+            <if test="agentRegistryId != null">
+                agent_registry_id = #{agentRegistryId,jdbcType=BIGINT},
+            </if>
+            <if test="cloudAccountId != null">
+                cloud_account_id = #{cloudAccountId,jdbcType=VARCHAR},
+            </if>
+            <if test="platform != null">
+                platform = #{platform,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.alipay.dao.po.AgentRegistryCloudAccountPO">
+        update agent_registry_cloud_account
+        set gmt_create        = #{gmtCreate,jdbcType=TIMESTAMP},
+            gmt_modified      = #{gmtModified,jdbcType=TIMESTAMP},
+            registry_value    = #{registryValue,jdbcType=VARCHAR},
+            agent_registry_id = #{agentRegistryId,jdbcType=BIGINT},
+            cloud_account_id  = #{cloudAccountId,jdbcType=VARCHAR},
+            platform          = #{platform,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="findList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM agent_registry_cloud_account WHERE agent_registry_id = #{agentId}
+    </select>
+    <select id="findOne" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM agent_registry_cloud_account
+        WHERE agent_registry_id = #{agentId} AND cloud_account_id = #{cloudAccountId} LIMIT 1
+    </select>
+
+
+</mapper>

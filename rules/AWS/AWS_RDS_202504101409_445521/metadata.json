@@ -1,0 +1,1 @@
+{"advice":"","categoryList":["网络访问"],"code":"AWS_RDS_202504101409_445521","context":"描述：{$.messages[0].Description}\nID：{$.ResourceId}\n名称：{$.ResourceName}","description":"当启用 Public access配置时，RDS集群会被分配一个公网IP。如非必要请勿使用公网访问。","level":"Medium","link":"","linkedDataList":null,"name":"AWS-RDS-集群启用公网地址","platform":"AWS","resourceType":"RDS"}

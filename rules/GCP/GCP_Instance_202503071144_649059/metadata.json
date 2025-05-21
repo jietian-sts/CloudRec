@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["网络访问"],"code":"GCP_Instance_202503071144_649059","context":null,"description":"实例存在公网ip，且firewalls配置将某个端口暴露到0.0.0.0","level":"Medium","link":null,"linkedDataList":null,"name":"GCP-Compute Engine-Instance存在对全网开放的端口","platform":"GCP","resourceType":"Instance"}

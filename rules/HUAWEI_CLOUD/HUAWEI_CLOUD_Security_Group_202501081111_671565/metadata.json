@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["网络访问"],"code":"HUAWEI_CLOUD_Security_Group_202501081111_671565","context":null,"description":"ECS SSH 服务默认端口暴露","level":"High","link":null,"linkedDataList":null,"name":"华为云-ECS-SSH 服务默认端口暴露","platform":"HUAWEI_CLOUD","resourceType":"Security Group"}

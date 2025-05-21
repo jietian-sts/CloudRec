@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["数据保护"],"code":"HUAWEI_CLOUD_Bucket_202505081936_612318","context":"{$.msg_to_user}","description":"华为云-OBS-Bucket允许公共写操作","level":"High","link":null,"linkedDataList":null,"name":"华为云-OBS-Bucket允许公共写操作","platform":"HUAWEI_CLOUD","resourceType":"Bucket"}

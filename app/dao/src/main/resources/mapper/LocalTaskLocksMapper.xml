@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alipay.dao.mapper.LocalTaskLocksMapper">
+  <resultMap id="BaseResultMap" type="com.alipay.dao.po.LocalTaskLocksPO">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+    <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified" />
+    <result column="task_name" jdbcType="VARCHAR" property="taskName" />
+    <result column="execute_host" jdbcType="VARCHAR" property="executeHost" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, gmt_create, gmt_modified, task_name, execute_host
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from local_task_locks
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+    <select id="selectByTaskName" parameterType="java.lang.String" resultMap="BaseResultMap">
+      select
+      <include refid="Base_Column_List" />
+      from local_task_locks
+      where task_name = #{taskName,jdbcType=VARCHAR}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from local_task_locks
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByTaskName" parameterType="string">
+    delete from local_task_locks
+    where task_name = #{taskName,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.alipay.dao.po.LocalTaskLocksPO">
+    insert into local_task_locks (id, gmt_create, gmt_modified, 
+      task_name, execute_host)
+    values (#{id,jdbcType=BIGINT}, #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP}, 
+      #{taskName,jdbcType=VARCHAR}, #{executeHost,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.alipay.dao.po.LocalTaskLocksPO">
+    insert into local_task_locks
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create,
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified,
+      </if>
+      <if test="taskName != null">
+        task_name,
+      </if>
+      <if test="executeHost != null">
+        execute_host,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="gmtCreate != null">
+        #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="taskName != null">
+        #{taskName,jdbcType=VARCHAR},
+      </if>
+      <if test="executeHost != null">
+        #{executeHost,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.alipay.dao.po.LocalTaskLocksPO">
+    update local_task_locks
+    <set>
+      <if test="gmtCreate != null">
+        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="taskName != null">
+        task_name = #{taskName,jdbcType=VARCHAR},
+      </if>
+      <if test="executeHost != null">
+        execute_host = #{executeHost,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.alipay.dao.po.LocalTaskLocksPO">
+    update local_task_locks
+    set gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      task_name = #{taskName,jdbcType=VARCHAR},
+      execute_host = #{executeHost,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

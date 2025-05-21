@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["网络访问"],"code":"ALI_CLOUD_ALB_202501081111_769125","context":null,"description":"ALB端口开放未配置ACL，直接对公网开放","level":"Low","link":null,"linkedDataList":null,"name":"阿里云-ALB-端口未配置ACL直接对公网开放","platform":"ALI_CLOUD","resourceType":"ALB"}

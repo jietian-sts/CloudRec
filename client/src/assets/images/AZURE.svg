@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>1</title>
+    <g id="最终" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="画板" transform="translate(-95, -8)">
+            <g id="1" transform="translate(95, 8)">
+                <rect id="矩形" stroke-opacity="0" stroke="#979797" stroke-width="0.5" fill="#F5F9FF" x="0.25" y="0.25" width="15.5" height="15.5" rx="2"></rect>
+                <g id="编组" transform="translate(2, 3)" fill="#1E88E5" fill-rule="nonzero">
+                    <path d="M6.63026536,0.000554532983 L2.73621802,8.00905731 L0,7.98022181 L3.05407603,2.90018485 L6.63026536,0 M7.05025102,0.632162662 L12,9 L2.84465694,9 L8.42495816,8.0378928 L5.50284485,4.68022182 L7.05025102,0.632162662 Z" id="形状"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

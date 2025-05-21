@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["数据保护"],"code":"HUAWEI_CLOUD_Bucket_202505081928_211427","context":"{$.msg_to_user}","description":"华为云-OBS-Bucket Policy 允许所有人执行List操作","level":"High","link":null,"linkedDataList":null,"name":"华为云-OBS-Bucket Policy 允许所有人执行List操作","platform":"HUAWEI_CLOUD","resourceType":"Bucket"}

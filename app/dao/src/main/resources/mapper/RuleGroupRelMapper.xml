@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alipay.dao.mapper.RuleGroupRelMapper">
+  <resultMap id="BaseResultMap" type="com.alipay.dao.po.RuleGroupRelPO">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate" />
+    <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified" />
+    <result column="rule_id" jdbcType="BIGINT" property="ruleId" />
+    <result column="rule_group_id" jdbcType="BIGINT" property="ruleGroupId" />
+    <result column="rule_code" jdbcType="VARCHAR" property="ruleCode" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, gmt_create, gmt_modified, rule_id, rule_group_id, rule_code
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from rule_group_rel
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+    <select id="queryOne" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM rule_group_rel
+        WHERE rule_id = #{ruleId} AND rule_group_id = #{groupId}
+    </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from rule_group_rel
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.alipay.dao.po.RuleGroupRelPO">
+    insert into rule_group_rel (id, gmt_create, gmt_modified, 
+      rule_id, rule_group_id, rule_code
+      )
+    values (#{id,jdbcType=BIGINT}, #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP}, 
+      #{ruleId,jdbcType=BIGINT}, #{ruleGroupId,jdbcType=BIGINT}, #{ruleCode,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.alipay.dao.po.RuleGroupRelPO">
+    insert into rule_group_rel
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="gmtCreate != null">
+        gmt_create,
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified,
+      </if>
+      <if test="ruleId != null">
+        rule_id,
+      </if>
+      <if test="ruleGroupId != null">
+        rule_group_id,
+      </if>
+      <if test="ruleCode != null">
+        rule_code,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="gmtCreate != null">
+        #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="ruleId != null">
+        #{ruleId,jdbcType=BIGINT},
+      </if>
+      <if test="ruleGroupId != null">
+        #{ruleGroupId,jdbcType=BIGINT},
+      </if>
+      <if test="ruleCode != null">
+        #{ruleCode,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.alipay.dao.po.RuleGroupRelPO">
+    update rule_group_rel
+    <set>
+      <if test="gmtCreate != null">
+        gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="gmtModified != null">
+        gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="ruleId != null">
+        rule_id = #{ruleId,jdbcType=BIGINT},
+      </if>
+      <if test="ruleGroupId != null">
+        rule_group_id = #{ruleGroupId,jdbcType=BIGINT},
+      </if>
+      <if test="ruleCode != null">
+        rule_code = #{ruleCode,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.alipay.dao.po.RuleGroupRelPO">
+    update rule_group_rel
+    set gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+      gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+      rule_id = #{ruleId,jdbcType=BIGINT},
+      rule_group_id = #{ruleGroupId,jdbcType=BIGINT},
+      rule_code = #{ruleCode,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+  <delete id="deleteByRuleGroupId">
+      DELETE
+      FROM rule_group_rel
+      WHERE rule_group_id = #{groupId}
+  </delete>
+    <delete id="deleteByRuleId">
+      DELETE
+      FROM rule_group_rel
+      WHERE rule_id = #{ruleId}
+    </delete>
+  <select id="queryByRuleId" resultMap="BaseResultMap">
+      SELECT
+      <include refid="Base_Column_List"></include>
+      FROM rule_group_rel
+      WHERE rule_id = #{ruleId}
+  </select>
+
+</mapper>

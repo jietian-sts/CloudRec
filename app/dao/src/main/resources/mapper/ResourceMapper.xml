@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alipay.dao.mapper.ResourceMapper">
+    <resultMap id="BaseResultMap" type="com.alipay.dao.po.ResourcePO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="resource_type" jdbcType="VARCHAR" property="resourceType"/>
+        <result column="resource_name" jdbcType="VARCHAR" property="resourceName"/>
+        <result column="platform" jdbcType="VARCHAR" property="platform"/>
+        <result column="resource_group_type" jdbcType="VARCHAR" property="resourceGroupType"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , gmt_create, gmt_modified, resource_type, resource_name, platform,resource_group_type
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from resource
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from resource
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <insert id="insertSelective" parameterType="com.alipay.dao.po.ResourcePO">
+        insert into resource
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create,
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified,
+            </if>
+            <if test="resourceType != null">
+                resource_type,
+            </if>
+            <if test="resourceName != null">
+                resource_name,
+            </if>
+            <if test="platform != null">
+                platform,
+            </if>
+            <if test="resourceGroupType != null">
+                resource_group_type,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="gmtCreate != null">
+                #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="resourceType != null">
+                #{resourceType,jdbcType=VARCHAR},
+            </if>
+            <if test="resourceName != null">
+                #{resourceName,jdbcType=VARCHAR},
+            </if>
+            <if test="platform != null">
+                #{platform,jdbcType=VARCHAR},
+            </if>
+            <if test="resourceGroupType != null">
+                #{resourceGroupType,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.alipay.dao.po.ResourcePO">
+        update resource
+        <set>
+            <if test="gmtCreate != null">
+                gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="resourceType != null">
+                resource_type = #{resourceType,jdbcType=VARCHAR},
+            </if>
+            <if test="resourceName != null">
+                resource_name = #{resourceName,jdbcType=VARCHAR},
+            </if>
+            <if test="platform != null">
+                platform = #{platform,jdbcType=VARCHAR},
+            </if>
+            <if test="resourceGroupType != null">
+                resource_group_type = #{resourceGroupType,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="findByPlatform" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM resource
+        <where>
+            <if test="platform != null and platform != ''">
+                platform = #{platform}
+            </if>
+        </where>
+    </select>
+
+    <select id="findByGroupType" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM resource
+        <where>
+            <if test="platformList != null and platformList.size() > 0">
+                AND platform IN
+                <foreach collection="platformList" item="platform" open="(" separator="," close=")">
+                    #{platform}
+                </foreach>
+            </if>
+            <if test="resourceGroupType != null and resourceGroupType != ''">
+                AND resource_group_type = #{resourceGroupType}
+            </if>
+        </where>
+    </select>
+    <select id="findOne" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM resource
+        WHERE BINARY platform = #{platform} AND BINARY resource_type = #{resourceType}
+    </select>
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"></include>
+        FROM resource
+    </select>
+</mapper>

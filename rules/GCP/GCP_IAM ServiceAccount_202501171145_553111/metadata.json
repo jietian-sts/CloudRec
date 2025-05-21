@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["身份安全"],"code":"GCP_IAM ServiceAccount_202501171145_553111","context":null,"description":"Service Account存在持久凭证","level":"Medium","link":null,"linkedDataList":null,"name":"GCP-IAM-Service Account存在持久凭证","platform":"GCP","resourceType":"IAM ServiceAccount"}

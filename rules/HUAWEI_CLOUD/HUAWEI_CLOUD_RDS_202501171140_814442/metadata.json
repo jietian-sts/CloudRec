@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["网络访问","数据保护"],"code":"HUAWEI_CLOUD_RDS_202501171140_814442","context":null,"description":"检查RDS实例是否开启了外网地址，如果开启了外网地址，则认为不符合规范。外网可直接访问数据库大大增加了数据泄露风险。","level":"High","link":null,"linkedDataList":null,"name":"华为云-RDS-数据库实例外网可访问","platform":"HUAWEI_CLOUD","resourceType":"RDS"}

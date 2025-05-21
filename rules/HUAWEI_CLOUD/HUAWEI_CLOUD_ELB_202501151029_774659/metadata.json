@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["数据保护"],"code":"HUAWEI_CLOUD_ELB_202501151029_774659","context":"{$.msg_to_user2}","description":"监听器的监听协议使用了 UDP、TCP、HTTP，这类协议往往是不安全的","level":"Low","link":null,"linkedDataList":null,"name":"华为云-ELB-不安全的监听协议","platform":"HUAWEI_CLOUD","resourceType":"ELB"}

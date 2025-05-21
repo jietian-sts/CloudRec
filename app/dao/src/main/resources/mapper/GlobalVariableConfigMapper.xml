@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alipay.dao.mapper.GlobalVariableConfigMapper">
+    <resultMap id="BaseResultMap" type="com.alipay.dao.po.GlobalVariableConfigPO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="path" jdbcType="VARCHAR" property="path"/>
+        <result column="username" jdbcType="VARCHAR" property="username"/>
+        <result column="user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="version" jdbcType="VARCHAR" property="version"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+    </resultMap>
+    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.alipay.dao.po.GlobalVariableConfigPO">
+        <result column="data" jdbcType="LONGVARCHAR" property="data"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , gmt_create, gmt_modified, name, path, username, user_id, version, status
+    </sql>
+    <sql id="Blob_Column_List">
+        data
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from global_variable_config
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from global_variable_config
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <insert id="insert" parameterType="com.alipay.dao.po.GlobalVariableConfigPO">
+        insert into global_variable_config (id, gmt_create, gmt_modified,
+                                            name, path, username,
+                                            user_id, version, status,
+                                            data)
+        values (#{id,jdbcType=BIGINT}, #{gmtCreate,jdbcType=TIMESTAMP}, #{gmtModified,jdbcType=TIMESTAMP},
+                #{name,jdbcType=VARCHAR}, #{path,jdbcType=VARCHAR}, #{username,jdbcType=VARCHAR},
+                #{userId,jdbcType=VARCHAR}, #{version,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR},
+                #{data,jdbcType=LONGVARCHAR})
+    </insert>
+    <insert id="insertSelective" parameterType="com.alipay.dao.po.GlobalVariableConfigPO" useGeneratedKeys="true" keyProperty="id">
+        insert into global_variable_config
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create,
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="path != null">
+                path,
+            </if>
+            <if test="username != null">
+                username,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="version != null">
+                version,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="data != null">
+                data,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="gmtCreate != null">
+                #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="path != null">
+                #{path,jdbcType=VARCHAR},
+            </if>
+            <if test="username != null">
+                #{username,jdbcType=VARCHAR},
+            </if>
+            <if test="userId != null">
+                #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="version != null">
+                #{version,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="data != null">
+                #{data,jdbcType=LONGVARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.alipay.dao.po.GlobalVariableConfigPO">
+        update global_variable_config
+        <set>
+            <if test="gmtCreate != null">
+                gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="path != null">
+                path = #{path,jdbcType=VARCHAR},
+            </if>
+            <if test="username != null">
+                username = #{username,jdbcType=VARCHAR},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="version != null">
+                version = #{version,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                status = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="data != null">
+                data = #{data,jdbcType=LONGVARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="findCount" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM global_variable_config
+        <include refid="getListWhere"></include>
+    </select>
+    <select id="findList" resultMap="ResultMapWithBLOBs">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        ,
+        <include refid="Blob_Column_List"></include>
+        FROM global_variable_config
+        <include refid="getListWhere"></include>
+        ORDER BY id DESC
+        <include refid="getListLimit"></include>
+    </select>
+    <select id="findByPath" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM global_variable_config
+        WHERE path = #{path,jdbcType=VARCHAR} LIMIT 1
+    </select>
+    <select id="findRelRuleList" resultType="com.alipay.dao.po.RulePO">
+        SELECT r.id AS id, rule_name AS ruleName
+        FROM `global_variable_config` gvc
+                 INNER JOIN global_variable_config_rule_rel gvcr ON gvc.id = gvcr.global_variable_config_id
+                 INNER JOIN rule r ON gvcr.rule_id = r.id
+        WHERE gvc.id = #{id,jdbcType=BIGINT}
+    </select>
+    <select id="findByRuleId" resultMap="BaseResultMap">
+        SELECT gvc.*
+        FROM `global_variable_config` gvc
+                 INNER JOIN global_variable_config_rule_rel gvcr ON gvc.id = gvcr.global_variable_config_id
+        WHERE gvcr.rule_id = #{ruleId,jdbcType=BIGINT}
+    </select>
+
+    <sql id="getListWhere">
+        <where>
+            <if test="name != null">
+                AND name LIKE CONCAT('%',#{name,jdbcType=VARCHAR},'%')
+            </if>
+            <if test="path != null">
+                AND path LIKE CONCAT('%',#{path,jdbcType=VARCHAR},'%')
+            </if>
+        </where>
+    </sql>
+
+    <sql id="getListLimit">
+        <if test="offset != null and size != null">
+            LIMIT
+            #{offset},
+            #{size}
+        </if>
+    </sql>
+</mapper>

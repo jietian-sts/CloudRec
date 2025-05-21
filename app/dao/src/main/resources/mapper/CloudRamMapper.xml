@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alipay.dao.mapper.CloudRamMapper">
+    <resultMap id="BaseResultMap" type="com.alipay.dao.po.CloudRamPO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="user_name" jdbcType="VARCHAR" property="userName"/>
+        <result column="user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="user_type" jdbcType="VARCHAR" property="userType"/>
+        <result column="ak_num" jdbcType="INTEGER" property="akNum"/>
+        <result column="cloud_account_id" jdbcType="VARCHAR" property="cloudAccountId"/>
+        <result column="alias" jdbcType="VARCHAR" property="alias"/>
+        <result column="acl_status" jdbcType="VARCHAR" property="aclStatus"/>
+        <result column="platform" jdbcType="VARCHAR" property="platform"/>
+        <result column="tenant_id" jdbcType="BIGINT" property="tenantId"/>
+    </resultMap>
+    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.alipay.dao.po.CloudRamPO">
+        <result column="detail" jdbcType="LONGVARCHAR" property="detail"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , gmt_create, gmt_modified, user_name, user_id, user_type, ak_num, cloud_account_id,
+    alias, acl_status, platform,tenant_id
+    </sql>
+    <sql id="Blob_Column_List">
+        detail
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from cloud_ram
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from cloud_ram
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <delete id="deleteLimit1000">
+        DELETE
+        FROM cloud_ram
+        WHERE platform = #{platform} LIMIT 1000
+    </delete>
+
+    <insert id="insertSelective" parameterType="com.alipay.dao.po.CloudRamPO">
+        insert into cloud_ram
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create,
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified,
+            </if>
+            <if test="userName != null">
+                user_name,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="userType != null">
+                user_type,
+            </if>
+            <if test="akNum != null">
+                ak_num,
+            </if>
+            <if test="cloudAccountId != null">
+                cloud_account_id,
+            </if>
+            <if test="alias != null">
+                alias,
+            </if>
+            <if test="aclStatus != null">
+                acl_status,
+            </if>
+            <if test="platform != null">
+                platform,
+            </if>
+            <if test="tenantId != null">
+                tenant_id,
+            </if>
+            <if test="detail != null">
+                detail,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="gmtCreate != null">
+                #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="userName != null">
+                #{userName,jdbcType=VARCHAR},
+            </if>
+            <if test="userId != null">
+                #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="userType != null">
+                #{userType,jdbcType=VARCHAR},
+            </if>
+            <if test="akNum != null">
+                #{akNum,jdbcType=INTEGER},
+            </if>
+            <if test="cloudAccountId != null">
+                #{cloudAccountId,jdbcType=VARCHAR},
+            </if>
+            <if test="alias != null">
+                #{alias,jdbcType=VARCHAR},
+            </if>
+            <if test="aclStatus != null">
+                #{aclStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="platform != null">
+                #{platform,jdbcType=VARCHAR},
+            </if>
+            <if test="tenantId != null">
+                #{tenantId,jdbcType=BIGINT},
+            </if>
+            <if test="detail != null">
+                #{detail,jdbcType=LONGVARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.alipay.dao.po.CloudRamPO">
+        update cloud_ram
+        <set>
+            <if test="gmtCreate != null">
+                gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="userName != null">
+                user_name = #{userName,jdbcType=VARCHAR},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="userType != null">
+                user_type = #{userType,jdbcType=VARCHAR},
+            </if>
+            <if test="akNum != null">
+                ak_num = #{akNum,jdbcType=INTEGER},
+            </if>
+            <if test="cloudAccountId != null">
+                cloud_account_id = #{cloudAccountId,jdbcType=VARCHAR},
+            </if>
+            <if test="alias != null">
+                alias = #{alias,jdbcType=VARCHAR},
+            </if>
+            <if test="aclStatus != null">
+                acl_status = #{aclStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="platform != null">
+                platform = #{platform,jdbcType=VARCHAR},
+            </if>
+            <if test="tenantId != null">
+                tenant_id = #{tenantId,jdbcType=BIGINT},
+            </if>
+            <if test="detail != null">
+                detail = #{detail,jdbcType=LONGVARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="getSumAkCountByPlatform" resultType="java.lang.Integer">
+        SELECT COALESCE(SUM(ak_num), 0)
+        FROM `cloud_ram`
+        WHERE platform = #{platform}
+        <if test="tenantId != null">
+            AND tenant_id = #{tenantId}
+        </if>
+    </select>
+
+    <select id="getSumAkExistAclCountByPlatform" resultType="java.lang.Integer">
+        SELECT COALESCE(SUM(ak_num), 0)
+        FROM `cloud_ram`
+        WHERE platform = #{platform}
+        AND acl_status = "exist_acl"
+        <if test="tenantId != null">
+            AND tenant_id = #{tenantId}
+        </if>
+    </select>
+
+</mapper>

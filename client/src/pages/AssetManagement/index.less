@@ -1,0 +1,239 @@
+@image-path: '../../assets/images/ASSET_POLYMERIZE_CARD.png'; // Set image path variable
+
+.polymerizeWrap {
+  :global {
+    .ant-spin-nested-loading {
+      width: 100%;
+      .ant-spin-container {
+        width: 100%;
+      }
+    }
+  }
+}
+
+.polymerizeCard {
+  width: 100%;
+  height: 278px;
+  background-image: url(@image-path);
+  background-position: top;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  .polymerizeHead {
+    height: 42px;
+    padding: 0 20px 0 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+  .polymerizeMain {
+    width: 100%;
+    height: 128px;
+    padding: 12px 18px 18px 18px;
+    .riskWrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .riskWrapLeft {
+        display: flex;
+        align-items: center;
+
+      }
+      .riskWrapRight {
+        .riskAsset {
+          background: #ebf0ff;
+          border: 1px solid #a6bfff;
+          border-radius: 2px;
+          color: #457aff;
+          margin-right: 0;
+        }
+      }
+    }
+    .assetMain {
+      height: 128px;
+      margin: 16px 0 12px 0;
+      background-color: #f4f4f4;
+      border-radius: 6px;
+      position: relative;
+      padding: 24px 0 8px 0;
+      .newTag {
+        position: absolute;
+        top: 0;
+        left: 0;
+        color: #fc6d19;
+        padding: 2px 4px;
+        border-radius: 6px 2px 2px 2px;
+        background-color: #ffe9cc;
+        font-size: 10px;
+      }
+      .assetMainItem {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: nowrap;
+        height: 24px;
+        padding: 0 13px;
+        .assetMainItemLabel {
+          color: #999;
+          font-size: 13px;
+        }
+      }
+    }
+    .assetView {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+}
+
+.assetPageContainer {
+
+  .customFilterCard {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  :global {
+    .ant-page-header {
+      padding-block: 0;
+    }
+    .ant-pro-table {
+      .ant-pro-table-search {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+      }
+
+      .ant-pro-card {
+        .ant-pro-card-body {
+          .ant-table-wrapper {
+            .ant-table-footer {
+              background-color: transparent;
+            }
+          }
+        }
+      }
+    }
+
+    .ant-form {
+      .ant-pro-query-filter-row {
+        row-gap: 16px;
+      }
+    }
+    .ant-pro-query-filter {
+      padding: 16px;
+    }
+  }
+}
+
+.customText {
+  display: block;
+  margin: 14px 0;
+}
+
+.iconWrap {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+  color: #eee;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all .3s;
+  background: #efeff0;
+  margin-left: 6px;
+  .resourceInstance {
+    font-size: 15px;
+    cursor: pointer;
+    color: rgba(115, 105, 255, 1);
+    font-weight: normal;
+  }
+  &:hover {
+    .resourceInstance {
+      font-size: 15px;
+      font-weight: bolder;
+      color: #87d068;
+    }
+  }
+}
+
+.assetConfigPageContainer {
+  height: calc(100vh - 56px);
+  :global {
+    .ant-page-header {
+      padding-block: 0;
+    }
+    .ant-pro-grid-content {
+      height: calc(100% - 64px);
+      > .ant-pro-grid-content-children {
+        height: 100%;
+        > .ant-pro-page-container-children-container {
+          height: 100%;
+        }
+      }
+    }
+  }
+}
+
+.customAssetTable {
+  :global {
+    .ant-table-expanded-row-fixed {
+      padding: 0;
+    }
+  }
+}
+
+.cleanBlock {
+  background-color: #FFF;
+  border: 0.5px solid rgb(239, 239, 239);
+  padding: 16px;
+  min-height: 60px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  > div {
+    max-width: 100%;
+    overflow-wrap: break-word;
+  }
+}
+
+.dimBlock {
+  color: #333;
+  background-color: rab(246, 246, 246);
+  border-top: 0.5px solid rgb(239, 239, 239);
+  border-bottom: 0.5px solid rgb(239, 239, 239);
+  min-height: 60px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.customField {
+  background-color: #FFF;
+  border: 0.5px solid rgb(239, 239, 239);
+  padding: 16px;
+  min-height: 60px;
+  box-sizing: border-box;
+}
+
+.tabProCard {
+  margin-bottom: 16px;
+  :global {
+    .ant-tabs {
+      .ant-tabs-content-holder {
+        .ant-tabs-content {
+          .ant-pro-card {
+            .ant-pro-card-body {
+              padding-block-end: 0;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+

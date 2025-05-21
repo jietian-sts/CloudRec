@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["数据保护"],"code":"HUAWEI_CLOUD_PRIVATE_ELB_202503061803_230533","context":"{$.msg_to_user}","description":"TLS 1.0, TLS 1.1 are unsafe TLS ciphers policies","level":"Low","link":null,"linkedDataList":null,"name":"华为云专有云-ELB-密码套件版本过旧","platform":"HUAWEI_CLOUD_PRIVATE","resourceType":"ELB"}

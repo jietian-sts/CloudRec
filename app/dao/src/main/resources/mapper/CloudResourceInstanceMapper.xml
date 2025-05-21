@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alipay.dao.mapper.CloudResourceInstanceMapper">
+    <resultMap id="BaseResultMap" type="com.alipay.dao.po.CloudResourceInstancePO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="deleted_at" jdbcType="TIMESTAMP" property="deletedAt"/>
+        <result column="platform" jdbcType="VARCHAR" property="platform"/>
+        <result column="cloud_account_id" jdbcType="VARCHAR" property="cloudAccountId"/>
+        <result column="alias" jdbcType="VARCHAR" property="alias"/>
+        <result column="resource_type" jdbcType="VARCHAR" property="resourceType"/>
+        <result column="address" jdbcType="VARCHAR" property="address"/>
+        <result column="resource_id" jdbcType="VARCHAR" property="resourceId"/>
+        <result column="resource_name" jdbcType="VARCHAR" property="resourceName"/>
+        <result column="version" jdbcType="VARCHAR" property="version"/>
+        <result column="region" jdbcType="VARCHAR" property="region"/>
+        <result column="tenant_id" jdbcType="BIGINT" property="tenantId"/>
+    </resultMap>
+    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.alipay.dao.po.CloudResourceInstancePO">
+        <result column="instance" jdbcType="LONGVARCHAR" property="instance"/>
+        <result column="custom_field_value" jdbcType="LONGVARCHAR" property="customFieldValue"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , gmt_create, gmt_modified,deleted_at, platform, cloud_account_id,alias, resource_type,
+    address, resource_id, resource_name, version,region,tenant_id
+    </sql>
+    <sql id="Blob_Column_List">
+        instance
+        ,custom_field_value
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from cloud_resource_instance_v1
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from cloud_resource_instance_v1
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    <insert id="insertSelective" parameterType="com.alipay.dao.po.CloudResourceInstancePO">
+        insert into cloud_resource_instance_v1
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create,
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified,
+            </if>
+            <if test="deletedAt != null">
+                deleted_at,
+            </if>
+            <if test="platform != null">
+                platform,
+            </if>
+            <if test="cloudAccountId != null">
+                cloud_account_id,
+            </if>
+            <if test="alias != null">
+                alias,
+            </if>
+            <if test="resourceType != null">
+                resource_type,
+            </if>
+            <if test="address != null">
+                address,
+            </if>
+            <if test="resourceId != null">
+                resource_id,
+            </if>
+            <if test="resourceName != null">
+                resource_name,
+            </if>
+            <if test="version != null">
+                version,
+            </if>
+            <if test="region != null">
+                region,
+            </if>
+            <if test="tenantId != null">
+                tenant_id,
+            </if>
+            <if test="instance != null">
+                instance,
+            </if>
+            <if test="customFieldValue != null">
+                custom_field_value,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="gmtCreate != null">
+                #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="deletedAt != null">
+                #{deletedAt,jdbcType=TIMESTAMP},
+            </if>
+            <if test="platform != null">
+                #{platform,jdbcType=VARCHAR},
+            </if>
+            <if test="cloudAccountId != null">
+                #{cloudAccountId,jdbcType=VARCHAR},
+            </if>
+            <if test="alias != null">
+                #{alias,jdbcType=VARCHAR},
+            </if>
+            <if test="resourceType != null">
+                #{resourceType,jdbcType=VARCHAR},
+            </if>
+            <if test="address != null">
+                #{address,jdbcType=VARCHAR},
+            </if>
+            <if test="resourceId != null">
+                #{resourceId,jdbcType=VARCHAR},
+            </if>
+            <if test="resourceName != null">
+                #{resourceName,jdbcType=VARCHAR},
+            </if>
+            <if test="version != null">
+                #{version,jdbcType=VARCHAR},
+            </if>
+            <if test="region != null">
+                #{region,jdbcType=VARCHAR},
+            </if>
+            <if test="tenantId != null">
+                #{tenantId,jdbcType=BIGINT},
+            </if>
+            <if test="instance != null">
+                #{instance,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="customFieldValue != null">
+                #{customFieldValue,jdbcType=LONGVARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.alipay.dao.po.CloudResourceInstancePO">
+        update cloud_resource_instance_v1
+        <set>
+            <if test="gmtCreate != null">
+                gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            deleted_at = #{deletedAt,jdbcType=TIMESTAMP},
+            <if test="platform != null">
+                platform = #{platform,jdbcType=VARCHAR},
+            </if>
+            <if test="cloudAccountId != null">
+                cloud_account_id = #{cloudAccountId,jdbcType=VARCHAR},
+            </if>
+            <if test="alias != null">
+                alias = #{alias,jdbcType=VARCHAR},
+            </if>
+            <if test="resourceType != null">
+                resource_type = #{resourceType,jdbcType=VARCHAR},
+            </if>
+            <if test="address != null">
+                address = #{address,jdbcType=VARCHAR},
+            </if>
+            <if test="resourceId != null">
+                resource_id = #{resourceId,jdbcType=VARCHAR},
+            </if>
+            <if test="resourceName != null">
+                resource_name = #{resourceName,jdbcType=VARCHAR},
+            </if>
+            <if test="version != null">
+                version = #{version,jdbcType=VARCHAR},
+            </if>
+            <if test="region != null">
+                region = #{region,jdbcType=VARCHAR},
+            </if>
+            <if test="tenantId != null">
+                tenant_id = #{tenantId,jdbcType=BIGINT},
+            </if>
+            <if test="instance != null">
+                instance = #{instance,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="customFieldValue != null">
+                custom_field_value = #{customFieldValue,jdbcType=LONGVARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="findOne" resultMap="ResultMapWithBLOBs">
+        SELECT
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        FROM cloud_resource_instance_v1
+        WHERE
+        resource_id = #{resourceId}
+        AND cloud_account_id = #{cloudAccountId}
+        AND resource_type = #{resourceType}
+        AND platform = #{platform}
+    </select>
+    <select id="findExampleLimit1" resultMap="ResultMapWithBLOBs">
+        SELECT
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        FROM cloud_resource_instance_v1
+        WHERE
+        resource_type = #{resourceType}
+        AND platform = #{platform}
+        ORDER BY id DESC
+        LIMIT 1
+    </select>
+
+    <delete id="deleteByCloudAccountId">
+        DELETE
+        FROM cloud_resource_instance_v1
+        WHERE cloud_account_id = #{cloudAccountId}
+    </delete>
+
+
+    <select id="findByCondWithScrollId" resultMap="ResultMapWithBLOBs">
+        SELECT
+        /*+ query_timeout(20000000)*/
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        FROM cloud_resource_instance_v1
+        <include refid="findListWhere"/>
+        <if test="scrollId != null and scrollId != ''">
+            AND id &lt; #{scrollId}
+        </if>
+        ORDER BY id DESC
+        LIMIT #{size}
+    </select>
+
+    <select id="findByCond" resultMap="ResultMapWithBLOBs">
+        SELECT
+        /*+ query_timeout(20000000)*/
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        FROM cloud_resource_instance_v1
+        <include refid="findListWhere"></include>
+        <if test="sortParam != null and sortParam != ''">
+            ORDER BY ${sortParam} ${sortType}
+        </if>
+        <if test="sortParam == null or sortParam == ''">
+            ORDER BY id DESC
+        </if>
+        <include refid="getListLimit"></include>
+    </select>
+    <select id="findCountByCloudAccountId" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM cloud_resource_instance_v1
+        WHERE cloud_account_id = #{cloudAccountId}
+    </select>
+    <select id="findCountByCond" resultType="java.lang.Long">
+        SELECT /*+ query_timeout(20000000)*/ COUNT(*)
+        FROM cloud_resource_instance_v1
+        <include refid="findListWhere"></include>
+    </select>
+
+    <select id="findAggregateAssetsCount" resultType="java.lang.Integer">
+        SELECT /*+ query_timeout(20000000)*/
+        COUNT(distinct resource_type)
+        FROM cloud_resource_instance_v1
+        <include refid="findAggregateAssetsListWhere"/>
+    </select>
+    <select id="findAggregateAssetsList" resultType="com.alipay.dao.dto.ResourceAggByInstanceTypeDTO">
+        SELECT /*+ query_timeout(20000000)*/ COUNT(*) AS count,resource_type AS resourceType,platform AS platform
+        FROM cloud_resource_instance_v1
+        <include refid="findAggregateAssetsListWhere"/>
+        GROUP BY resource_type
+        ORDER BY count DESC
+        <include refid="getListLimit"></include>
+    </select>
+
+    <sql id="getListLimit">
+        <if test="offset != null and size != null">
+            LIMIT
+            #{offset},
+            #{size}
+        </if>
+    </sql>
+
+    <sql id="findAggregateAssetsListWhere">
+        <where>
+            <if test="tenantId != null">
+                AND tenant_id = #{tenantId}
+            </if>
+            <if test="platform != null">
+                AND platform = #{platform}
+            </if>
+            <if test="platformList != null and platformList.size() > 0">
+                AND platform IN
+                <foreach collection="platformList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="resourceTypeList != null and resourceTypeList.size() > 0">
+                AND resource_type IN
+                <foreach collection="resourceTypeList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="cloudAccountIdList != null and cloudAccountIdList.size() > 0">
+                AND cloud_account_id IN
+                <foreach collection="cloudAccountIdList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="searchParam != null and searchParam != ''">
+                AND (resource_id LIKE CONCAT(#{searchParam},'%') OR resource_name LIKE CONCAT(#{searchParam},'%'))
+            </if>
+            <if test="address != null and address != ''">
+                AND address LIKE CONCAT(#{address},'%')
+            </if>
+            <if test="customFieldValue != null and customFieldValue != ''">
+                AND custom_field_value LIKE CONCAT('%',#{customFieldValue},'%')
+            </if>
+        </where>
+    </sql>
+    <select id="findLatestOne" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM cloud_resource_instance_v1
+        <include refid="findAggregateAssetsListWhere"></include>
+        ORDER BY gmt_modified DESC LIMIT 1
+    </select>
+    <select id="findByIdList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM cloud_resource_instance_v1
+        WHERE id IN
+        <foreach collection="idList" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+    <select id="findAccountList" resultType="java.lang.String">
+        SELECT DISTINCT cloud_account_id
+        FROM cloud_resource_instance_v1
+        WHERE platform = #{platform}
+          AND resource_type = #{resourceType}
+    </select>
+
+    <select id="findExpiredVersionDataList" resultType="java.lang.Long">
+        SELECT id FROM cloud_resource_instance_v1
+        WHERE platform = #{platform}
+        AND cloud_account_id = #{cloudAccountId}
+        AND resource_type = #{resourceType}
+        AND version IN
+        <foreach collection="expiredVersionList" item="version" open="(" separator="," close=")">
+            #{version}
+        </foreach>
+    </select>
+    <select id="findVersionList" resultType="java.lang.String">
+        SELECT DISTINCT version
+        FROM cloud_resource_instance_v1
+        WHERE platform = #{platform}
+          AND cloud_account_id = #{cloudAccountId}
+          AND resource_type = #{resourceType}
+    </select>
+    <select id="getResourceIdList" resultType="java.lang.String">
+        SELECT DISTINCT resource_id
+        FROM cloud_resource_instance_v1
+    </select>
+
+    <sql id="findListWhere">
+        <where>
+            1=1
+            <if test="id != null">
+                AND id = #{id}
+            </if>
+            <if test="tenantId != null">
+                AND tenant_id = #{tenantId}
+            </if>
+            <if test="platform != null">
+                AND platform = #{platform}
+            </if>
+            <if test="platformList != null and platformList.size() > 0">
+                AND platform IN
+                <foreach collection="platformList" item="platform" open="(" separator="," close=")">
+                    #{platform}
+                </foreach>
+            </if>
+            <if test="resourceType != null">
+                AND resource_type = #{resourceType}
+            </if>
+            <if test="resourceTypeList != null and resourceTypeList.size() > 0">
+                AND resource_type IN
+                <foreach collection="resourceTypeList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="cloudAccountId != null and cloudAccountId != ''">
+                AND cloud_account_id = #{cloudAccountId}
+            </if>
+            <if test="cloudAccountIdList != null and cloudAccountIdList.size() > 0">
+                AND cloud_account_id IN
+                <foreach collection="cloudAccountIdList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="resourceIdEq != null and resourceIdEq != ''">
+                AND resource_id = #{resourceIdEq}
+            </if>
+            <if test="resourceId != null and resourceId != ''">
+                AND resource_id LIKE CONCAT(#{resourceId},'%')
+            </if>
+            <if test="resourceName != null and resourceName != ''">
+                AND resource_name LIKE CONCAT(#{resourceName},'%')
+            </if>
+            <if test="searchParam != null and searchParam != ''">
+                AND (resource_id LIKE CONCAT(#{searchParam},'%') OR resource_name LIKE CONCAT(#{searchParam},'%'))
+            </if>
+            <if test="address != null and address != ''">
+                AND address LIKE CONCAT(#{address},'%')
+            </if>
+            <if test="customFieldValue != null and customFieldValue != ''">
+                AND custom_field_value LIKE CONCAT('%',#{customFieldValue},'%')
+            </if>
+            <if test="gmtCreateEnd != null">
+                AND gmt_create &lt;= #{gmtCreateEnd}
+            </if>
+        </where>
+    </sql>
+
+    <update id="deletedByIdList">
+        DELETE FROM cloud_resource_instance_v1
+        WHERE id IN
+        <foreach collection="idList" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <delete id="deleteByModified">
+        DELETE
+        FROM cloud_resource_instance_v1
+        WHERE cloud_account_id = #{cloudAccountId}
+          AND resource_type = #{resourceType}
+          AND gmt_modified &lt; DATE_SUB(NOW(), INTERVAL #{day} DAY) LIMIT 1000
+    </delete>
+    <delete id="deleteDiscardedData">
+        DELETE
+        FROM cloud_resource_instance_v1
+        WHERE cloud_account_id = #{cloudAccountId}
+          AND resource_type = #{resourceType}
+          AND deleted_at is not null LIMIT 1000
+    </delete>
+    <delete id="deleteByResourceType">
+        DELETE
+        FROM cloud_resource_instance_v1
+        WHERE platform = #{platform}
+          AND resource_type = #{resourceType}
+    </delete>
+
+</mapper>

@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["网络访问","数据保护"],"code":"GCP_Cloud Storage_202501081111_997522","context":null,"description":"bucket 匿名访问或公共访问","level":"High","link":null,"linkedDataList":null,"name":"GCP-Cloud Storage-Bucket 可匿名访问或公共访问","platform":"GCP","resourceType":"Bucket"}

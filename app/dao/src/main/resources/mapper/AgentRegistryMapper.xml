@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alipay.dao.mapper.AgentRegistryMapper">
+    <resultMap id="BaseResultMap" type="com.alipay.dao.po.AgentRegistryPO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="platform" jdbcType="VARCHAR" property="platform"/>
+        <result column="registry_value" jdbcType="VARCHAR" property="registryValue"/>
+        <result column="registry_time" jdbcType="TIMESTAMP" property="registryTime"/>
+        <result column="cron" jdbcType="VARCHAR" property="cron"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="agent_name" jdbcType="VARCHAR" property="agentName"/>
+        <result column="secret_key" jdbcType="VARCHAR" property="secretKey"/>
+        <result column="once_token" jdbcType="VARCHAR" property="onceToken"/>
+        <result column="persistent_token" jdbcType="VARCHAR" property="persistentToken"/>
+    </resultMap>
+    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.alipay.dao.po.AgentRegistryPO">
+        <result column="cloud_account_id" jdbcType="LONGVARCHAR" property="cloudAccountId"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id
+        , gmt_create, gmt_modified, platform, registry_value, registry_time, cron, status,agent_name,secret_key,once_token,persistent_token
+    </sql>
+    <sql id="Blob_Column_List">
+        cloud_account_id
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from agent_registry
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from agent_registry
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+
+    <insert id="insertSelective" parameterType="com.alipay.dao.po.AgentRegistryPO">
+        insert into agent_registry
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create,
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified,
+            </if>
+            <if test="platform != null">
+                platform,
+            </if>
+            <if test="registryValue != null">
+                registry_value,
+            </if>
+            <if test="registryTime != null">
+                registry_time,
+            </if>
+            <if test="cron != null">
+                cron,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="agentName != null">
+                agent_name,
+            </if>
+            <if test="secretKey != null">
+                secret_key,
+            </if>
+            <if test="onceToken != null">
+                once_token,
+            </if>
+            <if test="persistentToken != null">
+                persistent_token,
+            </if>
+            <if test="cloudAccountId != null">
+                cloud_account_id,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="gmtCreate != null">
+                #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="platform != null">
+                #{platform,jdbcType=VARCHAR},
+            </if>
+            <if test="registryValue != null">
+                #{registryValue,jdbcType=VARCHAR},
+            </if>
+            <if test="registryTime != null">
+                #{registryTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="cron != null">
+                #{cron,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="agentName != null">
+                #{agentName,jdbcType=VARCHAR},
+            </if>
+            <if test="secretKey != null">
+                #{secretKey,jdbcType=VARCHAR},
+            </if>
+            <if test="onceToken != null">
+                #{onceToken,jdbcType=VARCHAR},
+            </if>
+            <if test="persistentToken != null">
+                #{persistentToken,jdbcType=VARCHAR},
+            </if>
+            <if test="cloudAccountId != null">
+                #{cloudAccountId,jdbcType=LONGVARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.alipay.dao.po.AgentRegistryPO">
+        update agent_registry
+        <set>
+            <if test="gmtCreate != null">
+                gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="platform != null">
+                platform = #{platform,jdbcType=VARCHAR},
+            </if>
+            <if test="registryValue != null">
+                registry_value = #{registryValue,jdbcType=VARCHAR},
+            </if>
+            <if test="registryTime != null">
+                registry_time = #{registryTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="cron != null">
+                cron = #{cron,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                status = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="agentName != null">
+                agent_name = #{agentName,jdbcType=VARCHAR},
+            </if>
+            <if test="secretKey != null">
+                secret_key = #{secretKey,jdbcType=VARCHAR},
+            </if>
+            <if test="onceToken != null">
+                once_token = #{onceToken,jdbcType=VARCHAR},
+            </if>
+            <if test="persistentToken != null">
+                persistent_token = #{persistentToken,jdbcType=VARCHAR},
+            </if>
+            <if test="cloudAccountId != null">
+                cloud_account_id = #{cloudAccountId,jdbcType=LONGVARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+
+    <select id="findOne" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM agent_registry
+        WHERE platform = #{platform,jdbcType=VARCHAR}
+        AND registry_value = #{registryValue,jdbcType=VARCHAR} LIMIT 1
+    </select>
+    <select id="findListByStatusList" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM agent_registry WHERE status IN
+        <foreach collection="statusList" item="status" open="(" separator="," close=")">
+            #{status}
+        </foreach>
+    </select>
+    <select id="findCount" resultType="java.lang.Integer">
+        SELECT COUNT(distinct agent_name,registry_value,once_token)
+        FROM agent_registry
+        <include refid="findListWhere"></include>
+    </select>
+
+    <sql id="findListWhere">
+        <where>
+            <if test="platform != null and platform != ''">
+                platform = #{platform,jdbcType=VARCHAR}
+            </if>
+            <if test="agentName != null and agentName != ''">
+                AND agent_name LIKE CONCAT('%', #{agentName,jdbcType=VARCHAR}, '%')
+            </if>
+            <if test="registryValue != null and registryValue != ''">
+                AND registry_value LIKE CONCAT('%', #{registryValue,jdbcType=VARCHAR}, '%')
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </sql>
+
+    <select id="findList" resultMap="ResultMapWithBLOBs">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        ,
+        <include refid="Blob_Column_List"></include>
+        FROM agent_registry
+        <include refid="findListWhere"></include>
+        ORDER BY id DESC
+        <include refid="getListLimit"></include>
+    </select>
+
+    <select id="findAggList" resultMap="ResultMapWithBLOBs">
+        SELECT
+        gmt_create, gmt_modified, registry_value, registry_time, cron, status,agent_name,once_token,
+        GROUP_CONCAT(platform) as platform
+        FROM agent_registry
+        <include refid="findListWhere"></include>
+        GROUP BY agent_name,once_token
+        ORDER BY id DESC
+        <include refid="getListLimit"></include>
+    </select>
+    <select id="findListByOnceToken" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM agent_registry
+        WHERE once_token = #{onceToken,jdbcType=VARCHAR}
+    </select>
+    <select id="findAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM agent_registry
+    </select>
+
+    <sql id="getListLimit">
+        <if test="offset != null and size != null">
+            LIMIT
+            #{offset},
+            #{size}
+        </if>
+    </sql>
+</mapper>

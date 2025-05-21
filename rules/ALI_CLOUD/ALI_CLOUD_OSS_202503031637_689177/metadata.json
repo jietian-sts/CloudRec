@@ -1,0 +1,1 @@
+{"advice":null,"categoryList":["数据保护"],"code":"ALI_CLOUD_OSS_202503031637_689177","context":null,"description":"Bucket未启用版本控制","level":"Medium","link":null,"linkedDataList":null,"name":"阿里云-OSS-Bucket 未启用版本控制","platform":"ALI_CLOUD","resourceType":"OSS"}

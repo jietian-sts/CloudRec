@@ -1,0 +1,469 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alipay.dao.mapper.RuleMapper">
+    <resultMap id="BaseResultMap" type="com.alipay.dao.po.RulePO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="rule_name" jdbcType="VARCHAR" property="ruleName"/>
+        <result column="risk_level" jdbcType="VARCHAR" property="riskLevel"/>
+        <result column="platform" jdbcType="VARCHAR" property="platform"/>
+        <result column="resource_type" jdbcType="VARCHAR" property="resourceType"/>
+        <result column="rule_rego_id" jdbcType="BIGINT" property="ruleRegoId"/>
+        <result column="user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="last_scan_time" jdbcType="TIMESTAMP" property="lastScanTime"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="rule_code" jdbcType="VARCHAR" property="ruleCode"/>
+        <result column="risk_count" jdbcType="INTEGER" property="riskCount"/>
+        <result column="is_running" jdbcType="INTEGER" property="isRunning"/>
+        <result column="last_scan_time_start" jdbcType="TIMESTAMP" property="lastScanTimeStart"/>
+    </resultMap>
+
+    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.alipay.dao.po.RulePO">
+        <result column="rule_desc" jdbcType="LONGVARCHAR" property="ruleDesc"/>
+        <result column="context" jdbcType="LONGVARCHAR" property="context"/>
+        <result column="advice" jdbcType="LONGVARCHAR" property="advice"/>
+        <result column="link" jdbcType="LONGVARCHAR" property="link"/>
+        <result column="linked_data_list" jdbcType="LONGVARCHAR" property="linkedDataList"/>
+    </resultMap>
+
+
+    <resultMap id="BaseResultMapExcludeRiskCount" type="com.alipay.dao.po.RulePO">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="gmt_modified" jdbcType="TIMESTAMP" property="gmtModified"/>
+        <result column="rule_name" jdbcType="VARCHAR" property="ruleName"/>
+        <result column="risk_level" jdbcType="VARCHAR" property="riskLevel"/>
+        <result column="platform" jdbcType="VARCHAR" property="platform"/>
+        <result column="resource_type" jdbcType="VARCHAR" property="resourceType"/>
+        <result column="rule_rego_id" jdbcType="BIGINT" property="ruleRegoId"/>
+        <result column="user_id" jdbcType="VARCHAR" property="userId"/>
+        <result column="last_scan_time" jdbcType="TIMESTAMP" property="lastScanTime"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="rule_code" jdbcType="VARCHAR" property="ruleCode"/>
+        <result column="is_running" jdbcType="INTEGER" property="isRunning"/>
+        <result column="last_scan_time_start" jdbcType="TIMESTAMP" property="lastScanTimeStart"/>
+    </resultMap>
+
+    <resultMap extends="BaseResultMapExcludeRiskCount" id="ResultMapWithBLOBsV2" type="com.alipay.dao.po.RulePO">
+        <result column="rule_desc" jdbcType="LONGVARCHAR" property="ruleDesc"/>
+        <result column="context" jdbcType="LONGVARCHAR" property="context"/>
+        <result column="advice" jdbcType="LONGVARCHAR" property="advice"/>
+        <result column="link" jdbcType="LONGVARCHAR" property="link"/>
+        <result column="linked_data_list" jdbcType="LONGVARCHAR" property="linkedDataList"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id
+        , gmt_create, gmt_modified, rule_name, risk_level, platform, resource_type,
+    rule_rego_id, user_id, last_scan_time, status,rule_code,risk_count,is_running,last_scan_time_start
+    </sql>
+    <sql id="Blob_Column_List">
+        rule_desc
+        , context, advice, link,linked_data_list
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from rule
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete
+        from rule
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+
+    <insert id="insertSelective" parameterType="com.alipay.dao.po.RulePO" useGeneratedKeys="true"
+            keyProperty="id">
+        insert into rule
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create,
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified,
+            </if>
+            <if test="ruleName != null">
+                rule_name,
+            </if>
+            <if test="riskLevel != null">
+                risk_level,
+            </if>
+            <if test="platform != null">
+                platform,
+            </if>
+            <if test="resourceType != null">
+                resource_type,
+            </if>
+            <if test="ruleRegoId != null">
+                rule_rego_id,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="lastScanTime != null">
+                last_scan_time,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="ruleCode != null">
+                rule_code,
+            </if>
+            <if test="riskCount != null">
+                risk_count,
+            </if>
+            <if test="isRunning != null">
+                is_running,
+            </if>
+            <if test="lastScanTimeStart != null">
+                last_scan_time_start,
+            </if>
+            <if test="ruleDesc != null">
+                rule_desc,
+            </if>
+            <if test="context != null">
+                context,
+            </if>
+            <if test="advice != null">
+                advice,
+            </if>
+            <if test="link != null">
+                link,
+            </if>
+            <if test="linkedDataList != null">
+                linked_data_list,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="gmtCreate != null">
+                #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="ruleName != null">
+                #{ruleName,jdbcType=VARCHAR},
+            </if>
+            <if test="riskLevel != null">
+                #{riskLevel,jdbcType=VARCHAR},
+            </if>
+            <if test="platform != null">
+                #{platform,jdbcType=VARCHAR},
+            </if>
+            <if test="resourceType != null">
+                #{resourceType,jdbcType=VARCHAR},
+            </if>
+            <if test="ruleRegoId != null">
+                #{ruleRegoId,jdbcType=BIGINT},
+            </if>
+            <if test="userId != null">
+                #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="lastScanTime != null">
+                #{lastScanTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="ruleCode != null">
+                #{ruleCode,jdbcType=VARCHAR},
+            </if>
+            <if test="riskCount != null">
+                #{riskCount,jdbcType=INTEGER},
+            </if>
+            <if test="isRunning != null">
+                #{isRunning,jdbcType=INTEGER},
+            </if>
+            <if test="lastScanTimeStart != null">
+                #{lastScanTimeStart,jdbcType=TIMESTAMP},
+            </if>
+            <if test="ruleDesc != null">
+                #{ruleDesc,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="context != null">
+                #{context,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="advice != null">
+                #{advice,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="link != null">
+                #{link,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="linkedDataList != null">
+                #{linkedDataList,jdbcType=LONGVARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.alipay.dao.po.RulePO">
+        update rule
+        <set>
+            <if test="gmtCreate != null">
+                gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gmtModified != null">
+                gmt_modified = #{gmtModified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="ruleName != null">
+                rule_name = #{ruleName,jdbcType=VARCHAR},
+            </if>
+            <if test="riskLevel != null">
+                risk_level = #{riskLevel,jdbcType=VARCHAR},
+            </if>
+            <if test="platform != null">
+                platform = #{platform,jdbcType=VARCHAR},
+            </if>
+            <if test="resourceType != null">
+                resource_type = #{resourceType,jdbcType=VARCHAR},
+            </if>
+            <if test="ruleRegoId != null">
+                rule_rego_id = #{ruleRegoId,jdbcType=BIGINT},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="lastScanTime != null">
+                last_scan_time = #{lastScanTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null">
+                status = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="ruleCode != null">
+                rule_code = #{ruleCode,jdbcType=VARCHAR},
+            </if>
+            <if test="riskCount != null">
+                risk_count = #{riskCount,jdbcType=INTEGER},
+            </if>
+            <if test="isRunning != null">
+                is_running = #{isRunning,jdbcType=INTEGER},
+            </if>
+            <if test="lastScanTimeStart != null">
+                last_scan_time_start = #{lastScanTimeStart,jdbcType=TIMESTAMP},
+            </if>
+            <if test="ruleDesc != null">
+                rule_desc = #{ruleDesc,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="context != null">
+                context = #{context,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="advice != null">
+                advice = #{advice,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="link != null">
+                link = #{link,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="linkedDataList != null">
+                linked_data_list = #{linkedDataList,jdbcType=LONGVARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <update id="updateStatus">
+        update rule
+        set status = #{status}
+        where id = #{id}
+    </update>
+    <select id="findCount" resultType="java.lang.Integer">
+        select count(distinct r.id)
+        from rule r INNER JOIN rule_group_rel rgr ON r.id = rgr.rule_id INNER JOIN rule_group rg ON rgr.rule_group_id =
+        rg.id
+        <include refid="getLitWhere"></include>
+    </select>
+    <select id="findList" resultMap="BaseResultMap">
+        SELECT
+        r.*
+        from rule r INNER JOIN rule_group_rel rgr ON r.id = rgr.rule_id INNER JOIN rule_group rg ON rgr.rule_group_id =
+        rg.id
+        <include refid="getLitWhere"></include>
+        GROUP BY r.id
+        ORDER BY r.rule_code ASC
+        <include refid="getListLimit"></include>
+    </select>
+
+    <select id="findAll" resultMap="ResultMapWithBLOBs">
+        SELECT
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        FROM rule
+    </select>
+
+    <!--    暂时保留观察-->
+    <!--    <select id="findSortList" resultMap="ResultMapWithBLOBs">-->
+    <!--        SELECT-->
+    <!--        r.*,r.risk_count as riskCount-->
+    <!--        from rule r INNER JOIN rule_group_rel rgr ON r.id = rgr.rule_id INNER JOIN rule_group rg ON rgr.rule_group_id =-->
+    <!--        rg.id-->
+    <!--        <include refid="getLitWhere"></include>-->
+    <!--        GROUP BY r.id-->
+    <!--        <if test="sortParam!= null and sortParam != ''">-->
+    <!--            ORDER BY ${sortParam} ${sortType}-->
+    <!--        </if>-->
+    <!--        <if test=" sortParam == null or sortParam == ''">-->
+    <!--            ORDER BY r.id DESC-->
+    <!--        </if>-->
+    <!--        <include refid="getListLimit"></include>-->
+    <!--    </select>-->
+    <select id="findSortList" resultMap="ResultMapWithBLOBsV2">
+        SELECT
+        r.*,
+        IFNULL(rsrcs.count, 0) AS riskCount
+        from rule r INNER JOIN rule_group_rel rgr ON r.id = rgr.rule_id INNER JOIN rule_group rg ON rgr.rule_group_id =
+        rg.id
+        LEFT JOIN rule_scan_risk_count_statistics rsrcs ON r.id = rsrcs.rule_id
+        <if test="tenantId != null">
+            and rsrcs.tenant_id = #{tenantId}
+        </if>
+        <include refid="getLitWhere"></include>
+        GROUP BY r.id
+        <if test="sortParam!= null and sortParam != ''">
+            ORDER BY riskCount ${sortType}
+        </if>
+        <if test=" sortParam == null or sortParam == ''">
+            ORDER BY r.id DESC
+        </if>
+        <include refid="getListLimit"></include>
+    </select>
+    <!--    暂时保留观察-->
+    <!--    <select id="findSortListByTenant" resultMap="ResultMapWithBLOBs">-->
+    <!--        SELECT-->
+    <!--        r.*,-->
+    <!--        count(distinct rsr.id) AS riskCount-->
+    <!--        from rule r INNER JOIN rule_group_rel rgr ON r.id = rgr.rule_id INNER JOIN rule_group rg ON rgr.rule_group_id =-->
+    <!--        rg.id-->
+    <!--        LEFT JOIN rule_scan_result rsr ON r.id = rsr.rule_id AND rsr.status = "UNREPAIRED"-->
+    <!--        <if test="tenantId != null">-->
+    <!--            and rsr.tenant_id = #{tenantId}-->
+    <!--        </if>-->
+    <!--        <include refid="getLitWhere"></include>-->
+    <!--        GROUP BY r.id-->
+    <!--        <if test="sortParam!= null and sortParam != ''">-->
+    <!--            ORDER BY ${sortParam} ${sortType}-->
+    <!--        </if>-->
+    <!--        <if test=" sortParam == null or sortParam == ''">-->
+    <!--            ORDER BY r.id DESC-->
+    <!--        </if>-->
+    <!--        <include refid="getListLimit"></include>-->
+    <!--    </select>-->
+
+    <select id="findOne" resultMap="ResultMapWithBLOBs">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        ,
+        <include refid="Blob_Column_List"></include>
+        FROM rule WHERE rule_code = #{ruleCode}
+    </select>
+    <select id="findOneByCond" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"></include>
+        FROM rule
+        WHERE platform = #{platform} AND rule_name = #{ruleName}
+    </select>
+
+
+    <sql id="getListLimit">
+        <if test="offset != null and size != null">
+            LIMIT
+            #{offset},
+            #{size}
+        </if>
+    </sql>
+
+    <sql id="getLitWhere">
+        <where>
+            <if test="id != null">
+                r.id = #{id}
+            </if>
+            <if test="ruleIdList != null and ruleIdList.size() >0">
+                and r.id IN
+                <foreach collection="ruleIdList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="ruleName != null and ruleName != ''">
+                AND r.rule_name like CONCAT('%',#{ruleName},'%')
+            </if>
+            <if test="ruleCodeList != null and ruleCodeList.size > 0">
+                AND r.rule_code in
+                <foreach collection="ruleCodeList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="ruleNameEqual != null and ruleNameEqual != ''">
+                AND r.rule_name = #{ruleNameEqual}
+            </if>
+            <if test="ruleDesc != null and ruleDesc != ''">
+                and r.rule_desc like CONCAT('%',#{ruleDesc},'%')
+            </if>
+            <if test="riskLevel != null">
+                and r.risk_level = #{riskLevel}
+            </if>
+            <if test="riskLevelList != null and riskLevelList.size > 0">
+                and r.risk_level IN
+                <foreach collection="riskLevelList" item="riskLevel" open="(" separator="," close=")">
+                    #{riskLevel}
+                </foreach>
+            </if>
+            <if test="platform != null">
+                and r.platform = #{platform}
+            </if>
+            <if test="platformList != null and platformList.size() >0">
+                and r.platform IN
+                <foreach collection="platformList" item="platform" open="(" separator="," close=")">
+                    #{platform}
+                </foreach>
+            </if>
+            <if test="resourceType != null">
+                and r.resource_type = #{resourceType}
+            </if>
+            <if test="ruleGroupId != null">
+                and rg.id = #{ruleGroupId}
+            </if>
+            <if test="groupName != null and groupName != ''">
+                and rg.group_name = #{groupName}
+            </if>
+            <if test="groupNameList != null and groupNameList.size() >0">
+                and rg.group_name IN
+                <foreach collection="groupNameList" item="groupName" open="(" separator="," close=")">
+                    #{groupName}
+                </foreach>
+            </if>
+            <if test="status != null">
+                and r.status = #{status}
+            </if>
+            <if test="ruleTypeIdList != null">
+                AND EXISTS
+                (SELECT rt.id
+                FROM rule_type_rel rtr
+                INNER JOIN rule_type rt ON rtr.rule_type_id = rt.id
+                WHERE rtr.rule_id = r.id and rt.id IN
+                <foreach collection="ruleTypeIdList" item="ruleTypeId" open="(" separator="," close=")">
+                    #{ruleTypeId}
+                </foreach>
+                )
+            </if>
+            <if test="resourceTypeList != null and resourceTypeList.size() > 0">
+                and r.resource_type IN
+                <foreach collection="resourceTypeList" item="type" open="(" separator="," close=")">
+                    #{type}
+                </foreach>
+            </if>
+            <if test="ruleGroupIdList != null and ruleGroupIdList.size() > 0">
+                and rg.id IN
+                <foreach collection="ruleGroupIdList" item="ruleGroupId" open="(" separator="," close=")">
+                    #{ruleGroupId}
+                </foreach>
+            </if>
+        </where>
+    </sql>
+</mapper>
