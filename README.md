@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>CloudRec ☁️🛡️</h1>
+  <h1><img src="doc/images/logo.png" width="20"> CloudRec</h1>
   <p>
     <img src="https://img.shields.io/badge/License-Apache_2.0-blue?style=flat-square">
     <a href="https://docs.cloudrec.cloud"><img src="https://img.shields.io/badge/doc-English-blue?style=flat-square"></a>
