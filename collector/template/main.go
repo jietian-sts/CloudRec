@@ -16,18 +16,19 @@
 package main
 
 import (
-	"github.com/core-sdk/constant"
 	"github.com/core-sdk/log"
 	"github.com/core-sdk/schema"
-	"test/collector"
-	"test/collector/ecs"
+	"template/collector"
+	"template/collector/resourcename"
 )
 
 func main() {
 	p := schema.GetInstance(schema.PlatformConfig{
-		Name: string(constant.AlibabaCloud),
+		// [6.1] ADD_NEW_CLOUD : Change the cloud provider here.
+		//Name: string(constant.My_Cloud_Provider),
 		Resources: []schema.Resource{
-			ecs.GetEcsData(),
+			// [6.2] ADD_NEW_CLOUD : Invoke the collect function you've implemented
+			resourcename.GetSomeResource(),
 		},
 
 		Service:        &collector.Services{},

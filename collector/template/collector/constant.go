@@ -15,23 +15,7 @@
 
 package collector
 
-import (
-	"fmt"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/core-sdk/schema"
+const (
+	// [2] ADD_NEW_CLOUD : Add a new cloud resource
+	ResourceName = "ResourceName"
 )
-
-// Services 需要每一个云平台实现
-type Services struct {
-	ECS *ecs.Client
-}
-
-func (s *Services) InitServices(cloudAccountParam schema.CloudAccountParam) (err error) {
-	param := cloudAccountParam.CommonCloudAccountParam
-	s.ECS, err = ecs.NewClientWithAccessKey(param.Region, param.AK, param.SK)
-	if err != nil {
-		return fmt.Errorf("failed to initialize ecs client: %w", err)
-	}
-
-	return nil
-}
