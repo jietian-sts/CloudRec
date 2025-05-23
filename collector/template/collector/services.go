@@ -15,6 +15,30 @@
 
 package collector
 
-const (
-	TEST = "TEST"
+import (
+	"github.com/core-sdk/schema"
 )
+
+// Services 需要每一个云平台实现
+type Services struct {
+	// [3] ADD_NEW_CLOUD :
+	// example:
+	//OSS *oss.Client
+}
+
+func (s *Services) InitServices(cloudAccountParam schema.CloudAccountParam) (err error) {
+	// [4] ADD_NEW_CLOUD : init clients need
+	// example:
+
+	//param := cloudAccountParam.CommonCloudAccountParam
+	//switch cloudAccountParam.ResourceType {
+	//case Bucket:
+	//case ResourceName:
+	//	s.OSS, err = oss.NewClientWithAccessKey(param.Region, param.AK, param.SK)
+	//	if err != nil {
+	//		return fmt.Errorf("failed to initialize oss client: %w", err)
+	//	}
+	//}
+
+	return nil
+}

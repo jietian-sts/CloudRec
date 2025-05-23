@@ -28,6 +28,8 @@ const (
 	AWS                 PlatformType = "AWS"                  // AWS
 	GCP                 PlatformType = "GCP"                  // 谷歌云
 	IBM                 PlatformType = "AZURE"                // AZURE
+	// [1] ADD_NEW_CLOUD : Add a new cloud provider enum.
+	//MyCloudProvider PlatformType = "My_Cloud_Provider"
 )
 
 type PlatformDescription map[PlatformType]string

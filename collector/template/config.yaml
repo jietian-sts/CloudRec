@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-AgentName: "test"
+AgentName: "Collector Name"
 ServerUrl: "http://localhost:8080"
 Cron: "@every 4h"
 RunOnlyOnce: false
