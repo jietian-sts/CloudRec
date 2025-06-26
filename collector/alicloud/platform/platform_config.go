@@ -16,8 +16,6 @@
 package platform
 
 import (
-	"github.com/core-sdk/constant"
-	"github.com/core-sdk/schema"
 	"github.com/cloudrec/alicloud/collector"
 	"github.com/cloudrec/alicloud/collector/ack"
 	"github.com/cloudrec/alicloud/collector/acr"
@@ -61,6 +59,7 @@ import (
 	"github.com/cloudrec/alicloud/collector/pl"
 	"github.com/cloudrec/alicloud/collector/ram"
 	"github.com/cloudrec/alicloud/collector/redis"
+	"github.com/cloudrec/alicloud/collector/resourcecenter"
 	"github.com/cloudrec/alicloud/collector/rocketmq"
 	"github.com/cloudrec/alicloud/collector/sls"
 	"github.com/cloudrec/alicloud/collector/tablestore"
@@ -69,6 +68,8 @@ import (
 	"github.com/cloudrec/alicloud/collector/vpc/nat"
 	"github.com/cloudrec/alicloud/collector/waf"
 	"github.com/cloudrec/alicloud/collector/yundun"
+	"github.com/core-sdk/constant"
+	"github.com/core-sdk/schema"
 )
 
 func GetPlatformConfig() *schema.Platform {
@@ -115,6 +116,7 @@ func GetPlatformConfig() *schema.Platform {
 	return schema.GetInstance(schema.PlatformConfig{
 		Name: string(constant.AlibabaCloud),
 		Resources: []schema.Resource{
+			resourcecenter.GeCloudCenterResource(),
 			ddos.GetDDoSBGPResource(),
 			cloudfw.GetCloudFWConfigResource(),
 			cloudcenter.GetSasConfigResource(),
