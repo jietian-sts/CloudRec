@@ -16,18 +16,17 @@
 package collector
 
 import (
-	"github.com/core-sdk/constant"
 	"context"
+	resourcecenter20221201 "github.com/alibabacloud-go/resourcecenter-20221201/client"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ens"
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	ossCredentials "github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss/credentials"
+	"github.com/core-sdk/constant"
 	"go.uber.org/zap"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/core-sdk/log"
-	"github.com/core-sdk/schema"
 	adb20190315 "github.com/alibabacloud-go/adb-20190315/v4/client"
 	alb20200616 "github.com/alibabacloud-go/alb-20200616/v2/client"
 	alidns20150109 "github.com/alibabacloud-go/alidns-20150109/v4/client"
@@ -78,6 +77,8 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/hbase"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ram"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
+	"github.com/core-sdk/log"
+	"github.com/core-sdk/schema"
 )
 
 var RuntimeObject = new(util.RuntimeOptions)
@@ -163,6 +164,7 @@ type Services struct {
 	YUNDUN          *yundun_bastionhost20191209.Client
 	DDoS            *ddoscoo20200101.Client
 	APIG            *apig20240327.Client
+	ResourceCenter  *resourcecenter20221201.Client
 }
 
 // Clone creates a new instance of Services with copied configuration
@@ -426,6 +428,11 @@ func (s *Services) InitServices(cloudAccountParam schema.CloudAccountParam) (err
 		s.APIG, err = createAPIGClient(param.Region, s.Config)
 		if err != nil {
 			log.CtxLogger(ctx).Warn("init apig client failed", zap.Error(err))
+		}
+	case ResourceCenter:
+		s.ResourceCenter, err = createResourceClient(param.Region, s.Config)
+		if err != nil {
+			log.CtxLogger(ctx).Warn("init resourcecenter client failed", zap.Error(err))
 		}
 	}
 
@@ -962,6 +969,17 @@ func createDDoSBGPClient(regionId string, config *openapi.Config) (_result *ddos
 	config.Endpoint = tea.String("ddoscoo." + regionId + ".aliyuncs.com")
 	_result = &ddoscoo20200101.Client{}
 	_result, _err = ddoscoo20200101.NewClient(config)
+	_result.RegionId = tea.String(regionId)
+	return _result, _err
+}
+
+func createResourceClient(regionId string, config *openapi.Config) (_result *resourcecenter20221201.Client, err error) {
+	if regionId == "ap-southeast-1" {
+		config.Endpoint = tea.String("resourcecenter-intl.aliyuncs.com")
+	} else {
+		config.Endpoint = tea.String("resourcecenter.aliyuncs.com")
+	}
+	_result, _err := resourcecenter20221201.NewClient(config)
 	_result.RegionId = tea.String(regionId)
 	return _result, _err
 }

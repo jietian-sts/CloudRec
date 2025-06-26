@@ -1,10 +1,10 @@
-package acr
+package resourcecenter
 
 import (
+	"github.com/cloudrec/alicloud/collector"
 	"github.com/core-sdk/constant"
 	"github.com/core-sdk/log"
 	"github.com/core-sdk/schema"
-	"github.com/cloudrec/alicloud/collector"
 	"os"
 	"testing"
 )
@@ -23,15 +23,18 @@ var GetTestAccount = func() (res []schema.CloudAccount) {
 	return res
 }
 
-func TestGetCRResource(t *testing.T) {
+func TestCloudCenterResource(t *testing.T) {
 	p := schema.GetInstance(schema.PlatformConfig{
 		Name: string(constant.AlibabaCloud),
 		Resources: []schema.Resource{
-			GetCRResource(),
+			GeCloudCenterResource(),
 		},
 
-		Service:              &collector.Services{},
-		DefaultRegions:       []string{"cn-beijing"},
+		Service: &collector.Services{},
+		DefaultRegions: []string{
+			"cn-shanghai",
+			"ap-southeast-1",
+		},
 		DefaultCloudAccounts: GetTestAccount(),
 	})
 

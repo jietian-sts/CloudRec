@@ -31,8 +31,8 @@ require (
 	github.com/alibabacloud-go/adb-20190315/v4 v4.1.4 // indirect
 	github.com/alibabacloud-go/alb-20200616/v2 v2.2.3 // indirect
 	github.com/alibabacloud-go/alibabacloud-gateway-pop v0.0.6 // indirect
-	github.com/alibabacloud-go/alibabacloud-gateway-sls v0.2.0 // indirect
-	github.com/alibabacloud-go/alibabacloud-gateway-sls-util v0.0.2 // indirect
+	github.com/alibabacloud-go/alibabacloud-gateway-sls v0.3.0 // indirect
+	github.com/alibabacloud-go/alibabacloud-gateway-sls-util v0.3.0 // indirect
 	github.com/alibabacloud-go/alibabacloud-gateway-spi v0.0.5 // indirect
 	github.com/alibabacloud-go/alidns-20150109/v4 v4.5.7 // indirect
 	github.com/alibabacloud-go/apig-20240327/v3 v3.2.2 // indirect
@@ -46,7 +46,7 @@ require (
 	github.com/alibabacloud-go/darabonba-array v0.1.0 // indirect
 	github.com/alibabacloud-go/darabonba-encode-util v0.0.2 // indirect
 	github.com/alibabacloud-go/darabonba-map v0.0.2 // indirect
-	github.com/alibabacloud-go/darabonba-openapi/v2 v2.0.11-0.20241012070109-f821fe24f6e4 // indirect
+	github.com/alibabacloud-go/darabonba-openapi/v2 v2.1.7 // indirect
 	github.com/alibabacloud-go/darabonba-signature-util v0.0.7 // indirect
 	github.com/alibabacloud-go/darabonba-string v1.0.2 // indirect
 	github.com/alibabacloud-go/ddoscoo-20200101/v3 v3.6.0 // indirect
@@ -72,13 +72,14 @@ require (
 	github.com/alibabacloud-go/privatelink-20200415/v5 v5.0.2 // indirect
 	github.com/alibabacloud-go/r-kvstore-20150101/v5 v5.2.1 // indirect
 	github.com/alibabacloud-go/rds-20140815/v6 v6.1.0 // indirect
+	github.com/alibabacloud-go/resourcecenter-20221201 v1.4.0 // indirect
 	github.com/alibabacloud-go/rocketmq-20220801 v1.5.3 // indirect
 	github.com/alibabacloud-go/sas-20181203/v3 v3.4.0 // indirect
 	github.com/alibabacloud-go/selectdb-20230522/v3 v3.1.0 // indirect
 	github.com/alibabacloud-go/slb-20140515/v4 v4.0.9 // indirect
-	github.com/alibabacloud-go/sls-20201230/v6 v6.5.0 // indirect
+	github.com/alibabacloud-go/sls-20201230/v6 v6.9.2 // indirect
 	github.com/alibabacloud-go/tablestore-20201209 v1.0.1 // indirect
-	github.com/alibabacloud-go/tea v1.2.3-0.20240605082020-e6e537a31150 // indirect
+	github.com/alibabacloud-go/tea v1.3.8 // indirect
 	github.com/alibabacloud-go/tea-fileform v1.1.1 // indirect
 	github.com/alibabacloud-go/tea-oss-sdk v1.1.3 // indirect
 	github.com/alibabacloud-go/tea-oss-utils v1.1.0 // indirect
@@ -89,7 +90,7 @@ require (
 	github.com/alibabacloud-go/yundun-bastionhost-20191209/v2 v2.3.0 // indirect
 	github.com/aliyun/alibaba-cloud-sdk-go v1.63.48 // indirect
 	github.com/aliyun/alibabacloud-oss-go-sdk-v2 v1.2.1 // indirect
-	github.com/aliyun/credentials-go v1.3.10 // indirect
+	github.com/aliyun/credentials-go v1.4.5 // indirect
 	github.com/aws/aws-sdk-go v1.44.320 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.32.5 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.6 // indirect
@@ -124,9 +125,8 @@ require (
 	github.com/aws/smithy-go v1.22.1 // indirect
 	github.com/baidubce/bce-sdk-go v0.9.229 // indirect
 	github.com/clbanning/mxj v1.8.4 // indirect
-	github.com/clbanning/mxj/v2 v2.5.5 // indirect
+	github.com/clbanning/mxj/v2 v2.7.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
-	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -136,6 +136,7 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kingsoftcloud/sdk-go/v2 v2.1.8 // indirect
+	github.com/klauspost/compress v1.17.8 // indirect
 	github.com/ks3sdklib/aws-sdk-go v1.6.1 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect

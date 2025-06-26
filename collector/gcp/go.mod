@@ -5,10 +5,10 @@ go 1.23.0
 replace github.com/core-sdk => ../core-sdk
 
 require (
-	github.com/core-sdk v0.0.0-00010101000000-000000000000
 	cloud.google.com/go/accesscontextmanager v1.9.3
 	cloud.google.com/go/iam v1.2.2
 	cloud.google.com/go/resourcemanager v1.10.2
+	github.com/core-sdk v0.0.0-00010101000000-000000000000
 	github.com/turbot/go-kit v0.9.0
 	github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0
 	go.uber.org/zap v1.27.0
