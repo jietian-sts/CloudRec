@@ -8,6 +8,7 @@ cloudrec_collector_baidu
 cloudrec_collector_gcp
 cloudrec_collector_hws
 cloudrec_collector_tencent
+cloudrec_collector_ksyun
 
 *.misc.xml
 deploy/*.tar.gz

@@ -32,13 +32,15 @@ type JobStatus struct {
 
 // loadCloudAccounts Load the cloud account and decrypt it, and at the same time put the local test account into the result
 func (e *Executor) loadCloudAccounts(taskIds []int64) []CloudAccount {
+	if !e.registered {
+		return e.platform.DefaultCloudAccounts
+	}
 	cloudAccountList, err := e.platform.client.LoadAccountFromServer(e.registry.RegistryValue, taskIds)
 	if err != nil {
 		log.GetWLogger().Warn(fmt.Sprintf("Failed to get account from server: %v", err))
 		return nil
 	}
 	cloudAccountList = decryptCredentialsInfo(cloudAccountList, e.registry.SecretKey)
-	cloudAccountList = append(cloudAccountList, e.platform.DefaultCloudAccounts...)
 	return cloudAccountList
 }
 
