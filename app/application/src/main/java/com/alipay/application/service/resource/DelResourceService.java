@@ -7,6 +7,15 @@ package com.alipay.application.service.resource;
  *@author suitianshuang
  *@version 1.0
  *@create 2025/6/26 22:17
-*/
- public class DelResourceService {
+ */
+public interface DelResourceService {
+
+    /**
+     * 预删除资源，将资源的逻辑删除次数 + 1
+     *
+     * @param cloudAccountId
+     * @return
+     */
+    int preDeleteByCloudAccountId(String cloudAccountId);
+
 }
