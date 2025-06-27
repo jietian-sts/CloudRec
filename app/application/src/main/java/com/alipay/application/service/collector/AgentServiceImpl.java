@@ -16,6 +16,7 @@
  */
 package com.alipay.application.service.collector;
 
+import com.alibaba.fastjson.JSON;
 import com.alipay.application.service.collector.domain.Agent;
 import com.alipay.application.service.collector.domain.TaskResp;
 import com.alipay.application.service.collector.domain.repo.AgentRepository;
@@ -130,10 +131,11 @@ public class AgentServiceImpl implements AgentService {
         }
 
         if (agent == null) {
-            agent = Agent.newAgent(registry.getPlatform(), registry.getRegistryValue(), registry.getCron(), registry.getAgentName(), registry.getSecretKey(), onceToken);
+            agent = Agent.newAgent(registry.getPlatform(), registry.getRegistryValue(), registry.getCron(),
+                    registry.getAgentName(), registry.getSecretKey(), onceToken, JSON.toJSONString(registry.getHealthStatus()));
             agentRepository.save(agent);
         } else {
-            agent.refreshAgent(registry.getOnceToken(), registry.getSecretKey());
+            agent.refreshAgent(registry.getOnceToken(), registry.getSecretKey(), JSON.toJSONString(registry.getHealthStatus()));
             agentRepository.save(agent);
         }
         registryResponse.setPersistentToken(agent.getPersistentToken());

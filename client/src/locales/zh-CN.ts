@@ -393,6 +393,7 @@ export default {
     'module.text.registry.value': '注册地址',
     'module.text.registry.time': '心跳时间',
     'module.text.registry.user': '部署人',
+    'module.text.registry.Information':'信息',
     'module.text.registry.status': '健康状态',
     'module.text.status.health': '健康',
     'module.text.status.offline': '下线',

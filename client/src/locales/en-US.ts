@@ -401,6 +401,7 @@ export default {
     'module.text.registry.value': 'Registered Address',
     'module.text.registry.time': 'Heartbeat Time',
     'module.text.registry.user': 'Deployed User',
+    'module.text.registry.Information':'Information',
     'module.text.registry.status': 'Health Status',
     'module.text.status.health': 'Health',
     'module.text.status.offline': 'Offline',

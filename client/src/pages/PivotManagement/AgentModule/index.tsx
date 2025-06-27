@@ -104,6 +104,15 @@ const AgentModule: React.FC = () => {
     },
     {
       title: intl.formatMessage({
+        id: 'collector.module.text.registry.Information',
+      }),
+      dataIndex: 'healthStatus',
+      hideInSearch: true,
+      align: 'left',
+      width: 220,
+    },
+    {
+      title: intl.formatMessage({
         id: 'collector.module.text.registry.status',
       }),
       dataIndex: 'status',
