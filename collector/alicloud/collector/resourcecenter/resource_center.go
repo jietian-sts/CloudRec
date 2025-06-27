@@ -77,8 +77,9 @@ func GetDetail(ctx context.Context, service schema.ServiceInterface, res chan<- 
 		log.CtxLogger(ctx).Warn("Resource center query result is empty")
 		return nil
 	}
-  
+
 	res <- &Detail{
+		Columns:    columns,
 		Rows:       rows,
 		ResourceId: log.GetCloudAccountId(ctx) + "-" + tea.StringValue(cli.RegionId),
 	}
