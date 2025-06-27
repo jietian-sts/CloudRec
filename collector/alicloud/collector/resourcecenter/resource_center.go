@@ -73,6 +73,11 @@ func GetDetail(ctx context.Context, service schema.ServiceInterface, res chan<- 
 		request.NextToken = resp.Body.NextToken
 	}
 
+	if len(rows) == 0 {
+		log.CtxLogger(ctx).Warn("Resource center query result is empty")
+		return nil
+	}
+
 	res <- &Detail{
 		Columns:    columns,
 		Rows:       rows,
