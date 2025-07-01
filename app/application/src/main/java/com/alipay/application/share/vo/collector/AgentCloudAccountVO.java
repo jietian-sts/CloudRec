@@ -71,6 +71,11 @@ public class AgentCloudAccountVO {
      */
     private CollectorTask collectorTask;
 
+    /**
+     * 代理配置
+     */
+    private String proxyConfig;
+
 
     @Getter
     @Setter
@@ -91,6 +96,7 @@ public class AgentCloudAccountVO {
         AgentCloudAccountVO agentCloudAccountVO = new AgentCloudAccountVO();
         agentCloudAccountVO.setCloudAccountId(cloudAccountPO.getCloudAccountId());
         agentCloudAccountVO.setPlatform(cloudAccountPO.getPlatform());
+        agentCloudAccountVO.setProxyConfig(cloudAccountPO.getProxyConfig());
 
         Map<String, String> accountCredentialsInfo = PlatformUtils.getAccountCredentialsInfo(cloudAccountPO.getPlatform(), PlatformUtils.decryptCredentialsJson(cloudAccountPO.getCredentialsJson()));
         agentCloudAccountVO.setCredentialJson(AESEncryptionUtils.encrypt(JSON.toJSONString(accountCredentialsInfo), agentRegistryPO.getSecretKey()));

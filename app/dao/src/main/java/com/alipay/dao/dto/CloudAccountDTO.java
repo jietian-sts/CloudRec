@@ -103,4 +103,9 @@ public class CloudAccountDTO extends PageDTO {
      * 租户id
      */
     private Long tenantId;
+
+    /**
+     * 代理配置JSON
+     */
+    private String proxyConfig;
 }

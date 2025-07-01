@@ -131,6 +131,12 @@ public class CloudAccountVO {
 
     private String userId;
 
+    /**
+     * 代理配置JSON
+     */
+    private String proxyConfig;
+
+
     public static CloudAccountVO buildEasy(CloudAccountPO cloudAccountPO) {
         if (cloudAccountPO == null) {
             return null;

@@ -17,15 +17,16 @@ package collector
 
 import (
 	"context"
+	"net/http"
+	"strings"
+	"time"
+
 	resourcecenter20221201 "github.com/alibabacloud-go/resourcecenter-20221201/client"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ens"
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	ossCredentials "github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss/credentials"
 	"github.com/core-sdk/constant"
 	"go.uber.org/zap"
-	"net/http"
-	"strings"
-	"time"
 
 	adb20190315 "github.com/alibabacloud-go/adb-20190315/v4/client"
 	alb20200616 "github.com/alibabacloud-go/alb-20200616/v2/client"
@@ -179,6 +180,11 @@ func (s *Services) InitServices(cloudAccountParam schema.CloudAccountParam) (err
 	s.Config.ConnectTimeout = tea.Int(10000)
 	s.Config.ReadTimeout = tea.Int(20000)
 
+	if cloudAccountParam.ProxyConfig != "" {
+		s.Config.HttpProxy = tea.String(cloudAccountParam.ProxyConfig)
+		s.Config.HttpsProxy = tea.String(cloudAccountParam.ProxyConfig)
+	}
+
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, constant.CloudAccountId, cloudAccountParam.CloudAccountId)
 	ctx = context.WithValue(ctx, constant.RegionId, param.Region)
@@ -190,15 +196,23 @@ func (s *Services) InitServices(cloudAccountParam schema.CloudAccountParam) (err
 		if err != nil {
 			log.CtxLogger(ctx).Warn("init ecs client failed", zap.Error(err))
 		}
+		s.ECS.SetHttpProxy(cloudAccountParam.ProxyConfig)
+		s.ECS.SetHttpsProxy(cloudAccountParam.ProxyConfig)
 	case VPC, NAT, EIP:
 		s.VPC, err = vpc.NewClientWithAccessKey(param.Region, param.AK, param.SK)
 		if err != nil {
 			log.CtxLogger(ctx).Warn("init vpc client failed", zap.Error(err))
 		}
+		s.VPC.SetHttpProxy(cloudAccountParam.ProxyConfig)
+		s.VPC.SetHttpsProxy(cloudAccountParam.ProxyConfig)
 	case OSS:
 		cfg := oss.LoadDefaultConfig().
 			WithCredentialsProvider(ossCredentials.NewStaticCredentialsProvider(param.AK, param.SK)).
 			WithRegion(param.Region)
+		// A judgment must be made, otherwise it will be overwritten, affecting the execution result
+		if cloudAccountParam.ProxyConfig != "" {
+			cfg.WithProxyHost(cloudAccountParam.ProxyConfig)
+		}
 		s.OSS = oss.NewClient(cfg)
 	case SLB:
 		s.SLB, err = createSlbClient(param.Region, s.Config)
@@ -214,6 +228,8 @@ func (s *Services) InitServices(cloudAccountParam schema.CloudAccountParam) (err
 		if err != nil {
 			log.CtxLogger(ctx).Warn("init ram client failed", zap.Error(err))
 		}
+		s.RAM.SetHttpProxy(cloudAccountParam.ProxyConfig)
+		s.RAM.SetHttpsProxy(cloudAccountParam.ProxyConfig)
 	case Account:
 		s.IMS, err = createImsClient("cn-hangzhou", s.Config)
 		if err != nil {
@@ -224,11 +240,15 @@ func (s *Services) InitServices(cloudAccountParam schema.CloudAccountParam) (err
 		if err != nil {
 			log.CtxLogger(ctx).Warn("init actiontrail client failed", zap.Error(err))
 		}
+		s.Actiontrail.SetHttpProxy(cloudAccountParam.ProxyConfig)
+		s.Actiontrail.SetHttpsProxy(cloudAccountParam.ProxyConfig)
 	case Kafka:
 		s.Alikafka, err = alikafka.NewClientWithAccessKey(param.Region, param.AK, param.SK)
 		if err != nil {
 			log.CtxLogger(ctx).Warn("init alikafka client failed", zap.Error(err))
 		}
+		s.Alikafka.SetHttpProxy(cloudAccountParam.ProxyConfig)
+		s.Alikafka.SetHttpsProxy(cloudAccountParam.ProxyConfig)
 	case Sas, SasConfig:
 		s.Sas, err = createSasClient(param.Region, s.Config)
 		if err != nil {
@@ -239,6 +259,8 @@ func (s *Services) InitServices(cloudAccountParam schema.CloudAccountParam) (err
 		if err != nil {
 			log.CtxLogger(ctx).Warn("init cdn client failed", zap.Error(err))
 		}
+		s.CDN.SetHttpProxy(cloudAccountParam.ProxyConfig)
+		s.CDN.SetHttpsProxy(cloudAccountParam.ProxyConfig)
 	case WAF:
 		s.WAF, err = createWafClient(s.Config)
 		if err != nil {
@@ -259,6 +281,8 @@ func (s *Services) InitServices(cloudAccountParam schema.CloudAccountParam) (err
 		if err != nil {
 			log.CtxLogger(ctx).Warn("init clickhouse client failed", zap.Error(err))
 		}
+		s.Clickhouse.SetHttpProxy(cloudAccountParam.ProxyConfig)
+		s.Clickhouse.SetHttpsProxy(cloudAccountParam.ProxyConfig)
 	case Redis:
 		s.Redis, err = createRedisClient(param.Region, s.Config)
 		if err != nil {
@@ -319,6 +343,8 @@ func (s *Services) InitServices(cloudAccountParam schema.CloudAccountParam) (err
 		if err != nil {
 			log.CtxLogger(ctx).Warn("init hbase client failed", zap.Error(err))
 		}
+		s.Hbase.SetHttpProxy(cloudAccountParam.ProxyConfig)
+		s.Hbase.SetHttpsProxy(cloudAccountParam.ProxyConfig)
 	case SelectDB:
 		s.Selectdb, err = createSelectDBClient(param.Region, s.Config)
 		if err != nil {

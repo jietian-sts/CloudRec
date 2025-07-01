@@ -172,9 +172,12 @@ export default {
     'module.text.risk.information': 'Risk information',
     'module.text.identity': 'identities',
     'input.text.placeholder.access.key':
-      'Please enter Access Key, supports multiple inputs',
+    'Please enter Access Key, supports multiple inputs',
   },
   cloudAccount: {
+    'form.credential': 'credential',
+    'form.proxy': 'proxy',
+    'form.proxy.placeholder': 'schema://user:password@host:port',
     'module.search.open': 'Completed',
     'module.search.stop': 'Failed',
     'module.search.scanning': 'Scanning',
@@ -198,6 +201,7 @@ export default {
     'extend.title.cloud.platform': 'Cloud Provider',
     'extend.title.cloud.services': 'Cloud Services',
     'extend.title.cloud.site': 'Site',
+    'extend.title.proxy.configuration':'Proxy',
     'extend.title.cloud.operate': 'Operate',
     'extend.title.cloud.rotate': 'Rotate',
     'extend.title.createTime': 'Created',
