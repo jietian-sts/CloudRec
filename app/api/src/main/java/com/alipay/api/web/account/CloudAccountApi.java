@@ -109,8 +109,8 @@ public class CloudAccountApi {
         cloudAccountDTO.setResourceTypeList(ListUtils.setList(request.getResourceTypeList()));
 
         if (request.getCredentialsObj() != null) {
-            PlatformUtils.checkCredentialsJson(cloudAccountDTO.getCredentialsJson());
             cloudAccountDTO.setCredentialsJson(JSON.toJSONString(request.getCredentialsObj()));
+            PlatformUtils.checkCredentialsJson(cloudAccountDTO.getCredentialsJson());
         }
 
         return cloudAccountService.saveCloudAccount(cloudAccountDTO);
