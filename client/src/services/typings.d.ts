@@ -219,6 +219,7 @@ declare namespace API {
     site?: string;
     owner?: string;
     projectId?: string;
+    proxyConfig?: string;
   }
 
   interface RiskInfo {

@@ -907,3 +907,9 @@ ALTER TABLE `collector_log`
 
 ALTER TABLE `cloud_resource_instance_v1`
     ADD COLUMN `del_num` int(11) unsigned DEFAULT '0' COMMENT '删除次数';
+
+ALTER TABLE `agent_registry`
+    ADD COLUMN `health_status` varchar(512) DEFAULT NULL COMMENT '服务运行信息';
+
+ALTER TABLE `cloud_account`
+    ADD COLUMN `proxy_config` text DEFAULT NULL COMMENT '代理信息';

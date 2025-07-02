@@ -30,8 +30,7 @@ import com.jayway.jsonpath.JsonPath;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,8 +44,6 @@ import java.util.concurrent.TimeoutException;
 @Getter
 @Slf4j
 public class ResourceMergerTask implements Callable<List<CloudResourceInstancePO>> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceMergerTask.class);
 
     /**
      * Maximum waiting time for task execution 30s
@@ -138,7 +135,7 @@ public class ResourceMergerTask implements Callable<List<CloudResourceInstancePO
 
         // Turn on concurrent task
         orgInstanceData.parallelStream().forEach(instance -> {
-            LOGGER.info("resourceId {} start query...", instance.getResourceId());
+            log.info("resourceId {} start query...", instance.getResourceId());
             DocumentContext context = JsonPath.using(config).parse(instance.getInstance());
             for (LinkDataParam linkedData : linkedDataList) {
                 // 读取出的值与另一个资产读取的值对比
@@ -147,7 +144,7 @@ public class ResourceMergerTask implements Callable<List<CloudResourceInstancePO
 
                 if (linkedData.getAssociativeMode().equals(AssociativeMode.MANY_TO_ONE.getName())) {
                     // 无关联字段，直接将关联资产挂载到主资产上
-                    if (linkedData.getDataList() != null) {
+                    if (CollectionUtils.isNotEmpty(linkedData.getDataList())) {
                         newObjData = JSON.parseObject(linkedData.getDataList().get(0).getInstance());
                     }
                 } else {
@@ -155,7 +152,7 @@ public class ResourceMergerTask implements Callable<List<CloudResourceInstancePO
                     try {
                         primaryDataValue = context.read(linkedData.getLinkedKey1());
                     } catch (Exception e) {
-                        log.warn("primaryDataValue is null, linkedKey:{}", linkedData.getLinkedKey1());
+                        log.warn("primaryDataValue is null, linkedKey:{}", linkedData.getLinkedKey1(), e);
                         continue;
                     }
 
@@ -167,7 +164,7 @@ public class ResourceMergerTask implements Callable<List<CloudResourceInstancePO
                         try {
                             linkedDataValue = JsonPath.read(linkedDocument, linkedData.getLinkedKey2());
                         } catch (Exception e) {
-                            log.warn("linkedDataValue is null, linkedKey:{}", linkedData.getLinkedKey2());
+                            log.warn("linkedDataValue is null, linkedKey:{}", linkedData.getLinkedKey2(), e);
                             continue;
                         }
 
@@ -227,7 +224,7 @@ public class ResourceMergerTask implements Callable<List<CloudResourceInstancePO
 
             }
 
-            LOGGER.info("resourceId {} end query !!!", instance.getResourceId());
+            log.info("resourceId {} end query !!!", instance.getResourceId());
         });
 
         return orgInstanceData;

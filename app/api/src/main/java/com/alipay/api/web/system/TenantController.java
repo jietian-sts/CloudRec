@@ -34,8 +34,6 @@ import com.alipay.dao.context.UserInfoContext;
 import com.alipay.dao.context.UserInfoDTO;
 import com.alipay.dao.dto.TenantDTO;
 import jakarta.annotation.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -54,11 +52,6 @@ import java.util.List;
 @RequestMapping("/api/tenant")
 @Validated
 public class TenantController {
-
-    /**
-     * logger
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(TenantController.class);
 
     @Resource
     private TenantService tenantService;

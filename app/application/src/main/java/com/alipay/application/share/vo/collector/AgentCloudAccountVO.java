@@ -28,8 +28,6 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -38,8 +36,6 @@ import java.util.Map;
 
 @Data
 public class AgentCloudAccountVO {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AgentCloudAccountVO.class);
 
     /**
      * 云账号id
@@ -71,6 +67,11 @@ public class AgentCloudAccountVO {
      */
     private CollectorTask collectorTask;
 
+    /**
+     * 代理配置
+     */
+    private String proxyConfig;
+
 
     @Getter
     @Setter
@@ -91,6 +92,7 @@ public class AgentCloudAccountVO {
         AgentCloudAccountVO agentCloudAccountVO = new AgentCloudAccountVO();
         agentCloudAccountVO.setCloudAccountId(cloudAccountPO.getCloudAccountId());
         agentCloudAccountVO.setPlatform(cloudAccountPO.getPlatform());
+        agentCloudAccountVO.setProxyConfig(cloudAccountPO.getProxyConfig());
 
         Map<String, String> accountCredentialsInfo = PlatformUtils.getAccountCredentialsInfo(cloudAccountPO.getPlatform(), PlatformUtils.decryptCredentialsJson(cloudAccountPO.getCredentialsJson()));
         agentCloudAccountVO.setCredentialJson(AESEncryptionUtils.encrypt(JSON.toJSONString(accountCredentialsInfo), agentRegistryPO.getSecretKey()));

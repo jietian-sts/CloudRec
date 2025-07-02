@@ -33,7 +33,7 @@ import org.springframework.context.annotation.Configuration;
 public class OpaClientConfiguration {
 
     @Value("${opa.url}")
-    private String OPA_URL; // 替换为您的实际 OPA URL
+    private String OPA_URL;
 
     @Bean
     public OpaClient opaClient() {

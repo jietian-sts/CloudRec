@@ -28,9 +28,8 @@ import com.alipay.common.exception.UserNoLoginException;
 import com.alipay.application.service.system.domain.enums.RoleNameType;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -45,9 +44,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/user")
 @Validated
+@Slf4j
 public class UserController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
     @Resource
     private UserService userService;
@@ -106,7 +105,6 @@ public class UserController {
     @PostMapping("/changeUserStatus")
     public ApiResponse<String> changeUserStatus(@Validated @RequestBody ChangeUserStatusRequest request,
                                                 BindingResult error) {
-        LOGGER.info("{}", request);
         if (error.hasErrors()) {
             return new ApiResponse<>(error);
         }

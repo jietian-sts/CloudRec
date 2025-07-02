@@ -121,7 +121,7 @@ public class CloudAccountServiceImpl implements CloudAccountService {
 
     @Override
     public ApiResponse<String> saveCloudAccount(CloudAccountDTO cloudAccountDTO) {
-        // insert or update platform info
+        // check cloud account id
         if (cloudAccountDTO.getId() == null) {
             CloudAccountPO existPO = cloudAccountMapper.findByCloudAccountId(cloudAccountDTO.getCloudAccountId());
             if (existPO != null) {
@@ -130,6 +130,7 @@ public class CloudAccountServiceImpl implements CloudAccountService {
             }
         }
 
+        // set base info
         CloudAccountPO cloudAccountPO = new CloudAccountPO();
         cloudAccountPO.setCloudAccountId(cloudAccountDTO.getCloudAccountId());
         cloudAccountPO.setPlatform(cloudAccountDTO.getPlatform());
@@ -137,6 +138,10 @@ public class CloudAccountServiceImpl implements CloudAccountService {
         cloudAccountPO.setAlias(cloudAccountDTO.getAlias());
         cloudAccountPO.setSite(cloudAccountDTO.getSite());
         cloudAccountPO.setOwner(cloudAccountDTO.getOwner());
+        cloudAccountPO.setProxyConfig(cloudAccountDTO.getProxyConfig());
+        cloudAccountPO.setResourceTypeList(!ListUtils.isEmpty(cloudAccountDTO.getResourceTypeList()) ? String.join(",", cloudAccountDTO.getResourceTypeList()) : "");
+
+        // check credential
         if (StringUtils.isNoneEmpty(cloudAccountDTO.getCredentialsJson()) &&
                 !Objects.equals(MarkConstants.emptyJSON, cloudAccountDTO.getCredentialsJson())
                 && !cloudAccountDTO.getCredentialsJson().contains(MarkConstants.emptyJSON)) {
@@ -145,15 +150,14 @@ public class CloudAccountServiceImpl implements CloudAccountService {
                     .verification();
             if (!verification) {
                 log.warn("Cloud account credential verification failed {}", cloudAccountDTO.getCloudAccountId());
-                throw new RuntimeException("Cloud account credential verification failed");
+                throw new BizException("Cloud account credential verification failed");
             } else {
                 cloudAccountPO.setStatus(Status.valid.name());
                 cloudAccountPO.setCredentialsJson(AESEncryptionUtils.encrypt(cloudAccountDTO.getCredentialsJson()));
             }
         }
 
-        cloudAccountPO.setResourceTypeList(!ListUtils.isEmpty(cloudAccountDTO.getResourceTypeList()) ? String.join(",", cloudAccountDTO.getResourceTypeList()) : "");
-
+        // save cloud account
         if (cloudAccountDTO.getId() == null) {
             if (UserInfoContext.getCurrentUser() != null) {
                 cloudAccountPO.setUserId(UserInfoContext.getCurrentUser().getUserId());
@@ -168,6 +172,7 @@ public class CloudAccountServiceImpl implements CloudAccountService {
             cloudAccountMapper.updateByPrimaryKeySelective(cloudAccountPO);
         }
 
+        // clear cache
         dbCacheUtil.clear(cacheKey);
 
         return ApiResponse.SUCCESS;

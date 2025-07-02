@@ -25,7 +25,6 @@ import (
 	"github.com/cloudrec/alicloud/collector/cas"
 	"github.com/cloudrec/alicloud/collector/cdn"
 	"github.com/cloudrec/alicloud/collector/cen"
-	"github.com/cloudrec/alicloud/collector/cloudapi"
 	"github.com/cloudrec/alicloud/collector/cloudcenter"
 	"github.com/cloudrec/alicloud/collector/cloudfw"
 	"github.com/cloudrec/alicloud/collector/db/AnalyticDB/adbmysql"
@@ -171,7 +170,7 @@ func GetPlatformConfig() *schema.Platform {
 			ens.GetLoadBalancerResource(),
 			ens.GetNetworkResource(),
 			ens.GetNatGatewayResource(),
-			cloudapi.GetCloudAPIResource(),
+			// cloudapi.GetCloudAPIResource(),
 			kms.GetKMSResource(),
 			ack.GetClusterResource(),
 			mse.GetMSEResource(),
@@ -208,7 +207,7 @@ func GetPlatformConfigTest() *schema.Platform {
 	}
 
 	return schema.GetInstance(schema.PlatformConfig{
-		Name:      string(constant.AlibabaCloud),
+		Name: string(constant.AlibabaCloud),
 		Resources: []schema.Resource{
 			//test.TestBlockResource(),
 			//test.TestAutoExitResource(),

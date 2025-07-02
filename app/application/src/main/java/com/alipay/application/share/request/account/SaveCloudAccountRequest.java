@@ -52,7 +52,6 @@ public class SaveCloudAccountRequest {
     /**
      * 认证信息
      */
-    @NotNull(message = "认证信息不能为空")
     private Object credentialsObj;
 
     /**
@@ -81,4 +80,9 @@ public class SaveCloudAccountRequest {
      * 云账号的负责人
      */
     private String owner;
+
+    /**
+     * 代理配置JSON
+     */
+    private String proxyConfig;
 }

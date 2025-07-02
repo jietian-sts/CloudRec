@@ -289,11 +289,11 @@ public class StatisticsJobImpl implements StatisticsJob {
      */
     @Override
     public void statisticsAll() {
-        // 每日风险已处理、未处理统计
         try {
+            // 每日风险已处理、未处理统计
             dailyRiskManagementStatistics();
-            // 按租户、资产类型统计风险数量、资产数量
 
+            // 按租户、资产类型统计风险数量、资产数量
             resourceRiskCountStatistics();
 
             // 统计历史数据每天的风险数量、资产数量

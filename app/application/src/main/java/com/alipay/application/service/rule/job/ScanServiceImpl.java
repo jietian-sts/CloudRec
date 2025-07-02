@@ -48,9 +48,8 @@ import com.alipay.dao.mapper.*;
 import com.alipay.dao.po.*;
 import jakarta.annotation.Resource;
 import jakarta.validation.constraints.NotNull;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -64,10 +63,9 @@ import java.util.concurrent.*;
  *@version 1.0
  *@create 2024/6/18 09:12
  */
+@Slf4j
 @Service
 public class ScanServiceImpl implements ScanService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ScanServiceImpl.class);
 
     @Resource
     private RuleGroupMapper ruleGroupMapper;
@@ -132,13 +130,13 @@ public class ScanServiceImpl implements ScanService {
     public void scanByGroup(Long groupId) {
         RuleGroup ruleGroup = ruleGroupRepository.findOne(groupId);
         if (ruleGroup == null) {
-            LOGGER.warn("No rule group for groupId:{}", groupId);
+            log.warn("No rule group for groupId:{}", groupId);
             return;
         }
 
         List<RuleAgg> list = ruleRepository.findByGroupId(groupId, Status.valid.name());
         if (CollectionUtils.isEmpty(list)) {
-            LOGGER.warn("No rule for groupId:{}", groupId);
+            log.warn("No rule for groupId:{}", groupId);
             return;
         }
 
@@ -187,7 +185,7 @@ public class ScanServiceImpl implements ScanService {
 
     public void scanByRule(RuleAgg ruleAgg, @NotNull CloudAccountPO cloudAccountPO) {
         String cloudAccountId = cloudAccountPO.getCloudAccountId();
-        LOGGER.info("Scan by rule name:{} cloudAccountId:{}", ruleAgg.getRuleName(), cloudAccountId);
+        log.info("Scan by rule name:{} cloudAccountId:{}", ruleAgg.getRuleName(), cloudAccountId);
         long nextVersion = getNextVersion(ruleAgg.getId(), cloudAccountId);
 
         List<CloudResourceInstancePO> resourceInstances = iQueryResource.queryByCond(ruleAgg.getPlatform(),
@@ -211,7 +209,7 @@ public class ScanServiceImpl implements ScanService {
                 Map<String, Object> result = opaRepository.callOpa(ruleAgg.getRegoPath(), ruleAgg.getRegoPolicy(),
                         resourceInstance.getInstance());
                 if (result == null) {
-                    LOGGER.warn("Execute rule failed");
+                    log.warn("Execute rule failed");
                     continue;
                 }
 
@@ -261,7 +259,7 @@ public class ScanServiceImpl implements ScanService {
             Thread.sleep(200);
             // System.gc();
         } catch (InterruptedException e) {
-            LOGGER.error("Thread sleep error", e);
+            log.error("Thread sleep error", e);
         }
     }
 
@@ -281,7 +279,7 @@ public class ScanServiceImpl implements ScanService {
 
         List<RuleScanResultPO> ruleScanResultPOList = ruleScanResultMapper.find(ruleAgg.getId(), cloudAccountId,
                 List.of(RiskStatusManager.RiskStatus.UNREPAIRED.name()), nextVersion);
-        LOGGER.info("cloudAccountId:{},ruleName:{},handleAccountScanResultFinish: ruleScanResultPOList size: {}",
+        log.info("cloudAccountId:{},ruleName:{},handleAccountScanResultFinish: ruleScanResultPOList size: {}",
                 cloudAccountId, ruleAgg.getRuleName(), ruleScanResultPOList.size());
         for (RuleScanResultPO ruleScanResultPO : ruleScanResultPOList) {
             riskStatusManager.unrepairedToRepaired(ruleScanResultPO.getId());
@@ -299,7 +297,7 @@ public class ScanServiceImpl implements ScanService {
                 .cloudAccountIdList(Collections.singletonList(cloudAccountId)).ruleId(ruleAgg.getId())
                 .statusList(List.of(RiskStatusManager.RiskStatus.UNREPAIRED.name())).build();
         List<RuleScanResultPO> ruleScanResultPOList = ruleScanResultMapper.findList(resultDTO);
-        LOGGER.info("cloudAccountId:{},ruleName:{},handleAccountScanResultFinish: ruleScanResultPOList size: {}",
+        log.info("cloudAccountId:{},ruleName:{},handleAccountScanResultFinish: ruleScanResultPOList size: {}",
                 cloudAccountId, ruleAgg.getRuleName(), ruleScanResultPOList.size());
         for (RuleScanResultPO ruleScanResultPO : ruleScanResultPOList) {
             riskStatusManager.unrepairedToRepaired(ruleScanResultPO.getId());
@@ -367,12 +365,12 @@ public class ScanServiceImpl implements ScanService {
                 try {
                     scanByRule(ruleAgg, cloudAccountPO);
                 } catch (Exception e) {
-                    LOGGER.error("cloudAccountId:{} run rule:{} fail:{}", cloudAccountPO.getCloudAccountId(),
+                    log.error("cloudAccountId:{} run rule:{} fail:{}", cloudAccountPO.getCloudAccountId(),
                             ruleAgg.getRuleCode(), e.getMessage());
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("run rule:{} fail:{}", ruleAgg.getRuleCode(), e.getMessage());
+            log.error("run rule:{} fail:{}", ruleAgg.getRuleCode(), e.getMessage());
         } finally {
             // 改状态、释放锁
             handleScanResultFinish(ruleAgg);
@@ -439,7 +437,7 @@ public class ScanServiceImpl implements ScanService {
                 break;
             }
         }
-        LOGGER.info("Update ruleScanResult status:{},hitWhitedRuleName:{},ruleScanResult_id:{}", isWhited,
+        log.info("Update ruleScanResult status:{},hitWhitedRuleName:{},ruleScanResult_id:{}", isWhited,
                 hitWhitedRuleName, ruleScanResultPO.getId());
         if (isWhited) {
             ruleScanResultPO.setWhitedId(hitWhitedRuleConfigId);
@@ -467,7 +465,7 @@ public class ScanServiceImpl implements ScanService {
         operationLogPO.setCorrelationId(id);
         operationLogMapper.insertSelective(operationLogPO);
         if (Objects.isNull(id)) {
-            LOGGER.info("saveOperationLog not CorrelationId， OperationLogPO id:{}", operationLogPO.getId());
+            log.info("saveOperationLog not CorrelationId， OperationLogPO id:{}", operationLogPO.getId());
         }
     }
 

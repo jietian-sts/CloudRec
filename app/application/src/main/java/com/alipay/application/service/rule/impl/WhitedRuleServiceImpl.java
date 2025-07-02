@@ -124,7 +124,7 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
             try {
                 ruleConfigJson = ConditionAssembler.generateJsonCond(conditionItemMap, dto.getCondition());
             } catch (Exception e) {
-                log.error("ruleName: {} 生成condition失败, condition:{}, error:", dto.getRuleName(), dto.getCondition(), e);
+                log.error("ruleName: {} create condition failed, condition:{}, error:", dto.getRuleName(), dto.getCondition(), e);
                 throw new RuntimeException(dto.getRuleName() + ": condition is not valid");
             }
         }

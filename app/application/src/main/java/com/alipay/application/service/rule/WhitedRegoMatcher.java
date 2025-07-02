@@ -24,9 +24,8 @@ import com.alipay.dao.po.CloudAccountPO;
 import com.alipay.dao.po.CloudResourceInstancePO;
 import com.alipay.dao.po.RuleScanResultPO;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -37,11 +36,9 @@ import java.util.Map;
  * Author: lz
  * Description: 使用rego模式扫描规则
  */
+@Slf4j
 @Component
 public class WhitedRegoMatcher {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(WhitedRegoMatcher.class);
-
 
     @Resource
     private OpaRepository opaRepository;
@@ -63,7 +60,7 @@ public class WhitedRegoMatcher {
         }
 
         if (result == null) {
-            LOGGER.warn("Execute rule failed");
+            log.warn("Execute rule failed");
             return false;
         }
 

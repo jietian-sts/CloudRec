@@ -16,6 +16,7 @@
  */
 package com.alipay.application.service.collector;
 
+import com.alibaba.fastjson.JSON;
 import com.alipay.application.service.collector.domain.Agent;
 import com.alipay.application.service.collector.domain.TaskResp;
 import com.alipay.application.service.collector.domain.repo.AgentRepository;
@@ -98,8 +99,6 @@ public class AgentServiceImpl implements AgentService {
     @Resource
     private AccountScanJob accountScanJob;
     @Resource
-    private CloudResourceInstanceMapper cloudResourceInstanceMapper;
-    @Resource
     private DelResourceService delResourceService;
     @Resource
     private CollectorRecordMapper collectorRecordMapper;
@@ -130,10 +129,11 @@ public class AgentServiceImpl implements AgentService {
         }
 
         if (agent == null) {
-            agent = Agent.newAgent(registry.getPlatform(), registry.getRegistryValue(), registry.getCron(), registry.getAgentName(), registry.getSecretKey(), onceToken);
+            agent = Agent.newAgent(registry.getPlatform(), registry.getRegistryValue(), registry.getCron(),
+                    registry.getAgentName(), registry.getSecretKey(), onceToken, JSON.toJSONString(registry.getHealthStatus()));
             agentRepository.save(agent);
         } else {
-            agent.refreshAgent(registry.getOnceToken(), registry.getSecretKey());
+            agent.refreshAgent(registry.getOnceToken(), registry.getSecretKey(), JSON.toJSONString(registry.getHealthStatus()));
             agentRepository.save(agent);
         }
         registryResponse.setPersistentToken(agent.getPersistentToken());
@@ -425,7 +425,8 @@ public class AgentServiceImpl implements AgentService {
                 }
 
                 // Pre-delete asset data
-                delResourceService.preDeleteByCloudAccountId(cloudAccountPO.getCloudAccountId());
+                int effectCount = delResourceService.preDeleteByCloudAccountId(cloudAccountPO.getCloudAccountId());
+                log.info("accountStartCollectPreHandler delResourceService.preDeleteByCloudAccountId,cloudAccountId:{},effectCount:{}", cloudAccountPO.getCloudAccountId(), effectCount);
             } catch (Exception e) {
                 log.error("accountStartCollectPreHandler error,cloudAccountId:{}", cloudAccountPO.getCloudAccountId(), e);
             }
