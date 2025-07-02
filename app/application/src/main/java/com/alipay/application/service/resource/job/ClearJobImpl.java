@@ -23,7 +23,6 @@ import com.alipay.common.enums.ResourceStatus;
 import com.alipay.common.enums.Status;
 import com.alipay.dao.mapper.CloudAccountMapper;
 import com.alipay.dao.mapper.CloudResourceInstanceMapper;
-import com.alipay.dao.mapper.ResourceMapper;
 import com.alipay.dao.mapper.RuleScanResultMapper;
 import com.alipay.dao.po.CloudAccountPO;
 import com.alipay.dao.po.CloudResourceInstancePO;
@@ -46,9 +45,6 @@ import java.util.Objects;
 @Slf4j
 @Component
 public class ClearJobImpl implements ClearJob {
-
-    @Resource
-    private ResourceMapper resourceMapper;
 
     @Resource
     private CloudResourceInstanceMapper cloudResourceInstanceMapper;

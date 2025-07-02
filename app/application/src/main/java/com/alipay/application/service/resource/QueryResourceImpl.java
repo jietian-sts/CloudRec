@@ -70,13 +70,7 @@ public class QueryResourceImpl implements IQueryResource {
     private ResourceMapper resourceMapper;
 
     @Resource
-    private TenantMapper tenantMapper;
-
-    @Resource
     private CloudAccount cloudAccount;
-
-    @Resource
-    private CloudAccountMapper cloudAccountMapper;
 
     @Resource
     private CloudResourceInstanceMapper cloudResourceInstanceMapper;

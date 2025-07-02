@@ -99,8 +99,6 @@ public class AgentServiceImpl implements AgentService {
     @Resource
     private AccountScanJob accountScanJob;
     @Resource
-    private CloudResourceInstanceMapper cloudResourceInstanceMapper;
-    @Resource
     private DelResourceService delResourceService;
     @Resource
     private CollectorRecordMapper collectorRecordMapper;
@@ -427,7 +425,8 @@ public class AgentServiceImpl implements AgentService {
                 }
 
                 // Pre-delete asset data
-                delResourceService.preDeleteByCloudAccountId(cloudAccountPO.getCloudAccountId());
+                int effectCount = delResourceService.preDeleteByCloudAccountId(cloudAccountPO.getCloudAccountId());
+                log.info("accountStartCollectPreHandler delResourceService.preDeleteByCloudAccountId,cloudAccountId:{},effectCount:{}", cloudAccountPO.getCloudAccountId(), effectCount);
             } catch (Exception e) {
                 log.error("accountStartCollectPreHandler error,cloudAccountId:{}", cloudAccountPO.getCloudAccountId(), e);
             }

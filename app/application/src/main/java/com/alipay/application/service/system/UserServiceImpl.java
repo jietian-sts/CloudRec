@@ -32,9 +32,8 @@ import com.alipay.dao.dto.UserDTO;
 import com.alipay.dao.mapper.UserMapper;
 import com.alipay.dao.po.UserPO;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -50,10 +49,9 @@ import java.util.stream.Collectors;
  *@version 1.0
  *@create 2024/6/14 11:38
  */
+@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
-
-    public static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Resource
     private TenantService tenantService;
@@ -97,10 +95,10 @@ public class UserServiceImpl implements UserService {
         List<UserPO> list = userMapper.findList(userDTO);
 
         List<UserVO> collect = list.stream().map(UserVO::toVo).collect(Collectors.toList());
-        collect.stream().forEach(t -> {
+        collect.forEach(t -> {
             List<Tenant> tenantList = tenantRepository.findList(t.getUserId());
             if(!CollectionUtils.isEmpty(tenantList)){
-                List<Long> tenantIds = tenantList.stream().map(Tenant::getId).collect(Collectors.toList());
+                List<Long> tenantIds = tenantList.stream().map(Tenant::getId).toList();
                 t.setTenantIds(StringUtils.join(tenantIds,","));
             }
         });
@@ -164,7 +162,7 @@ public class UserServiceImpl implements UserService {
             try {
                 tenantService.joinDefaultTenant(userId);
             } catch (Exception e) {
-                LOGGER.error("Join default tenant failed", e);
+                log.error("Join default tenant failed", e);
             }
         }
 

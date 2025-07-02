@@ -16,6 +16,11 @@
  */
 package com.alipay.application.service.system;
 
+import com.alipay.application.service.system.domain.Tenant;
+import com.alipay.application.service.system.domain.User;
+import com.alipay.application.service.system.domain.enums.Status;
+import com.alipay.application.service.system.domain.repo.TenantRepository;
+import com.alipay.application.service.system.domain.repo.UserRepository;
 import com.alipay.application.share.vo.ApiResponse;
 import com.alipay.application.share.vo.ListVO;
 import com.alipay.application.share.vo.system.TenantVO;
@@ -28,15 +33,9 @@ import com.alipay.dao.mapper.TenantMapper;
 import com.alipay.dao.mapper.UserMapper;
 import com.alipay.dao.po.TenantPO;
 import com.alipay.dao.po.UserPO;
-import com.alipay.application.service.system.domain.Tenant;
-import com.alipay.application.service.system.domain.User;
-import com.alipay.application.service.system.domain.enums.Status;
-import com.alipay.application.service.system.domain.repo.TenantRepository;
-import com.alipay.application.service.system.domain.repo.UserRepository;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -54,10 +53,9 @@ import java.util.stream.Collectors;
  *@create 2024/6/13 17:44
  */
 
+@Slf4j
 @Service
 public class TenantServiceImpl implements TenantService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TenantServiceImpl.class);
 
     @Resource
     private TenantRepository tenantRepository;
@@ -248,7 +246,7 @@ public class TenantServiceImpl implements TenantService {
             //check before tenant_user
             List<TenantPO> tenantPOList = tenantMapper.findListByUserId(user.getUserId());
             for (TenantPO tenantPO : tenantPOList){
-                tenantRepository.remove(Long.valueOf(user.getId()), tenantPO.getId());
+                tenantRepository.remove(user.getId(), tenantPO.getId());
             }
 
             for (String tenantIdStr : StringUtils.split(tenantIds, ",")) {

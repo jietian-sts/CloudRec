@@ -28,8 +28,6 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -38,8 +36,6 @@ import java.util.Map;
 
 @Data
 public class AgentCloudAccountVO {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AgentCloudAccountVO.class);
 
     /**
      * 云账号id

@@ -20,7 +20,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alipay.application.share.request.resource.DataPushRequest;
 import com.alipay.application.share.request.resource.ResourceInstance;
-import com.alipay.application.share.vo.resource.ResourceDetailConfigVO;
 import com.alipay.common.enums.Status;
 import com.alipay.dao.mapper.CloudAccountMapper;
 import com.alipay.dao.mapper.CloudResourceInstanceMapper;
@@ -33,8 +32,6 @@ import com.jayway.jsonpath.JsonPath;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -45,8 +42,6 @@ import java.util.List;
 @Slf4j
 @Service
 public class SaveResourceServiceImpl implements SaveResourceService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SaveResourceServiceImpl.class);
 
     @Resource
     private CloudAccountMapper cloudAccountMapper;
@@ -61,7 +56,7 @@ public class SaveResourceServiceImpl implements SaveResourceService {
     public void saveOrUpdateData(DataPushRequest.Data dataPushRequest) {
         CloudAccountPO cloudAccountPO = cloudAccountMapper.findByCloudAccountId(dataPushRequest.getCloudAccountId());
         if (cloudAccountPO == null) {
-            LOGGER.error("account account not found, cloudAccountId:{}", dataPushRequest.getCloudAccountId());
+            log.error("account account not found, cloudAccountId:{}", dataPushRequest.getCloudAccountId());
             return;
         }
 
@@ -97,7 +92,7 @@ public class SaveResourceServiceImpl implements SaveResourceService {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("save resource instance error", e);
+            log.error("save resource instance error", e);
         }
     }
 
@@ -110,7 +105,7 @@ public class SaveResourceServiceImpl implements SaveResourceService {
         try {
             this.saveOrUpdateData(parseObject);
         } catch (Exception e) {
-            LOGGER.error("error", e);
+            log.error("save or update resource error", e);
         }
     }
 
@@ -138,26 +133,10 @@ public class SaveResourceServiceImpl implements SaveResourceService {
             try {
                 result.add(JSON.toJSONString(JsonPath.read(document, po.getPath())));
             } catch (Exception e) {
-                log.error("jsonpath error:{}", po.getPath(), e);
+                log.warn("jsonpath error:{}", po.getPath(), e);
             }
         }
 
         return result;
-    }
-
-    private void getPath(Object document, List<ResourceDetailConfigVO> networkList,
-                         List<ResourceDetailConfigPO> networkConfigList) {
-        for (ResourceDetailConfigPO po : networkConfigList) {
-            ResourceDetailConfigVO vo = ResourceDetailConfigVO.build(po);
-            try {
-                Object read = JsonPath.read(document, po.getPath());
-                String value = JSON.toJSONString(read);
-                vo.setValue(value);
-            } catch (Exception e) {
-                LOGGER.info("jsonpath error:{}", po.getPath());
-                vo.setValue(e.getMessage());
-            }
-            networkList.add(vo);
-        }
     }
 }

@@ -16,9 +16,9 @@
  */
 package com.alipay.application.share.vo.account;
 
-import com.alipay.application.service.resource.IQueryResource;
 import com.alipay.application.service.account.utils.PlatformUtils;
 import com.alipay.application.service.common.utils.SpringUtils;
+import com.alipay.application.service.resource.IQueryResource;
 import com.alipay.common.constant.CollectorStatusConstants;
 import com.alipay.common.enums.Status;
 import com.alipay.dao.mapper.PlatformMapper;
@@ -31,8 +31,6 @@ import com.alipay.dao.po.TenantPO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 
 import java.util.Arrays;
@@ -42,8 +40,6 @@ import java.util.Map;
 
 @Data
 public class CloudAccountVO {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CloudAccountVO.class);
 
     private Long id;
 
