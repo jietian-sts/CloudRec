@@ -100,14 +100,14 @@ public class SaveResourceServiceImpl implements SaveResourceService {
                 }
             }
         } catch (Exception e) {
-            log.error("cloud account id :{} save resource instance error, retry count: {}", cloudAccountPO.getCloudAccountId(), retryCount, e);
+            log.warn("cloud account id :{} save resource instance error, retry count: {}", cloudAccountPO.getCloudAccountId(), retryCount, e);
             if (retryCount < MAX_RETRY_ATTEMPTS) {
                 SchedulerManager.getScheduler().schedule(
                         () -> {
                             try {
                                 saveOrUpdateDataWithRetry(dataPushRequest, retryCount + 1);
                             } catch (Exception error) {
-                                log.error("cloud account id :{} save resource instance error on retry {}", cloudAccountPO.getCloudAccountId(), retryCount + 1, error);
+                                log.warn("cloud account id :{} save resource instance error on retry {}", cloudAccountPO.getCloudAccountId(), retryCount + 1, error);
                             }
                         },
                         RETRY_DELAY_SECONDS,
