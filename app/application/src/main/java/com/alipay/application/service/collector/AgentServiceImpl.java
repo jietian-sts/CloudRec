@@ -404,9 +404,7 @@ public class AgentServiceImpl implements AgentService {
         return new ApiResponse<>(collect);
     }
 
-
     private void accountStartCollectPreHandler(List<CloudAccountPO> list, AgentRegistryPO agentRegistryPO) {
-        Collections.reverse(list);
         log.info("accountStartCollectPreHandler start");
         for (CloudAccountPO cloudAccountPO : list) {
             log.info("accountStartCollectPreHandler cloudAccountId:{}", cloudAccountPO.getCloudAccountId());
@@ -440,7 +438,6 @@ public class AgentServiceImpl implements AgentService {
             }
             log.info("accountStartCollectPreHandler end,cloudAccountId:{}", cloudAccountPO.getCloudAccountId());
         }
-
 
         log.info("accountStartCollectPreHandler end");
     }
