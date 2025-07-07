@@ -409,9 +409,10 @@ public class AgentServiceImpl implements AgentService {
         for (CloudAccountPO cloudAccountPO : list) {
             log.info("accountStartCollectPreHandler cloudAccountId:{}", cloudAccountPO.getCloudAccountId());
             try {
-                // Pre-delete asset data
-                int effectCount = delResourceService.preDeleteByCloudAccountId(cloudAccountPO.getCloudAccountId());
-                log.info("accountStartCollectPreHandler delResourceService.preDeleteByCloudAccountId,cloudAccountId:{},effectCount:{}", cloudAccountPO.getCloudAccountId(), effectCount);
+                // Change the status of this batch of account accounts to running
+                cloudAccountPO.setCollectorStatus(Status.running.name());
+                cloudAccountPO.setLastScanTime(new Date());
+                cloudAccountMapper.updateByPrimaryKeySelective(cloudAccountPO);
 
                 // Bind the corresponding relationship between account and collector
                 AgentRegistryCloudAccountPO agentRegistryCloudAccountPO = agentRegistryCloudAccountMapper
@@ -429,10 +430,9 @@ public class AgentServiceImpl implements AgentService {
                     }
                 }
 
-                // Change the status of this batch of account accounts to running
-                cloudAccountPO.setCollectorStatus(Status.running.name());
-                cloudAccountPO.setLastScanTime(new Date());
-                cloudAccountMapper.updateByPrimaryKeySelective(cloudAccountPO);
+                // Pre-delete asset data
+                int effectCount = delResourceService.preDeleteByCloudAccountId(cloudAccountPO.getCloudAccountId());
+                log.info("accountStartCollectPreHandler delResourceService.preDeleteByCloudAccountId,cloudAccountId:{},effectCount:{}", cloudAccountPO.getCloudAccountId(), effectCount);
             } catch (Exception e) {
                 log.error("accountStartCollectPreHandler error,cloudAccountId:{}", cloudAccountPO.getCloudAccountId(), e);
             }
