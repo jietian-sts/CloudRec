@@ -23,6 +23,7 @@ import com.alipay.application.service.collector.domain.repo.AgentRepository;
 import com.alipay.application.service.collector.domain.repo.CollectorTaskRepository;
 import com.alipay.application.service.collector.enums.TaskStatus;
 import com.alipay.application.service.common.Platform;
+import com.alipay.application.service.common.utils.ThreadPoolConfig;
 import com.alipay.application.service.resource.DelResourceService;
 import com.alipay.application.service.resource.job.ClearJob;
 import com.alipay.application.service.rule.job.AccountScanJob;
@@ -53,11 +54,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -106,9 +107,10 @@ public class AgentServiceImpl implements AgentService {
     private CollectorTaskRepository collectorTaskRepository;
     @Resource
     private CollectorTaskMapper collectorTaskMapper;
-
     @Resource
     private CollectorLogMapper collectorLogMapper;
+    @Resource
+    private ThreadPoolConfig threadPoolConfig;
 
     @Value("${collector.bucket.url}")
     private String bucketUrl;
@@ -393,20 +395,22 @@ public class AgentServiceImpl implements AgentService {
                     }
                 }).filter(Objects::nonNull).toList();
 
-        // 5. pre handler
-        accountStartCollectPreHandler(list, agentRegistryPO);
+        // 5. pre handler - async execution using CompletableFuture
+        final List<CloudAccountPO> accountList = list;
+        final AgentRegistryPO registry = agentRegistryPO;
+        CompletableFuture.runAsync(() -> accountStartCollectPreHandler(accountList, registry), threadPoolConfig.asyncServiceExecutor());
 
         return new ApiResponse<>(collect);
     }
 
-    @Async
-    void accountStartCollectPreHandler(List<CloudAccountPO> list, AgentRegistryPO agentRegistryPO) {
+
+    private void accountStartCollectPreHandler(List<CloudAccountPO> list, AgentRegistryPO agentRegistryPO) {
         // Change the status of this batch of account accounts to running
         list.forEach(cloudAccountPO -> {
             try {
-                cloudAccountPO.setCollectorStatus(Status.running.name());
-                cloudAccountPO.setLastScanTime(new Date());
-                cloudAccountMapper.updateByPrimaryKeySelective(cloudAccountPO);
+                // Pre-delete asset data
+                int effectCount = delResourceService.preDeleteByCloudAccountId(cloudAccountPO.getCloudAccountId());
+                log.info("accountStartCollectPreHandler delResourceService.preDeleteByCloudAccountId,cloudAccountId:{},effectCount:{}", cloudAccountPO.getCloudAccountId(), effectCount);
 
                 // Bind the corresponding relationship between account and collector
                 AgentRegistryCloudAccountPO agentRegistryCloudAccountPO = agentRegistryCloudAccountMapper
@@ -424,9 +428,9 @@ public class AgentServiceImpl implements AgentService {
                     }
                 }
 
-                // Pre-delete asset data
-                int effectCount = delResourceService.preDeleteByCloudAccountId(cloudAccountPO.getCloudAccountId());
-                log.info("accountStartCollectPreHandler delResourceService.preDeleteByCloudAccountId,cloudAccountId:{},effectCount:{}", cloudAccountPO.getCloudAccountId(), effectCount);
+                cloudAccountPO.setCollectorStatus(Status.running.name());
+                cloudAccountPO.setLastScanTime(new Date());
+                cloudAccountMapper.updateByPrimaryKeySelective(cloudAccountPO);
             } catch (Exception e) {
                 log.error("accountStartCollectPreHandler error,cloudAccountId:{}", cloudAccountPO.getCloudAccountId(), e);
             }
