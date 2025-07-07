@@ -56,7 +56,7 @@ public class SaveResourceServiceImpl implements SaveResourceService {
     public void saveOrUpdateData(DataPushRequest.Data dataPushRequest) {
         CloudAccountPO cloudAccountPO = cloudAccountMapper.findByCloudAccountId(dataPushRequest.getCloudAccountId());
         if (cloudAccountPO == null) {
-            log.error("account account not found, cloudAccountId:{}", dataPushRequest.getCloudAccountId());
+            log.warn("account not found, cloudAccountId:{}", dataPushRequest.getCloudAccountId());
             return;
         }
 
@@ -92,7 +92,7 @@ public class SaveResourceServiceImpl implements SaveResourceService {
                 }
             }
         } catch (Exception e) {
-            log.error("save resource instance error", e);
+            log.error("cloud account id :{} save resource instance error", cloudAccountPO.getCloudAccountId(), e);
         }
     }
 

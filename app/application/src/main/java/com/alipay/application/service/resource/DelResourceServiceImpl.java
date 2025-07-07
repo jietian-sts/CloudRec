@@ -33,7 +33,7 @@ public class DelResourceServiceImpl implements DelResourceService {
     @Override
     public int preDeleteByCloudAccountId(String cloudAccountId) {
         int totalUpdated = 0;
-        final int size = 100;
+        final int size = 1000;
         Long scrollId = 0L;
         while (true) {
             IQueryResourceDTO request = IQueryResourceDTO.builder()
