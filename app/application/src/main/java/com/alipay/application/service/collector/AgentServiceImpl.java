@@ -58,7 +58,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -70,6 +69,7 @@ import java.util.concurrent.locks.ReentrantLock;
  *@version 1.0
  *@create 2024/8/13 14:20
  */
+
 @Slf4j
 @Service
 public class AgentServiceImpl implements AgentService {
@@ -396,9 +396,7 @@ public class AgentServiceImpl implements AgentService {
                 }).filter(Objects::nonNull).toList();
 
         // 5. pre handler - async execution using CompletableFuture
-        final List<CloudAccountPO> accountList = list;
-        final AgentRegistryPO registry = agentRegistryPO;
-        CompletableFuture.runAsync(() -> accountStartCollectPreHandler(accountList, registry), threadPoolConfig.asyncServiceExecutor());
+        accountStartCollectPreHandler(list, agentRegistryPO);
 
         return new ApiResponse<>(collect);
     }
@@ -406,7 +404,7 @@ public class AgentServiceImpl implements AgentService {
 
     private void accountStartCollectPreHandler(List<CloudAccountPO> list, AgentRegistryPO agentRegistryPO) {
         // Change the status of this batch of account accounts to running
-        list.forEach(cloudAccountPO -> {
+        list.parallelStream().forEach(cloudAccountPO -> {
             try {
                 // Pre-delete asset data
                 int effectCount = delResourceService.preDeleteByCloudAccountId(cloudAccountPO.getCloudAccountId());
