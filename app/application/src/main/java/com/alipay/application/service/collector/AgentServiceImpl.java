@@ -58,6 +58,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -69,7 +70,6 @@ import java.util.concurrent.locks.ReentrantLock;
  *@version 1.0
  *@create 2024/8/13 14:20
  */
-
 @Slf4j
 @Service
 public class AgentServiceImpl implements AgentService {
@@ -396,43 +396,52 @@ public class AgentServiceImpl implements AgentService {
                 }).filter(Objects::nonNull).toList();
 
         // 5. pre handler - async execution using CompletableFuture
-        accountStartCollectPreHandler(list, agentRegistryPO);
+        final List<CloudAccountPO> accountList = list;
+        final AgentRegistryPO registry = agentRegistryPO;
+        CompletableFuture.runAsync(() -> accountStartCollectPreHandler(accountList, registry), threadPoolConfig.asyncServiceExecutor());
 
         return new ApiResponse<>(collect);
     }
 
 
     private void accountStartCollectPreHandler(List<CloudAccountPO> list, AgentRegistryPO agentRegistryPO) {
+        log.info("accountStartCollectPreHandler start");
         // Change the status of this batch of account accounts to running
-        list.parallelStream().forEach(cloudAccountPO -> {
-            try {
-                // Pre-delete asset data
-                int effectCount = delResourceService.preDeleteByCloudAccountId(cloudAccountPO.getCloudAccountId());
-                log.info("accountStartCollectPreHandler delResourceService.preDeleteByCloudAccountId,cloudAccountId:{},effectCount:{}", cloudAccountPO.getCloudAccountId(), effectCount);
+        List<CompletableFuture<Void>> futures = list.stream()
+            .map(cloudAccountPO -> CompletableFuture.runAsync(() -> {
+                try {
+                    // Pre-delete asset data
+                    int effectCount = delResourceService.preDeleteByCloudAccountId(cloudAccountPO.getCloudAccountId());
+                    log.info("accountStartCollectPreHandler delResourceService.preDeleteByCloudAccountId,cloudAccountId:{},effectCount:{}", cloudAccountPO.getCloudAccountId(), effectCount);
 
-                // Bind the corresponding relationship between account and collector
-                AgentRegistryCloudAccountPO agentRegistryCloudAccountPO = agentRegistryCloudAccountMapper
-                        .findOne(agentRegistryPO.getId(), cloudAccountPO.getCloudAccountId());
-                if (agentRegistryCloudAccountPO == null) {
-                    agentRegistryCloudAccountPO = new AgentRegistryCloudAccountPO();
-                    agentRegistryCloudAccountPO.setAgentRegistryId(agentRegistryPO.getId());
-                    agentRegistryCloudAccountPO.setCloudAccountId(cloudAccountPO.getCloudAccountId());
-                    agentRegistryCloudAccountPO.setRegistryValue(agentRegistryPO.getRegistryValue());
-                    agentRegistryCloudAccountPO.setPlatform(agentRegistryPO.getPlatform());
-                    try {
-                        agentRegistryCloudAccountMapper.insertSelective(agentRegistryCloudAccountPO);
-                    } catch (Exception e) {
-                        log.error("Exceptions due to concurrent registrations");
+                    // Bind the corresponding relationship between account and collector
+                    AgentRegistryCloudAccountPO agentRegistryCloudAccountPO = agentRegistryCloudAccountMapper
+                            .findOne(agentRegistryPO.getId(), cloudAccountPO.getCloudAccountId());
+                    if (agentRegistryCloudAccountPO == null) {
+                        agentRegistryCloudAccountPO = new AgentRegistryCloudAccountPO();
+                        agentRegistryCloudAccountPO.setAgentRegistryId(agentRegistryPO.getId());
+                        agentRegistryCloudAccountPO.setCloudAccountId(cloudAccountPO.getCloudAccountId());
+                        agentRegistryCloudAccountPO.setRegistryValue(agentRegistryPO.getRegistryValue());
+                        agentRegistryCloudAccountPO.setPlatform(agentRegistryPO.getPlatform());
+                        try {
+                            agentRegistryCloudAccountMapper.insertSelective(agentRegistryCloudAccountPO);
+                        } catch (Exception e) {
+                            log.error("Exceptions due to concurrent registrations");
+                        }
                     }
-                }
 
-                cloudAccountPO.setCollectorStatus(Status.running.name());
-                cloudAccountPO.setLastScanTime(new Date());
-                cloudAccountMapper.updateByPrimaryKeySelective(cloudAccountPO);
-            } catch (Exception e) {
-                log.error("accountStartCollectPreHandler error,cloudAccountId:{}", cloudAccountPO.getCloudAccountId(), e);
-            }
-        });
+                    cloudAccountPO.setCollectorStatus(Status.running.name());
+                    cloudAccountPO.setLastScanTime(new Date());
+                    cloudAccountMapper.updateByPrimaryKeySelective(cloudAccountPO);
+                } catch (Exception e) {
+                    log.error("accountStartCollectPreHandler error,cloudAccountId:{}", cloudAccountPO.getCloudAccountId(), e);
+                }
+            }, threadPoolConfig.asyncServiceExecutor()))
+            .toList();
+
+        // 等待所有任务完成
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        log.info("accountStartCollectPreHandler end");
     }
 
 
