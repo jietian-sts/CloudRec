@@ -187,7 +187,7 @@ export default {
     'extend.title.iKnow': 'Understood',
     'extend.title.collect.status': 'Collection Status',
     'extend.title.tenant.attribution': 'Organization',
-    'extend.title.asset.number': 'Resources',
+    'extend.title.asset.number': 'Resources | Risks',
     'extend.title.asset.type': 'Resource Type',
     'extend.title.asset.name': 'Resource Name',
     'extend.title.asset.id': 'Resource ID',

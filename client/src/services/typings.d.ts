@@ -208,6 +208,7 @@ declare namespace API {
     tenantId?: number;
     tenantName?: string;
     resourceCount?: number;
+    riskCount?: number;
     lastScanTime?: string;
     resourceTypeList?: Array<string>;
     collectorStatus?: string;
