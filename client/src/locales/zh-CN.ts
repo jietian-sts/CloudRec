@@ -197,6 +197,7 @@ export default {
     'extend.title.detailed.configuration': '详细配置',
     'extend.title.proxy.configuration':'代理配置',
     'extend.title.account.id': '账号ID',
+    'extend.title.account.email': '邮箱',
     'extend.title.account.alias': '账号别名',
     'extend.title.cloud.platform': '云平台',
     'extend.title.cloud.services': '云服务',

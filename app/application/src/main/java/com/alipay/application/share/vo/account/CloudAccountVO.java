@@ -140,6 +140,8 @@ public class CloudAccountVO {
      */
     private String proxyConfig;
 
+    private String email;
+
 
     public static CloudAccountVO buildEasy(CloudAccountPO cloudAccountPO) {
         if (cloudAccountPO == null) {

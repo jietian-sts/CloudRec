@@ -197,6 +197,7 @@ export default {
     'extend.title.basic.information': 'Basic Information',
     'extend.title.detailed.configuration': 'Configuration Details',
     'extend.title.account.id': 'Account ID',
+    'extend.title.account.email': 'Email',
     'extend.title.account.alias': 'Account Alias',
     'extend.title.cloud.platform': 'Cloud Provider',
     'extend.title.cloud.services': 'Cloud Services',
