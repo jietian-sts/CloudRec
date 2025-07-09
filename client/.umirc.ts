@@ -72,7 +72,7 @@ export default defineConfig({
   hash: true, // Enable file content hash
   proxy: {
     '/achieve': {
-      target: 'http://local.dev.alipay.net:8080',
+      target: 'http://localhost:8080',
       changeOrigin: true,
       pathRewrite: { '^/achieve': '' },
     },
