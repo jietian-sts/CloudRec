@@ -28,6 +28,7 @@ export default {
     'button.text.rollback': '回滚',
     'button.text.save': '保存',
     'button.text.viewDetail': '查看详情',
+    'button.text.view':'查看',
     'button.text.today': '今天',
     'button.text.last7.days': '近7天',
     'button.text.within.a.month': '一个月内',
@@ -285,6 +286,7 @@ export default {
     'table.columns.text.status': '状态',
     'table.columns.text.type': '类型',
     'table.columns.text.creator': '创建人员',
+    'table.columns.text.config': '配置',
     'table.columns.text.lockor': '持锁人员',
     'table.columns.text.grab.lock': '抢锁',
     'table.columns.text.whiteListStatus': '白名单状态',
@@ -301,7 +303,8 @@ export default {
     'module.text.sync.button': '同步规则',
     'module.text.sync.confirm': '是否覆盖已有规则？',
     'module.text.sync.overwrite': '覆盖规则',
-    'module.text.sync.no.overwrite': '不覆盖规则'
+    'module.text.sync.no.overwrite': '不覆盖规则',
+    'message.not.holding.lock': '当前未持有锁，需先抢锁',
   },
   risk: {
     'module.text.not.fixed': '未修复',

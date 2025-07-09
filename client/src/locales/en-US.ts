@@ -28,6 +28,7 @@ export default {
     'button.text.rollback': 'Rollback',
     'button.text.save': 'Save',
     'button.text.viewDetail': 'View Detail',
+    'button.text.view': 'View',
     'button.text.today': 'Today',
     'button.text.last7.days': 'Last 7 days',
     'button.text.within.a.month': 'Within a month',
@@ -288,6 +289,7 @@ export default {
     'table.columns.text.status': 'Status',
     'table.columns.text.type': 'Type',
     'table.columns.text.creator': 'Creator',
+    'table.columns.text.config': 'Configuration',
     'table.columns.text.lockor': 'Lock Holder',
     'table.columns.text.grab.lock': 'Grab Lock',
     'table.columns.text.whiteListStatus': 'Whitelist State',
@@ -304,7 +306,8 @@ export default {
     'module.text.sync.button': 'Sync Rules',
     'module.text.sync.confirm': 'Do you want to overwrite existing rules?',
     'module.text.sync.overwrite': 'Overwrite Rules',
-    'module.text.sync.no.overwrite': 'Keep Existing Rules'
+    'module.text.sync.no.overwrite': 'Keep Existing Rules',
+    'message.not.holding.lock': 'You do not hold the lock, please grab the lock first',
   },
   risk: {
     'module.text.not.fixed': 'Not fixed',
