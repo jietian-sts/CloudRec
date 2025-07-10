@@ -255,4 +255,11 @@
     </where>
   </sql>
 
+  <delete id="deleteByRuleCode">
+      delete
+      from tenant_rule
+      where rule_code = #{ruleCode,jdbcType=VARCHAR}
+  </delete>
+
+
 </mapper>

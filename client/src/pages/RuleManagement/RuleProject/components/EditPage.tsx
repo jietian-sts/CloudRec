@@ -1287,7 +1287,7 @@ const EditPage: React.FC = () => {
                     label={intl.formatMessage({
                       id: 'rule.module.text.risk.context.template',
                     })}
-                    initialValue={CONTEXT_TEMPLATE}
+                    placeholder={CONTEXT_TEMPLATE}
                   />
                 </>
               )}

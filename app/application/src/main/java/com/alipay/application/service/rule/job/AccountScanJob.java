@@ -18,6 +18,7 @@ package com.alipay.application.service.rule.job;
 
 import com.alipay.application.service.rule.domain.RuleAgg;
 import com.alipay.application.service.rule.domain.repo.RuleRepository;
+import com.alipay.application.service.system.domain.repo.TenantRepository;
 import com.alipay.dao.mapper.CloudAccountMapper;
 import com.alipay.dao.po.CloudAccountPO;
 import com.google.common.cache.Cache;
@@ -49,6 +50,8 @@ public class AccountScanJob {
     private RuleRepository ruleRepository;
     @Resource
     private WhitedConfigContext whitedConfigContext;
+    @Resource
+    private TenantRepository tenantRepository;
 
     private final Cache<String, List<RuleAgg>> ruleCache = CacheBuilder.newBuilder()
             .maximumSize(10)
@@ -79,7 +82,7 @@ public class AccountScanJob {
             log.info("scanByCloudAccountId start, cloudAccountId:{}, platform:{} start", cloudAccountId, cloudAccountPO.getPlatform());
             for (RuleAgg ruleAgg : ruleAggList) {
                 log.info("scanByCloudAccountId start, cloudAccountId:{}, platform:{}, ruleCode:{}", cloudAccountId, cloudAccountPO.getPlatform(), ruleAgg.getRuleCode());
-                scanService.scanByRule(ruleAgg, cloudAccountPO);
+                scanService.scanByRule(ruleAgg, cloudAccountPO, tenantRepository.isSelectedByGlobalTenant(ruleAgg.getRuleCode()));
                 log.info("scanByCloudAccountId end, cloudAccountId:{}, platform:{}, ruleCode:{} end", cloudAccountId, cloudAccountPO.getPlatform(), ruleAgg.getRuleCode());
             }
             log.info("scanByCloudAccountId end, cloudAccountId:{}, platform:{} end, spend time:{}", cloudAccountId, cloudAccountPO.getPlatform(), System.currentTimeMillis() - startTime);

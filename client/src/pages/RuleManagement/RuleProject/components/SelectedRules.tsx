@@ -12,6 +12,9 @@ import {
 import {
   MinusOutlined,
   PlayCircleOutlined,
+  PlayCircleFilled,
+  PauseCircleFilled,
+  InfoCircleOutlined,
 } from '@ant-design/icons';
 import {
   ActionType,
@@ -34,6 +37,8 @@ import { MessageType } from 'antd/es/message/interface';
 import { isEmpty } from 'lodash';
 import React, { useRef, useState, useEffect } from 'react';
 import { queryTenantSelectRuleList, removeTenantSelectRule, scanByRule, scanRuleList, batchDeleteTenantSelectRule } from '@/services/rule/RuleController';
+import { createTableRowConfig } from '../utils/tableRowUtils';
+import RuleDetailDrawer from './RuleDetailDrawer';
 
 const { useBreakpoint } = Grid;
 
@@ -80,10 +85,22 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
   const [batchScanLoading, setBatchScanLoading] = useState<boolean>(false);
   // Batch Remove Loading
   const [batchRemoveLoading, setBatchRemoveLoading] = useState<boolean>(false);
+  // Rule Detail Drawer
+  const [ruleDetailVisible, setRuleDetailVisible] = useState<boolean>(false);
+  const [selectedRuleId, setSelectedRuleId] = useState<number>();
+  // Data status for empty state message
+  const [hasData, setHasData] = useState<boolean>(true);
+  const [dataLoaded, setDataLoaded] = useState<boolean>(false);
 
   // Current activation item Row
   const activeRowType = (record: Record<string, any>): string => {
     return record.id === activeRow ? 'ant-table-row-selected' : '';
+  };
+
+  // Handle row click to show rule detail drawer
+  const handleRowClick = (record: any): void => {
+    setSelectedRuleId(record.id);
+    setRuleDetailVisible(true);
   };
 
   // 监听查询触发器变化，重新加载表格数据
@@ -252,12 +269,21 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
       const response = await queryTenantSelectRuleList(requestParams);
 
       if (response?.content) {
+        const data = response.content.data || [];
+        const total = response.content.total || 0;
+        
+        // 更新数据状态
+        setHasData(total > 0);
+        setDataLoaded(true);
+        
         return {
-          data: response.content.data || [],
-          total: response.content.total || 0,
+          data,
+          total,
           success: true,
         };
       } else {
+        setHasData(false);
+        setDataLoaded(true);
         return {
           data: [],
           total: 0,
@@ -265,6 +291,8 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
         };
       }
     } catch (error) {
+      setHasData(false);
+      setDataLoaded(true);
       return {
         data: [],
         total: 0,
@@ -285,48 +313,22 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
       render: (_, record) => {
         return (
           <div>
-            <DispositionPro
-              placement={'topLeft'}
-              maxWidth={breakpoints?.xxl ? 600 : 400}
-              rows={1}
-              text={record?.ruleName || '-'}
-              tooltipText={
-                <div>
-                  <div>
-                    {intl.formatMessage({
-                      id: 'rule.module.text.rule.code',
-                    })}
-                    &nbsp;: {record?.ruleCode || '-'}
-                  </div>
-                  <div>
-                    {intl.formatMessage({
-                      id: 'home.module.inform.columns.ruleName',
-                    })}
-                    &nbsp;: {record?.ruleName || '-'}
-                  </div>
-                  <div>
-                    {intl.formatMessage({
-                      id: 'rule.module.text.rule.describe',
-                    })}
-                    &nbsp;: {record?.ruleDesc || '-'}
-                  </div>
-                </div>
-              }
+            <div
               style={{
                 fontWeight: 500,
                 color: 'rgb(58, 58, 58)',
               }}
-            />
-            <Disposition
-              placement={'topLeft'}
-              maxWidth={breakpoints?.xxl ? 600 : 400}
-              rows={1}
-              text={record?.ruleTypeNameList?.toString() || '-'}
+            >
+              {record?.ruleName || '-'}
+            </div>
+            <div
               style={{
                 color: 'rgb(166, 167, 167)',
                 fontSize: 13,
               }}
-            />
+            >
+              {record?.ruleTypeNameList?.toString() || '-'}
+            </div>
           </div>
         );
       },
@@ -386,55 +388,115 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
         </Button>
       ),
     },
+
     {
-      title: intl.formatMessage({
-        id: 'cloudAccount.extend.title.cloud.operate',
-      }),
+      title: '最近扫描时间',
+      dataIndex: 'lastScanTime',
+      valueType: 'text',
+      hideInSearch: true,
+      align: 'center',
+      width: 150,
+      sorter: true,
+      render: (_, record) => {
+        if (record?.lastScanTime) {
+          return (
+            <Tooltip title={record.lastScanTime}>
+              <span>{record.lastScanTime}</span>
+            </Tooltip>
+          );
+        }
+        return '-';
+      },
+    },
+    {
+      title: '状态/操作',
       dataIndex: 'option',
       valueType: 'option',
       align: 'center',
       fixed: 'right',
+      width: 180,
       render: (_, record) => {
-        return (
-          <Space size={'small'}>
-            <Button
-              block
-              loading={scanLoading[Number(record.id)]}
-              onClick={() => onClickScanByRule(record.id!)}
-              type="default"
-              target={'_blank'}
-              size={'small'}
-              icon={<PlayCircleOutlined />}
-            >
-              {intl.formatMessage({
-                id: 'common.button.text.test',
-              })}
-            </Button>
+         const isRunning = record?.isRunning;
+         const canDetect = isRunning === 0;
+         
+         // 根据运行状态选择按钮图标
+         const getButtonIcon = () => {
+           if (isRunning === 1) {
+             return <PlayCircleFilled />; // 运行中显示实心播放图标
+           } else {
+             return <PlayCircleOutlined />; // 停止状态显示空心播放图标
+           }
+         };
 
-            <Popconfirm
-              title="确定要移出自选规则吗？"
-              onConfirm={() => onClickRemoveFromSelected(record)}
-              okText="确定"
-              cancelText="取消"
-            >
-              <Button
-                danger
-                size="small"
-                loading={removeLoading[Number(record.id)]}
-                icon={<MinusOutlined />}
+         return (
+           <Space size={'small'}>
+             <Button
+               block
+               loading={scanLoading[Number(record.id)]}
+               disabled={!canDetect}
+               onClick={(e) => {
+                 e.stopPropagation();
+                 onClickScanByRule(record.id!);
+               }}
+               type="default"
+               target={'_blank'}
+               size={'small'}
+               icon={getButtonIcon()}
+               style={{
+                 color: isRunning === 1 ? '#52c41a' : undefined,
+                 borderColor: isRunning === 1 ? '#52c41a' : undefined
+               }}
+             >
+               {intl.formatMessage({
+                 id: 'common.button.text.test',
+               })}
+             </Button>
+
+             <Popconfirm
+                title="确定要移出自选规则吗？"
+                onConfirm={(e) => {
+                  e?.stopPropagation();
+                  onClickRemoveFromSelected(record);
+                }}
+                okText="确定"
+                cancelText="取消"
               >
+               <Button
+                 danger
+                 size="small"
+                 loading={removeLoading[Number(record.id)]}
+                 icon={<MinusOutlined />}
+                 onClick={(e) => e.stopPropagation()}
+               >
 
-              </Button>
-            </Popconfirm>
-          </Space>
-        );
-      },
+               </Button>
+             </Popconfirm>
+           </Space>
+         );
+       },
     },
   ];
 
   return (
     <>
       {contextHolder}
+      {/* 规则生效状态提示 */}
+      {dataLoaded && hasData && (
+         <div style={{
+           marginBottom: 16,
+           padding: '8px 12px',
+           backgroundColor: '#f0f9ff',
+           border: '1px solid #bae7ff',
+           borderRadius: '6px',
+           display: 'flex',
+           alignItems: 'center',
+           fontSize: '14px',
+           color: '#1890ff'
+         }}>
+           <InfoCircleOutlined style={{ marginRight: 8 }} />
+           当前租户自选规则与全局租户下的自选规则同时生效
+         </div>
+       )}
       <ProTable<any>
         scroll={{ x: 'max-content' }}
         rowSelection={{
@@ -483,6 +545,19 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
           defaultPageSize: 10,
           defaultCurrent: 1,
         }}
+        locale={{
+          emptyText: (
+            <div style={{ textAlign: 'center', padding: '20px 0' }}>
+              <div>当前租户暂无自选规则，运行全局租户下的自选规则</div>
+            </div>
+          ),
+        }}
+        onRow={createTableRowConfig(handleRowClick)}
+      />
+      <RuleDetailDrawer
+        visible={ruleDetailVisible}
+        onClose={() => setRuleDetailVisible(false)}
+        ruleId={selectedRuleId}
       />
     </>
   );

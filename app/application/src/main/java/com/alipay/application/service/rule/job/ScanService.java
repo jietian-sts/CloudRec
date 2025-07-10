@@ -62,7 +62,7 @@ public interface ScanService {
      * @param cloudAccountPO cloudAccountPO
      * @throws Exception Exception
      */
-    void scanByRule(RuleAgg ruleAgg, CloudAccountPO cloudAccountPO) throws Exception;
+    void scanByRule(RuleAgg ruleAgg, CloudAccountPO cloudAccountPO, Boolean selectedByGlobalTenant) throws Exception;
 
     /**
      * 扫描指定规则的数据

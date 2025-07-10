@@ -84,7 +84,7 @@ public class RuleServiceImpl implements RuleService {
     @Resource
     private DbCacheUtil dbCacheUtil;
 
-    public static final String cacheKey = "rule::query_rule_list";
+    public static final String ruleMarketCacheKey = "rule::query_rule_list";
     public static final String tenantSelectRuleCacheKey = "rule::query_tenant_select_rule_list";
 
     @Transactional(rollbackFor = Exception.class)
@@ -155,7 +155,7 @@ public class RuleServiceImpl implements RuleService {
             }
         }
 
-        dbCacheUtil.clear(cacheKey);
+        dbCacheUtil.clear(ruleMarketCacheKey);
 
         return new ApiResponse<>(String.valueOf(rulePO.getId()));
     }
@@ -164,7 +164,7 @@ public class RuleServiceImpl implements RuleService {
     @Override
     public ApiResponse<ListVO<RuleVO>> queryRuleList(ListRuleRequest request) {
         boolean needCache = false;
-        String key = CacheUtil.buildKey(cacheKey, UserInfoContext.getCurrentUser().getUserTenantId(), request.getPage(), request.getSize(),
+        String key = CacheUtil.buildKey(ruleMarketCacheKey, UserInfoContext.getCurrentUser().getUserTenantId(), request.getPage(), request.getSize(),
                 request.getSortParam(), request.getSortType());
         if (ListUtils.isEmpty(request.getPlatformList())
                 && ListUtils.isEmpty(request.getRuleTypeIdList())
@@ -268,9 +268,10 @@ public class RuleServiceImpl implements RuleService {
             return new ApiResponse<>(ApiResponse.FAIL.getCode(), "Rules are selected with tenants: " + String.join(",", tenantNameList));
         }
 
+        tenantRuleMapper.deleteByRuleCode(rulePO.getRuleCode());
         ruleMapper.deleteByPrimaryKey(id);
         ruleScanResultMapper.deleteByRuleId(id);
-        dbCacheUtil.clear(cacheKey);
+        dbCacheUtil.clear(ruleMarketCacheKey);
         return ApiResponse.SUCCESS;
     }
 
@@ -278,7 +279,7 @@ public class RuleServiceImpl implements RuleService {
     @Override
     public ApiResponse<String> changeRuleStatus(ChangeStatusRequest changeRuleStatusRequest) {
         ruleMapper.updateStatus(changeRuleStatusRequest.getId(), changeRuleStatusRequest.getStatus());
-        dbCacheUtil.clear(cacheKey);
+        dbCacheUtil.clear(ruleMarketCacheKey);
         return ApiResponse.SUCCESS;
     }
 
@@ -326,7 +327,7 @@ public class RuleServiceImpl implements RuleService {
             ruleTypeRelMapper.insertSelective(ruleTypeRelPO);
         }
 
-        dbCacheUtil.clear(cacheKey);
+        dbCacheUtil.clear(ruleMarketCacheKey);
         return ApiResponse.SUCCESS;
     }
 
@@ -483,6 +484,7 @@ public class RuleServiceImpl implements RuleService {
         log.info("user:{}, deleteTenantSelectRule, ruleCode:{}", UserInfoContext.getCurrentUser(), ruleCode);
 
         dbCacheUtil.clear(tenantSelectRuleCacheKey);
+        dbCacheUtil.clear(ruleMarketCacheKey);
 
         return ApiResponse.SUCCESS;
     }

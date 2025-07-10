@@ -187,7 +187,16 @@ public class ScanServiceImpl implements ScanService {
         return version == null ? 1 : version + 1;
     }
 
-    public void scanByRule(RuleAgg ruleAgg, @NotNull CloudAccountPO cloudAccountPO) {
+    public void scanByRule(RuleAgg ruleAgg, @NotNull CloudAccountPO cloudAccountPO, Boolean selectedByGlobalTenant) {
+        // Change rules to determine whether the tenant to which the current account belongs
+        if (!selectedByGlobalTenant) {
+            boolean selected = tenantRepository.isSelected(cloudAccountPO.getTenantId(), ruleAgg.getRuleCode());
+            if (!selected) {
+                log.info("cloudAccountId:{},ruleCode:{} is not selected", cloudAccountPO.getCloudAccountId(), ruleAgg.getRuleCode());
+                return;
+            }
+        }
+
         String cloudAccountId = cloudAccountPO.getCloudAccountId();
         log.info("Scan by rule name:{} cloudAccountId:{}", ruleAgg.getRuleName(), cloudAccountId);
         long nextVersion = getNextVersion(ruleAgg.getId(), cloudAccountId);
@@ -357,7 +366,11 @@ public class ScanServiceImpl implements ScanService {
 
             List<CloudAccountPO> cloudAccountPOS = cloudAccountMapper.findList(cloudAccountDTO);
 
-            // 获取所有的白名单规则
+
+            // Determine whether the rules are selected by the global tenant
+            boolean selectedByGlobalTenant = tenantRepository.isSelectedByGlobalTenant(ruleAgg.getRuleCode());
+
+            // Get all whitelist rules
             whitedConfigContext.initWhitedConfigCache();
             for (CloudAccountPO cloudAccountPO : cloudAccountPOS) {
                 if (!cloudAccountIdList.contains(cloudAccountPO.getCloudAccountId())) {
@@ -366,15 +379,8 @@ public class ScanServiceImpl implements ScanService {
                     continue;
                 }
 
-                // Change rules to determine whether the tenant to which the current account belongs
-                boolean selected = tenantRepository.isSelected(cloudAccountPO.getTenantId(), ruleAgg.getRuleCode());
-                if (!selected) {
-                    log.info("cloudAccountId:{},ruleCode:{} is not selected", cloudAccountPO.getCloudAccountId(), ruleAgg.getRuleCode());
-                    continue;
-                }
-
                 try {
-                    scanByRule(ruleAgg, cloudAccountPO);
+                    scanByRule(ruleAgg, cloudAccountPO, selectedByGlobalTenant);
                 } catch (Exception e) {
                     log.error("cloudAccountId:{} run rule:{} fail:{}", cloudAccountPO.getCloudAccountId(),
                             ruleAgg.getRuleCode(), e.getMessage());
@@ -392,7 +398,7 @@ public class ScanServiceImpl implements ScanService {
             dbDistributedLockUtil.releaseLock(localLockPrefix + ruleId);
         }
 
-        dbCacheUtil.clear(RuleServiceImpl.cacheKey);
+        dbCacheUtil.clear(RuleServiceImpl.tenantSelectRuleCacheKey);
 
         return ApiResponse.SUCCESS;
     }

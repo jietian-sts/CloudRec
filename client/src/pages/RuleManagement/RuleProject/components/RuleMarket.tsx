@@ -14,6 +14,7 @@ import {
   addTenantSelectRule,
   removeTenantSelectRule,
 } from '@/services/rule/RuleController';
+import RuleDetailDrawer from './RuleDetailDrawer';
 import { RiskLevelList } from '@/utils/const';
 import {
   BlobExportZIPFn,
@@ -55,6 +56,7 @@ import {
 import { MessageType } from 'antd/es/message/interface';
 import { isEmpty } from 'lodash';
 import React, { useRef, useState, useEffect } from 'react';
+import { createTableRowConfig } from '../utils/tableRowUtils';
 
 const { useBreakpoint } = Grid;
 
@@ -95,6 +97,9 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
   const [activeRow, setActiveRow] = useState<number>();
   // Scanning Loading
   const [scanLoading, setScanLoading] = useState<any>({});
+  // Rule Detail Drawer
+  const [ruleDetailVisible, setRuleDetailVisible] = useState(false);
+  const [selectedRuleId, setSelectedRuleId] = useState<number>();
   // Copy Loading
   const [copyLoading, setCopyLoading] = useState<any>({});
   // Add to Selected Loading
@@ -120,6 +125,18 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
   // Current activation item Row
   const activeRowType = (record: Record<string, any>): string => {
     return record.id === activeRow ? 'ant-table-row-selected' : '';
+  };
+
+  // 处理行点击事件
+  const handleRowClick = (record: API.RuleProjectInfo) => {
+    setSelectedRuleId(record.id);
+    setRuleDetailVisible(true);
+  };
+
+  // 关闭规则详情抽屉
+  const handleCloseRuleDetail = () => {
+    setRuleDetailVisible(false);
+    setSelectedRuleId(undefined);
   };
 
   // Delete selected rule
@@ -274,28 +291,6 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
               maxWidth={breakpoints?.xxl ? 600 : 400}
               rows={1}
               text={record?.ruleName || '-'}
-              tooltipText={
-                <div>
-                  <div>
-                    {intl.formatMessage({
-                      id: 'rule.module.text.rule.code',
-                    })}
-                    &nbsp;: {record?.ruleCode || '-'}
-                  </div>
-                  <div>
-                    {intl.formatMessage({
-                      id: 'home.module.inform.columns.ruleName',
-                    })}
-                    &nbsp;: {record?.ruleName || '-'}
-                  </div>
-                  <div>
-                    {intl.formatMessage({
-                      id: 'rule.module.text.rule.describe',
-                    })}
-                    &nbsp;: {record?.ruleDesc || '-'}
-                  </div>
-                </div>
-              }
               style={{
                 fontWeight: 500,
                 color: 'rgb(58, 58, 58)',
@@ -401,7 +396,10 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
         <Space size={'small'}>
           <Button
             size={'small'}
-            onClick={() => setActiveRow(record.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setActiveRow(record.id);
+            }}
             type="link"
             target={'_self'}
             href={`/ruleManagement/ruleProject/edit?id=${record?.id}`}
@@ -452,7 +450,11 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
               </Space>
             }
           >
-            <Button type={'link'} icon={<MoreOutlined />} />
+            <Button 
+              type={'link'} 
+              icon={<MoreOutlined />} 
+              onClick={(e) => e.stopPropagation()}
+            />
           </Popover>
 
           {record.tenantSelected ? (
@@ -460,7 +462,10 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
               type="default"
               size="small"
               loading={removeLoading[Number(record.id)]}
-              onClick={() => onClickRemoveFromSelected(record)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onClickRemoveFromSelected(record);
+              }}
               icon={<MinusOutlined />}
               danger
             >
@@ -471,7 +476,10 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
               type="primary"
               size="small"
               loading={addLoading[Number(record.id)]}
-              onClick={() => onClickAddToSelected(record)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onClickAddToSelected(record);
+              }}
               icon={<PlusOutlined />}
             >
 
@@ -485,12 +493,13 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
           >
             <Switch
               checked={record?.status === 'valid'}
-              onClick={() =>
+              onClick={(checked, e) => {
+                e?.stopPropagation();
                 onClickChangeRuleStatus(
                   record.id!,
                   record?.status === 'valid' ? 'invalid' : 'valid',
-                )
-              }
+                );
+              }}
             />
           </Tooltip>
         </Space>
@@ -683,9 +692,17 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
           defaultPageSize: 10,
           defaultCurrent: 1,
         }}
+        onRow={createTableRowConfig(handleRowClick)}
       />
-    </>
-  );
-};
+        
+        {/* 规则详情抽屉 */}
+        <RuleDetailDrawer
+          visible={ruleDetailVisible}
+          onClose={handleCloseRuleDetail}
+          ruleId={selectedRuleId}
+        />
+      </>
+    );
+  };
 
-export default RuleMarket;
+  export default RuleMarket;

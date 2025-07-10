@@ -49,4 +49,6 @@ public interface TenantRepository {
     void remove(Long uid, Long tenantId);
 
     boolean isSelected(Long tenantId, String ruleCode);
+
+    boolean isSelectedByGlobalTenant(String ruleCode);
 }

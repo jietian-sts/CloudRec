@@ -29,4 +29,6 @@ public interface TenantRuleMapper {
     List<RulePO> findAllList(@Param("tenantId") Long tenantId);
 
     List<TenantRulePO> findByCode(String ruleCode);
+
+    int deleteByRuleCode(String ruleCode);
 }

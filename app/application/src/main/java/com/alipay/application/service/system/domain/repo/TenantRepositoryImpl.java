@@ -18,6 +18,7 @@ package com.alipay.application.service.system.domain.repo;
 
 
 import com.alipay.application.service.system.domain.Tenant;
+import com.alipay.common.constant.TenantConstants;
 import com.alipay.dao.dto.TenantDTO;
 import com.alipay.dao.mapper.TenantMapper;
 import com.alipay.dao.mapper.TenantRuleMapper;
@@ -28,6 +29,7 @@ import com.alipay.dao.po.TenantRulePO;
 import com.alipay.dao.po.TenantUserPO;
 import com.alipay.dao.po.UserPO;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -40,6 +42,7 @@ import java.util.stream.Collectors;
  *@version 1.0
  *@create 2025/1/17 17:46
  */
+@Slf4j
 @Repository
 public class TenantRepositoryImpl implements TenantRepository {
 
@@ -134,5 +137,17 @@ public class TenantRepositoryImpl implements TenantRepository {
     public boolean isSelected(Long tenantId, String ruleCode) {
         TenantRulePO tenantRulePO = tenantRuleMapper.findOne(tenantId, ruleCode);
         return tenantRulePO != null;
+    }
+
+    @Override
+    public boolean isSelectedByGlobalTenant(String ruleCode) {
+        try {
+            Tenant tenant = this.find(TenantConstants.GLOBAL_TENANT);
+            TenantRulePO tenantRulePO = tenantRuleMapper.findOne(tenant.getId(), ruleCode);
+            return tenantRulePO != null;
+        } catch (Exception e) {
+            log.error("isSelectedByGlobalTenant error", e);
+            return false;
+        }
     }
 }
