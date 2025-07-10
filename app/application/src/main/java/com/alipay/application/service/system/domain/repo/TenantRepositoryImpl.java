@@ -20,9 +20,11 @@ package com.alipay.application.service.system.domain.repo;
 import com.alipay.application.service.system.domain.Tenant;
 import com.alipay.dao.dto.TenantDTO;
 import com.alipay.dao.mapper.TenantMapper;
+import com.alipay.dao.mapper.TenantRuleMapper;
 import com.alipay.dao.mapper.TenantUserMapper;
 import com.alipay.dao.mapper.UserMapper;
 import com.alipay.dao.po.TenantPO;
+import com.alipay.dao.po.TenantRulePO;
 import com.alipay.dao.po.TenantUserPO;
 import com.alipay.dao.po.UserPO;
 import jakarta.annotation.Resource;
@@ -52,6 +54,9 @@ public class TenantRepositoryImpl implements TenantRepository {
 
     @Resource
     private TenantConverter tenantConverter;
+
+    @Resource
+    private TenantRuleMapper tenantRuleMapper;
 
     @Override
     public Tenant find(Long id) {
@@ -123,5 +128,11 @@ public class TenantRepositoryImpl implements TenantRepository {
             return;
         }
         tenantUserMapper.del(userPO.getId(), tenantId);
+    }
+
+    @Override
+    public boolean isSelected(Long tenantId, String ruleCode) {
+        TenantRulePO tenantRulePO = tenantRuleMapper.findOne(tenantId, ruleCode);
+        return tenantRulePO != null;
     }
 }

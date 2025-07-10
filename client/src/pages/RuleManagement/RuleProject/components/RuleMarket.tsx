@@ -1,0 +1,691 @@
+import ThemeTag from '@/components/Common/ThemeTag';
+import styleType from '@/components/Common/index.less';
+import Disposition from '@/components/Disposition';
+import DispositionPro from '@/components/DispositionPro';
+import { queryGroupTypeList } from '@/services/resource/ResourceController';
+import {
+  copyRule,
+  deleteRule,
+  queryRuleList,
+  scanByRule,
+  loadRuleFromGithub,
+  queryExportRuleList,
+  changeRuleStatus,
+  addTenantSelectRule,
+  removeTenantSelectRule,
+} from '@/services/rule/RuleController';
+import { RiskLevelList } from '@/utils/const';
+import {
+  BlobExportZIPFn,
+  obtainFirstProperty,
+  obtainPlatformEasyIcon,
+  obtainRiskLevel,
+  valueListAsValueEnum,
+} from '@/utils/shared';
+import {
+  DownOutlined,
+  EditOutlined,
+  ExportOutlined,
+  MoreOutlined,
+  PlusOutlined,
+  MinusOutlined,
+  SyncOutlined,
+} from '@ant-design/icons';
+import {
+  ActionType,
+  ProColumns,
+  ProFormInstance,
+  ProTable,
+} from '@ant-design/pro-components';
+import { useIntl, useModel, useRequest } from '@umijs/max';
+import {
+  Badge,
+  Breakpoint,
+  Button,
+  Dropdown,
+  Form,
+  Grid,
+  message,
+  Popconfirm,
+  Popover,
+  Space,
+  Switch,
+  Tooltip,
+} from 'antd';
+import { MessageType } from 'antd/es/message/interface';
+import { isEmpty } from 'lodash';
+import React, { useRef, useState, useEffect } from 'react';
+
+const { useBreakpoint } = Grid;
+
+interface RuleMarketProps {
+  form: any;
+  platformList: any;
+  resourceTypeList: any[];
+  ruleGroupList: any;
+  ruleTypeList: any;
+  allRuleList: any;
+  checkNewRules: () => Promise<void>;
+  newRulesCount: number;
+  queryTrigger?: number;
+}
+
+const RuleMarket: React.FC<RuleMarketProps> = ({
+  form,
+  platformList,
+  resourceTypeList,
+  ruleGroupList,
+  ruleTypeList,
+  allRuleList,
+  checkNewRules,
+  newRulesCount,
+  queryTrigger,
+}) => {
+  // Message API
+  const [messageApi, contextHolder] = message.useMessage();
+  // Ant Design Provide monitoring of screen width changes
+  const breakpoints: Partial<Record<Breakpoint, boolean>> = useBreakpoint();
+  // Table Action
+  const tableActionRef = useRef<ActionType>();
+  // Form Action
+  const formActionRef = useRef<ProFormInstance>();
+  // Intl API
+  const intl = useIntl();
+  // Select status Table Row
+  const [activeRow, setActiveRow] = useState<number>();
+  // Scanning Loading
+  const [scanLoading, setScanLoading] = useState<any>({});
+  // Copy Loading
+  const [copyLoading, setCopyLoading] = useState<any>({});
+  // Add to Selected Loading
+  const [addLoading, setAddLoading] = useState<any>({});
+  // Remove from Selected Loading
+  const [removeLoading, setRemoveLoading] = useState<any>({});
+  // Selected Row Keys
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  // Sync Rules Popover Visible
+  const [popoverVisible, setPopoverVisible] = useState<boolean>(false);
+  // Sync Rules Loading Status
+  const [syncLoading, setSyncLoading] = useState<boolean>(false);
+  // Export Loading
+  const [exportLoading, setExportLoading] = useState<boolean>(false);
+
+  // 监听查询触发器变化，重新加载表格数据
+  useEffect(() => {
+    if (queryTrigger !== undefined && queryTrigger > 0) {
+      tableActionRef.current?.reload();
+    }
+  }, [queryTrigger]);
+
+  // Current activation item Row
+  const activeRowType = (record: Record<string, any>): string => {
+    return record.id === activeRow ? 'ant-table-row-selected' : '';
+  };
+
+  // Delete selected rule
+  const onClickDelRule = async (id: number): Promise<void> => {
+    const hide: MessageType = messageApi.loading(
+      intl.formatMessage({ id: 'common.message.text.delete.loading' }),
+    );
+    const result = await deleteRule({ id });
+    hide();
+    if (result.code === 200 || result.msg === 'success') {
+      messageApi.success(
+        intl.formatMessage({ id: 'common.message.text.delete.success' }),
+      );
+      tableActionRef.current?.reloadAndRest?.();
+    }
+  };
+
+  // Copy
+  const onClickCopyByRule = async (id: number): Promise<void> => {
+    setCopyLoading({ ...copyLoading, [id]: true });
+    const hide: MessageType = messageApi.loading(
+      intl.formatMessage({ id: 'common.message.text.copy.loading' }),
+    );
+    const result = await copyRule({ id });
+    setCopyLoading({ ...copyLoading, [id]: false });
+    hide();
+    if (result.code === 200 || result.msg === 'success') {
+      messageApi.success(
+        intl.formatMessage({ id: 'common.message.text.copy.success' }),
+      );
+      tableActionRef.current?.reloadAndRest?.();
+    }
+  };
+
+  // Add to Selected Rules
+  const onClickAddToSelected = async (record: API.RuleProjectInfo): Promise<void> => {
+    const id = record.id!;
+    setAddLoading({ ...addLoading, [id]: true });
+    const hide: MessageType = messageApi.loading('正在添加到自选规则...');
+    
+    try {
+      const result = await addTenantSelectRule({ ruleCode: record.ruleCode! });
+      
+      if (result.code === 200 || result.msg === 'success') {
+        messageApi.success('已添加到自选规则');
+        tableActionRef.current?.reloadAndRest?.();
+      } else {
+        // 处理特定的错误信息
+        const errorMsg = result.msg || result.errorMsg || '添加失败';
+        if (errorMsg.includes('The rules do not exist')) {
+          messageApi.error('规则不存在');
+        } else if (errorMsg.includes('The rules are not enabled')) {
+          messageApi.error('规则未启用');
+        } else if (errorMsg.includes('The rules have been added to the optional list')) {
+          messageApi.warning('规则已经添加到自选列表');
+        } else {
+          messageApi.error(errorMsg);
+        }
+      }
+    } catch (error) {
+      messageApi.error('添加失败，请稍后重试');
+    } finally {
+      setAddLoading({ ...addLoading, [id]: false });
+      hide();
+    }
+  };
+
+  // Remove from Selected Rules
+  const onClickRemoveFromSelected = async (record: API.RuleProjectInfo): Promise<void> => {
+    const id = record.id!;
+    setRemoveLoading({ ...removeLoading, [id]: true });
+    const hide: MessageType = messageApi.loading('正在移出自选规则...');
+    
+    try {
+      const result = await removeTenantSelectRule({ ruleCode: record.ruleCode! });
+      
+      if (result.code === 200 || result.msg === 'success') {
+        messageApi.success('已移出自选规则');
+        tableActionRef.current?.reloadAndRest?.();
+      } else {
+        const errorMsg = result.msg || result.errorMsg || '移出失败';
+        if (errorMsg.includes('The rules do not exist')) {
+          messageApi.error('规则不存在');
+        } else if (errorMsg.includes('The rules do not belong to the current tenant')) {
+          messageApi.error('规则不属于当前租户');
+        } else {
+          messageApi.error(errorMsg);
+        }
+      }
+    } catch (error) {
+      messageApi.error('移出失败，请稍后重试');
+    } finally {
+      setRemoveLoading({ ...removeLoading, [id]: false });
+      hide();
+    }
+  };
+
+  // Export Rule List
+  const onClickExportRuleList = (selectedRowKeys?: React.Key[]) => {
+    setExportLoading(true);
+
+    queryExportRuleList(
+      selectedRowKeys ? { idList: selectedRowKeys } as any : undefined,
+      { responseType: 'blob' }
+    )
+      .then((r) => {
+        BlobExportZIPFn(
+          r,
+          `CloudRec ${intl.formatMessage({
+            id: 'rule.module.text.rule.data',
+          })}`,
+        );
+        messageApi.success(
+          intl.formatMessage({ id: 'common.message.text.export.success' }),
+        );
+      })
+      .finally(() => setExportLoading(false));
+  };
+
+  // 规则状态切换
+  const onClickChangeRuleStatus = async (
+    id: number,
+    status: string,
+  ): Promise<void> => {
+    const postBody = {
+      id,
+      status,
+    };
+    const res = await changeRuleStatus(postBody);
+    if (res.code === 200 || res.msg === 'success') {
+      messageApi.success(
+        intl.formatMessage({ id: 'common.message.text.edit.success' }),
+      );
+      tableActionRef.current?.reloadAndRest?.();
+    }
+  };
+
+  const columns: ProColumns<API.RuleProjectInfo, 'text'>[] = [
+    {
+      title: intl.formatMessage({
+        id: 'home.module.inform.columns.ruleName',
+      }),
+      dataIndex: 'ruleName',
+      valueType: 'text',
+      align: 'left',
+      hideInSearch: true,
+      render: (_, record: API.RuleProjectInfo) => {
+        return (
+          <div>
+            <DispositionPro
+              placement={'topLeft'}
+              maxWidth={breakpoints?.xxl ? 600 : 400}
+              rows={1}
+              text={record?.ruleName || '-'}
+              tooltipText={
+                <div>
+                  <div>
+                    {intl.formatMessage({
+                      id: 'rule.module.text.rule.code',
+                    })}
+                    &nbsp;: {record?.ruleCode || '-'}
+                  </div>
+                  <div>
+                    {intl.formatMessage({
+                      id: 'home.module.inform.columns.ruleName',
+                    })}
+                    &nbsp;: {record?.ruleName || '-'}
+                  </div>
+                  <div>
+                    {intl.formatMessage({
+                      id: 'rule.module.text.rule.describe',
+                    })}
+                    &nbsp;: {record?.ruleDesc || '-'}
+                  </div>
+                </div>
+              }
+              style={{
+                fontWeight: 500,
+                color: 'rgb(58, 58, 58)',
+              }}
+            />
+            <Disposition
+              placement={'topLeft'}
+              maxWidth={breakpoints?.xxl ? 600 : 400}
+              rows={1}
+              text={record?.ruleTypeNameList?.toString() || '-'}
+              style={{
+                color: 'rgb(166, 167, 167)',
+                fontSize: 13,
+              }}
+            />
+          </div>
+        );
+      },
+    },
+    {
+      title: intl.formatMessage({
+        id: 'cloudAccount.extend.title.asset.type',
+      }),
+      dataIndex: 'resourceTypeStr',
+      valueType: 'text',
+      align: 'left',
+      hideInSearch: true,
+      render: (_, record: API.RuleProjectInfo) => {
+        return <ThemeTag text={record?.resourceTypeStr || '-'} />;
+      },
+    },
+    {
+      title: intl.formatMessage({
+        id: 'home.module.inform.columns.riskLevel',
+      }),
+      dataIndex: 'riskLevel',
+      valueType: 'select',
+      valueEnum: valueListAsValueEnum(RiskLevelList),
+      align: 'center',
+      hideInSearch: true,
+      render: (_, record: API.RuleProjectInfo) => {
+        return obtainRiskLevel(RiskLevelList, record?.riskLevel as string);
+      },
+    },
+    {
+      title: intl.formatMessage({
+        id: 'common.table.columns.createAndUpdateTime',
+      }),
+      dataIndex: 'gmtCreated',
+      valueType: 'text',
+      align: 'left',
+      hideInSearch: true,
+      render: (_, record) => {
+        return (
+          <div>
+            <section style={{ color: '#999' }}>
+              {record?.gmtCreate || '-'}
+            </section>
+            <section style={{ color: '#999' }}>
+              {record?.gmtModified || '-'}
+            </section>
+          </div>
+        );
+      },
+    },
+    {
+      title: intl.formatMessage({
+        id: 'common.table.columns.platform',
+      }),
+      dataIndex: 'platform',
+      valueType: 'select',
+      valueEnum: valueListAsValueEnum(platformList),
+      align: 'center',
+      hideInSearch: true,
+      render: (_, record) => {
+        return obtainPlatformEasyIcon(record.platform!, platformList);
+      },
+      fieldProps: {
+        onChange: (value: any) => {
+          formActionRef.current?.setFieldValue('resourceTypeList', null);
+          // TODO: 实现资源类型列表请求
+        },
+      },
+    },
+    {
+      title: intl.formatMessage({
+        id: 'rule.input.text.rule.group.creator',
+      }),
+      dataIndex: 'username',
+      valueType: 'text',
+      hideInSearch: true,
+      width: 120,
+    },
+    {
+      title: intl.formatMessage({
+        id: 'cloudAccount.extend.title.cloud.operate',
+      }),
+      dataIndex: 'option',
+      valueType: 'option',
+      align: 'center',
+      fixed: 'right',
+      render: (_, record: API.RuleProjectInfo) => (
+        <Space size={'small'}>
+          <Button
+            size={'small'}
+            onClick={() => setActiveRow(record.id)}
+            type="link"
+            target={'_self'}
+            href={`/ruleManagement/ruleProject/edit?id=${record?.id}`}
+          >
+            <Tooltip
+              title={intl.formatMessage({
+                id: 'common.button.text.edit',
+              })}
+            >
+              <EditOutlined />
+            </Tooltip>
+          </Button>
+
+          <Popover
+            content={
+              <Space>
+                <Popconfirm
+                  title={intl.formatMessage({
+                    id: 'common.button.text.delete.confirm',
+                  })}
+                  onConfirm={() => onClickDelRule(record.id!)}
+                  okText={intl.formatMessage({
+                    id: 'common.button.text.ok',
+                  })}
+                  cancelText={intl.formatMessage({
+                    id: 'common.button.text.cancel',
+                  })}
+                >
+                  <Button block type="link" danger size={'small'}>
+                    {intl.formatMessage({
+                      id: 'common.button.text.delete',
+                    })}
+                  </Button>
+                </Popconfirm>
+
+                <Button
+                  block
+                  loading={copyLoading[Number(record.id)]}
+                  onClick={() => onClickCopyByRule(record.id!)}
+                  type="link"
+                  target={'_blank'}
+                  size={'small'}
+                >
+                  {intl.formatMessage({
+                    id: 'common.button.text.copy',
+                  })}
+                </Button>
+              </Space>
+            }
+          >
+            <Button type={'link'} icon={<MoreOutlined />} />
+          </Popover>
+
+          {record.tenantSelected ? (
+            <Button
+              type="default"
+              size="small"
+              loading={removeLoading[Number(record.id)]}
+              onClick={() => onClickRemoveFromSelected(record)}
+              icon={<MinusOutlined />}
+              danger
+            >
+
+            </Button>
+          ) : (
+            <Button
+              type="primary"
+              size="small"
+              loading={addLoading[Number(record.id)]}
+              onClick={() => onClickAddToSelected(record)}
+              icon={<PlusOutlined />}
+            >
+
+            </Button>
+          )}
+
+          <Tooltip
+            title={intl.formatMessage({
+              id: 'rule.module.text.tooltip.status',
+            })}
+          >
+            <Switch
+              checked={record?.status === 'valid'}
+              onClick={() =>
+                onClickChangeRuleStatus(
+                  record.id!,
+                  record?.status === 'valid' ? 'invalid' : 'valid',
+                )
+              }
+            />
+          </Tooltip>
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      {contextHolder}
+      <ProTable<API.RuleProjectInfo>
+        scroll={{ x: 'max-content' }}
+        rowSelection={{
+          type: 'checkbox',
+          selectedRowKeys: selectedRowKeys,
+          onChange: (selectedRowKeys) => setSelectedRowKeys(selectedRowKeys),
+          preserveSelectedRowKeys: true,
+        }}
+        headerTitle={
+          <div className={styleType['customTitle']}>
+            <Space>
+              规则市场
+            </Space>
+          </div>
+        }
+        actionRef={tableActionRef}
+        formRef={formActionRef}
+        rowClassName={activeRowType}
+        rowKey="id"
+        search={false}
+        toolBarRender={() => [
+          <Popover
+            key="sync"
+            open={popoverVisible}
+            onOpenChange={(visible) => setPopoverVisible(visible)}
+            title={intl.formatMessage({
+              id: 'rule.module.text.sync.confirm',
+            })}
+            content={
+              <Space>
+                <Button
+                  danger
+                  type="primary"
+                  loading={syncLoading}
+                  onClick={async () => {
+                    setSyncLoading(true);
+                    const hide = messageApi.loading(intl.formatMessage({
+                      id: 'rule.module.text.sync.loading',
+                    }));
+                    try {
+                      const res = await loadRuleFromGithub({ coverage: true });
+                      if (res.code === 200 || res.msg === 'success') {
+                        messageApi.success(intl.formatMessage({
+                          id: 'rule.module.text.sync.success',
+                        }));
+                        tableActionRef.current?.reloadAndRest?.();
+                        checkNewRules();
+                      }
+                    } finally {
+                      hide();
+                      setSyncLoading(false);
+                      setPopoverVisible(false);
+                    }
+                  }}
+                >
+                  {intl.formatMessage({
+                    id: 'rule.module.text.sync.overwrite',
+                  })}
+                </Button>
+                <Button
+                  type="primary"
+                  loading={syncLoading}
+                  onClick={async () => {
+                    setSyncLoading(true);
+                    const hide = messageApi.loading(intl.formatMessage({
+                      id: 'rule.module.text.sync.loading',
+                    }));
+                    try {
+                      const res = await loadRuleFromGithub({ coverage: false });
+                      if (res.code === 200 || res.msg === 'success') {
+                        messageApi.success(intl.formatMessage({
+                          id: 'rule.module.text.sync.success',
+                        }));
+                        tableActionRef.current?.reloadAndRest?.();
+                        checkNewRules();
+                      }
+                    } finally {
+                      hide();
+                      setSyncLoading(false);
+                      setPopoverVisible(false);
+                    }
+                  }}
+                >
+                  {intl.formatMessage({
+                    id: 'rule.module.text.sync.no.overwrite',
+                  })}
+                </Button>
+                <Button
+                  onClick={() => {
+                    setPopoverVisible(false);
+                  }}
+                >
+                  {intl.formatMessage({
+                    id: 'common.button.text.cancel',
+                  })}
+                </Button>
+              </Space>
+            }
+            trigger="click"
+          >
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              <Button type="primary">
+                {intl.formatMessage({
+                  id: 'rule.module.text.sync.button',
+                })}
+              </Button>
+              {newRulesCount > 0 && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '-8px',
+                    right: '-8px',
+                    backgroundColor: '#ff4d4f',
+                    color: 'white',
+                    borderRadius: '50%',
+                    width: '20px',
+                    height: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    zIndex: 1,
+                  }}
+                >
+                  {newRulesCount > 99 ? '99+' : newRulesCount}
+                </div>
+              )}
+            </div>
+          </Popover>,
+          <Button
+            key="CREATE"
+            type="primary"
+            href={'/ruleManagement/ruleProject/edit'}
+          >
+            {intl.formatMessage({
+              id: 'rule.extend.basic.add',
+            })}
+          </Button>,
+          <Button
+            loading={exportLoading}
+            key="EXPORT"
+            type="primary"
+            onClick={() => onClickExportRuleList(selectedRowKeys)}
+          >
+            {intl.formatMessage({
+              id: 'common.button.text.export',
+            })}
+          </Button>,
+        ]}
+        request={async (
+          params: Record<string, any>,
+          sort: Record<string, any>,
+        ) => {
+          const { pageSize, current, ...reset } = params;
+          const filterForm = form.getFieldsValue();
+          // When there is field sorting
+          const sorter = obtainFirstProperty(sort);
+          const postBody: Record<string, any> = {
+            ...reset,
+            ...filterForm,
+            page: current,
+            size: pageSize,
+          };
+          if (!isEmpty(sorter)) {
+            postBody.sortParam = sorter?.key;
+            postBody.sortType = sorter?.value?.slice(0, -3)?.toUpperCase();
+          }
+          const { content, code } = await queryRuleList(postBody);
+          return {
+            data: content?.data || [],
+            total: content?.total || 0,
+            success: code === 200 || false,
+          };
+        }}
+        columns={columns}
+        pagination={{
+          showQuickJumper: false,
+          showSizeChanger: true,
+          defaultPageSize: 10,
+          defaultCurrent: 1,
+        }}
+      />
+    </>
+  );
+};
+
+export default RuleMarket;

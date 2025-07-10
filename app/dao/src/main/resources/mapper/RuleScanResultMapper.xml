@@ -538,6 +538,13 @@
           AND resource_type = #{resourceType} LIMIT 1000
     </delete>
 
+    <delete id="deleteByRuleIdAndTenantId">
+        DELETE
+        FROM rule_scan_result
+        WHERE rule_id = #{ruleId}
+          AND tenant_id = #{tenantId}
+    </delete>
+
     <select id="findListWithScrollId" resultMap="ResultMapWithBLOBs">
         SELECT
         <include refid="Base_Column_List"></include>

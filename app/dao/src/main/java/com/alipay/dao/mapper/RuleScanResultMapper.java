@@ -124,4 +124,5 @@ public interface RuleScanResultMapper {
 
     List<RuleStatisticsDTO> listRuleStatistics(RuleScanResultDTO dto);
 
+    int deleteByRuleIdAndTenantId(@Param("ruleId") Long ruleId,@Param("tenantId") Long tenantId);
 }

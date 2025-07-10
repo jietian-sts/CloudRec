@@ -34,6 +34,7 @@ import com.alipay.application.service.rule.domain.repo.RuleGroupRepository;
 import com.alipay.application.service.rule.domain.repo.RuleRepository;
 import com.alipay.application.service.rule.enums.Field;
 import com.alipay.application.service.statistics.job.StatisticsJob;
+import com.alipay.application.service.system.domain.repo.TenantRepository;
 import com.alipay.application.share.request.rule.LinkDataParam;
 import com.alipay.application.share.request.rule.WhitedRuleConfigDTO;
 import com.alipay.application.share.vo.ApiResponse;
@@ -120,6 +121,9 @@ public class ScanServiceImpl implements ScanService {
 
     @Resource
     private WhitedConfigContext whitedConfigContext;
+
+    @Resource
+    private TenantRepository tenantRepository;
 
     /**
      * localLockPrefix
@@ -362,6 +366,13 @@ public class ScanServiceImpl implements ScanService {
                     continue;
                 }
 
+                // Change rules to determine whether the tenant to which the current account belongs
+                boolean selected = tenantRepository.isSelected(cloudAccountPO.getTenantId(), ruleAgg.getRuleCode());
+                if (!selected) {
+                    log.info("cloudAccountId:{},ruleCode:{} is not selected", cloudAccountPO.getCloudAccountId(), ruleAgg.getRuleCode());
+                    continue;
+                }
+
                 try {
                     scanByRule(ruleAgg, cloudAccountPO);
                 } catch (Exception e) {
@@ -386,8 +397,22 @@ public class ScanServiceImpl implements ScanService {
         return ApiResponse.SUCCESS;
     }
 
+    /**
+     * 扫描指定规则列表的数据
+     *
+     * @param ruleIdList 规则列表
+     * @return ApiResponse<String>
+     */
+    @Override
+    public ApiResponse<String> scanRuleList(List<Long> ruleIdList) {
+        for (Long ruleId : ruleIdList) {
+            scanByRule(ruleId);
+        }
+        return ApiResponse.SUCCESS;
+    }
+
     protected void saveOrUpdate(CloudResourceInstancePO resourceInstance, Map<String, Object> result,
-            Long version, RuleAgg ruleAgg, CloudAccountPO cloudAccountPO) {
+                                Long version, RuleAgg ruleAgg, CloudAccountPO cloudAccountPO) {
         RuleScanResultPO ruleScanResultPO = ruleScanResultMapper.fineOne(resourceInstance.getResourceId(),
                 resourceInstance.getCloudAccountId(), ruleAgg.getId());
 
@@ -410,7 +435,7 @@ public class ScanServiceImpl implements ScanService {
     }
 
     private void scanWhitedRuleConfig(RuleScanResultPO ruleScanResultPO, String ruleCode, CloudAccountPO cloudAccountPO,
-            CloudResourceInstancePO resourceInstance) {
+                                      CloudResourceInstancePO resourceInstance) {
         List<WhitedRuleConfigPO> whitedRuleConfigPOList = whitedConfigContext.get();
         String hitWhitedRuleName = null;
         Long hitWhitedRuleConfigId = null;
@@ -479,12 +504,12 @@ public class ScanServiceImpl implements ScanService {
      * @param version          数据版本
      */
     private void finishData(RuleScanResultPO ruleScanResultPO,
-            CloudResourceInstancePO resourceInstance,
-            Long ruleId,
-            String regoPolicy,
-            Long tenantId,
-            Map<String, Object> result,
-            Long version) {
+                            CloudResourceInstancePO resourceInstance,
+                            Long ruleId,
+                            String regoPolicy,
+                            Long tenantId,
+                            Map<String, Object> result,
+                            Long version) {
 
         ruleScanResultPO.setRuleSnapshoot(regoPolicy);
         ruleScanResultPO.setResourceStatus(ResourceStatus.exist.name());

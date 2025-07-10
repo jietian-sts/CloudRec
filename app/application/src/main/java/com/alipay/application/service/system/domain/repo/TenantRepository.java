@@ -47,4 +47,6 @@ public interface TenantRepository {
     void join(Long uid, Long tenantId);
 
     void remove(Long uid, Long tenantId);
+
+    boolean isSelected(Long tenantId, String ruleCode);
 }

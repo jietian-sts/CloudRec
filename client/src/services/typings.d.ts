@@ -121,6 +121,8 @@ declare namespace API {
     ruleCode?: string;
     /** Rule Group Name List */
     ruleGroupNameList?: Array<string>;
+    /** Whether the rule is selected by current tenant */
+    tenantSelected?: boolean;
   }
 
   /** Platform Results */
@@ -892,4 +894,35 @@ declare namespace API {
     data: CollectorRecord[];
     total: number;
   };
+
+  interface ListRuleRequest {
+    page?: number;
+    size?: number;
+    ruleGroupIdList?: Array<number>;
+    ruleName?: string;
+    riskLevel?: string;
+    riskLevelList?: Array<string>;
+    platform?: string;
+    platformList?: Array<string>;
+    resourceType?: string;
+    resourceTypeList?: Array<Array<string>>;
+    ruleDesc?: string;
+    groupName?: string;
+    groupNameList?: Array<string>;
+    ruleTypeIdList?: Array<Array<number>>;
+    status?: string;
+    sortParam?: string;
+    sortType?: string;
+    ruleCodeList?: Array<string>;
+  }
+
+  interface AddTenantSelectRuleRequest {
+    /** 规则代码，规则的唯一标识 */
+    ruleCode: string;
+  }
+
+  interface DeleteTenantSelectRuleRequest {
+    /** 规则代码，规则的唯一标识 */
+    ruleCode: string;
+  }
 }

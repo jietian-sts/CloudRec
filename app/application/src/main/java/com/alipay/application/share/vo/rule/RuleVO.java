@@ -28,8 +28,10 @@ import com.alipay.application.service.common.utils.SpringUtils;
 import com.alipay.application.service.rule.RuleService;
 import com.alipay.application.service.rule.domain.RuleGroup;
 import com.alipay.application.service.rule.domain.repo.RuleGroupRepository;
+import com.alipay.application.service.system.domain.repo.TenantRepository;
 import com.alipay.application.share.request.rule.LinkDataParam;
 import com.alipay.common.utils.ListUtils;
+import com.alipay.dao.context.UserInfoContext;
 import com.alipay.dao.dto.RuleGroupDTO;
 import com.alipay.dao.mapper.*;
 import com.alipay.dao.po.*;
@@ -52,12 +54,6 @@ public class RuleVO {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date gmtModified;
-
-    /**
-     * 最近一次扫描时间
-     */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private Date lastScanTime;
 
     /**
      * 规则名称
@@ -179,6 +175,11 @@ public class RuleVO {
      */
     private String ruleCode;
 
+    /**
+     * 当前租户是否选择规则
+     */
+    private Boolean tenantSelected;
+
     private static RuleScanResultMapper ruleScanResultMapper = SpringUtils.getBean(RuleScanResultMapper.class);
 
     private static RuleGroupRepository ruleGroupRepository = SpringUtils.getBean(RuleGroupRepository.class);
@@ -196,6 +197,8 @@ public class RuleVO {
     private static ResourceMapper resourceMapper = SpringUtils.getApplicationContext().getBean(ResourceMapper.class);
 
     private static UserMapper userMapper = SpringUtils.getApplicationContext().getBean(UserMapper.class);
+
+    private static TenantRepository tenantRepository = SpringUtils.getApplicationContext().getBean(TenantRepository.class);
 
 
     public static RuleVO buildEasy(RulePO rulePO) {
@@ -219,6 +222,8 @@ public class RuleVO {
         if (!list.isEmpty()) {
             ruleVO.setRuleGroupNameList(list.stream().map(RuleGroup::getGroupName).toList());
         }
+
+        ruleVO.setTenantSelected(tenantRepository.isSelected(UserInfoContext.getCurrentUser().getUserTenantId(), rulePO.getRuleCode()));
 
         return ruleVO;
     }
@@ -284,6 +289,8 @@ public class RuleVO {
             ruleVO.setGlobalVariableConfigIdList(globalVariableConfigRuleRelPOList.stream()
                     .map(GlobalVariableConfigRuleRelPO::getGlobalVariableConfigId).toList());
         }
+
+        ruleVO.setTenantSelected(tenantRepository.isSelected(UserInfoContext.getCurrentUser().getUserTenantId(), rulePO.getRuleCode()));
         return ruleVO;
     }
 
@@ -305,4 +312,5 @@ public class RuleVO {
         }
         return userId;
     }
+
 }
