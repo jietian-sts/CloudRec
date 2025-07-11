@@ -700,7 +700,7 @@ const EditPage: React.FC = () => {
             intl.formatMessage({ id: 'common.message.text.create.success' }),
           );
         }
-        history.push('/ruleManagement/ruleProject');
+        history.push('/ruleManagement/ruleProject?tab=market');
       }
     });
   };

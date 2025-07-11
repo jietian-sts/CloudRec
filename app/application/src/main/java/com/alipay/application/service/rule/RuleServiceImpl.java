@@ -27,6 +27,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.alipay.application.service.common.utils.CacheUtil;
 import com.alipay.application.service.common.utils.DbCacheUtil;
 import com.alipay.application.service.rule.domain.repo.RuleGroupRepository;
+import com.alipay.application.service.rule.enums.EffectRuleType;
 import com.alipay.application.service.rule.enums.RuleType;
 import com.alipay.application.service.rule.exposed.GroupJoinService;
 import com.alipay.application.service.system.domain.repo.TenantRepository;
@@ -54,6 +55,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -209,9 +211,9 @@ public class RuleServiceImpl implements RuleService {
     }
 
     @Override
-    public ListVO<RuleVO> queryTenantSelectRuleList(ListRuleRequest request) {
+    public ListVO<RuleVO> queryEffectRuleList(ListRuleRequest request) {
         boolean needCache = false;
-        String key = CacheUtil.buildKey(tenantSelectRuleCacheKey, UserInfoContext.getCurrentUser().getUserTenantId(), request.getPage(), request.getSize(),
+        String key = CacheUtil.buildKey(tenantSelectRuleCacheKey, UserInfoContext.getCurrentUser().getUserTenantId(), request.getPage(), request.getSize(), request.getEffectRuleType(),
                 request.getSortParam(), request.getSortType());
         if (ListUtils.isEmpty(request.getPlatformList())
                 && ListUtils.isEmpty(request.getRuleTypeIdList())
@@ -232,7 +234,15 @@ public class RuleServiceImpl implements RuleService {
         BeanUtils.copyProperties(request, ruleDTO);
         ruleDTO.setResourceTypeList(ListUtils.setList(request.getResourceTypeList()));
         ruleDTO.setRuleTypeIdList(ListUtils.setList(request.getRuleTypeIdList()));
-        ruleDTO.setTenantId(UserInfoContext.getCurrentUser().getUserTenantId());
+
+
+        if (EffectRuleType.ALL.getCode().equals(request.getEffectRuleType())) {
+            ruleDTO.setTenantIdList(Stream.of(tenantRepository.findGlobalTenant().getId(), UserInfoContext.getCurrentUser().getUserTenantId()).distinct().toList());
+        } else if (EffectRuleType.SELECTED.getCode().equals(request.getEffectRuleType())) {
+            ruleDTO.setTenantIdList(Collections.singletonList(UserInfoContext.getCurrentUser().getUserTenantId()));
+        } else if (EffectRuleType.DEFAULT.getCode().equals(request.getEffectRuleType())) {
+            ruleDTO.setTenantIdList(Collections.singletonList(tenantRepository.findGlobalTenant().getId()));
+        }
 
         ListVO<RuleVO> listVO = new ListVO<>();
         int count = tenantRuleMapper.findCount(ruleDTO);
@@ -455,17 +465,13 @@ public class RuleServiceImpl implements RuleService {
         log.info("user:{}, addTenantSelectRule, req:{}", UserInfoContext.getCurrentUser(), req);
 
         dbCacheUtil.clear(tenantSelectRuleCacheKey);
+        dbCacheUtil.clear(ruleMarketCacheKey);
 
         return ApiResponse.SUCCESS;
     }
 
     @Override
     public ApiResponse<String> deleteTenantSelectRule(String ruleCode) {
-        RulePO rulePO = ruleMapper.findOne(ruleCode);
-        if (rulePO == null) {
-            return new ApiResponse<>(ApiResponse.FAIL_CODE, "The rules do not exist");
-        }
-
         Long tenantId = UserInfoContext.getCurrentUser().getUserTenantId();
         TenantRulePO tenantRulePO = tenantRuleMapper.findOne(tenantId, ruleCode);
         if (tenantRulePO == null) {
@@ -476,11 +482,7 @@ public class RuleServiceImpl implements RuleService {
             return new ApiResponse<>(ApiResponse.FAIL_CODE, "The rules do not belong to the current tenant");
         }
 
-        tenantRuleMapper.deleteByPrimaryKey(tenantRulePO.getId());
-
-        // Delete the corresponding risk data
-        ruleScanResultMapper.deleteByRuleIdAndTenantId(rulePO.getId(), tenantId);
-
+        tenantRepository.removeSelectedRule(tenantId, ruleCode);
         log.info("user:{}, deleteTenantSelectRule, ruleCode:{}", UserInfoContext.getCurrentUser(), ruleCode);
 
         dbCacheUtil.clear(tenantSelectRuleCacheKey);

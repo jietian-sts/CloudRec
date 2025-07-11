@@ -75,10 +75,18 @@ const RuleProject: React.FC = () => {
   // List of Resource Types
   const [resourceTypeList, setResourceTypeList] = useState<any[]>([]);
   // Active Tab Key
-  const [activeTabKey, setActiveTabKey] = useState<string>('market');
+  const tabQuery = searchParams.get('tab');
+  const [activeTabKey, setActiveTabKey] = useState<string>(tabQuery || 'selected');
+  
+  useEffect(() => {
+    const currentTabQuery = searchParams.get('tab');
+    if (currentTabQuery && currentTabQuery !== activeTabKey) {
+      setActiveTabKey(currentTabQuery);
+    }
+  }, [search, activeTabKey]);
   // Query Loading
   const [queryLoading, setQueryLoading] = useState<boolean>(false);
-  // Query Trigger - 用于触发子组件重新加载数据
+  // Query Trigger
   const [queryTrigger, setQueryTrigger] = useState<number>(0);
 
   // Check for new rules
@@ -146,7 +154,6 @@ const RuleProject: React.FC = () => {
     checkNewRules();
   }, [groupIdQuery, ruleCodeQuery, platformQuery]);
 
-  // Tab items configuration - 这部分代码已经不需要了，因为我们在下面直接定义了tabs
 
   return (
     <PageContainer
@@ -283,7 +290,6 @@ const RuleProject: React.FC = () => {
                     loading={queryLoading}
                     onClick={() => {
                       setQueryLoading(true);
-                      // 触发子组件重新加载数据
                       setQueryTrigger(prev => prev + 1);
                       setTimeout(() => {
                         setQueryLoading(false);
@@ -292,14 +298,13 @@ const RuleProject: React.FC = () => {
                   >
                     {intl.formatMessage({
                       id: 'common.button.text.query',
-                    }) || '查询'}
+                    })}
                   </Button>
                   <Button
                     icon={<ReloadOutlined />}
                     onClick={() => {
                       form.resetFields();
                       setResourceTypeList([]);
-                      // 重置后触发查询
                       setQueryLoading(true);
                       setQueryTrigger(prev => prev + 1);
                       setTimeout(() => {
@@ -309,7 +314,7 @@ const RuleProject: React.FC = () => {
                   >
                     {intl.formatMessage({
                       id: 'common.button.text.reset',
-                    }) || '重置'}
+                    })}
                   </Button>
                 </Space>
               </Form.Item>
@@ -323,13 +328,31 @@ const RuleProject: React.FC = () => {
           activeKey={activeTabKey}
           onChange={(key) => {
             setActiveTabKey(key);
-            // 切换tab时触发数据重新加载
             setQueryTrigger(prev => prev + 1);
           }}
           items={[
             {
+              key: 'selected',
+              label: intl.formatMessage({
+                id: 'rule.module.text.selected.rules',
+              }),
+              children: (
+                <SelectedRules
+                  form={form}
+                  platformList={platformList}
+                  resourceTypeList={resourceTypeList}
+                  ruleGroupList={ruleGroupList}
+                  ruleTypeList={ruleTypeList}
+                  allRuleList={allRuleList}
+                  queryTrigger={queryTrigger}
+                />
+              ),
+            },
+            {
               key: 'market',
-              label: '规则市场',
+              label: intl.formatMessage({
+                id: 'rule.module.text.market.rules',
+              }),
               children: (
                 <RuleMarket
                   form={form}
@@ -344,21 +367,7 @@ const RuleProject: React.FC = () => {
                 />
               ),
             },
-            {
-              key: 'selected',
-              label: '自选规则',
-              children: (
-                <SelectedRules
-                  form={form}
-                  platformList={platformList}
-                  resourceTypeList={resourceTypeList}
-                  ruleGroupList={ruleGroupList}
-                  ruleTypeList={ruleTypeList}
-                  allRuleList={allRuleList}
-                  queryTrigger={queryTrigger}
-                />
-              ),
-            },
+            
           ]}
         />
       </ProCard>

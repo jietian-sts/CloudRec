@@ -187,9 +187,9 @@ public class ScanServiceImpl implements ScanService {
         return version == null ? 1 : version + 1;
     }
 
-    public void scanByRule(RuleAgg ruleAgg, @NotNull CloudAccountPO cloudAccountPO, Boolean selectedByGlobalTenant) {
-        // Change rules to determine whether the tenant to which the current account belongs
-        if (!selectedByGlobalTenant) {
+    public void scanByRule(RuleAgg ruleAgg, @NotNull CloudAccountPO cloudAccountPO, Boolean isDefaultRule) {
+        // Only the "default rules" or the optional rules of the tenant to which the account belongs
+        if (!isDefaultRule) {
             boolean selected = tenantRepository.isSelected(cloudAccountPO.getTenantId(), ruleAgg.getRuleCode());
             if (!selected) {
                 log.info("cloudAccountId:{},ruleCode:{} is not selected", cloudAccountPO.getCloudAccountId(), ruleAgg.getRuleCode());
@@ -368,7 +368,7 @@ public class ScanServiceImpl implements ScanService {
 
 
             // Determine whether the rules are selected by the global tenant
-            boolean selectedByGlobalTenant = tenantRepository.isSelectedByGlobalTenant(ruleAgg.getRuleCode());
+            boolean selectedByGlobalTenant = tenantRepository.isDefaultRule(ruleAgg.getRuleCode());
 
             // Get all whitelist rules
             whitedConfigContext.initWhitedConfigCache();

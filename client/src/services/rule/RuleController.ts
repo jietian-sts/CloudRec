@@ -500,12 +500,12 @@ export async function checkExistNewRule() {
   });
 }
 
-/** 查询租户自选规则列表: POST /api/rule/queryTenantSelectRuleList */
-export async function queryTenantSelectRuleList(
+/** 查询租户自选规则列表: POST /api/rule/queryEffectRuleList */
+export async function queryEffectRuleList(
   body?: API.ListRuleRequest,
   options?: { [key: string]: any },
 ) {
-  return request<API.Result_T_>(`${BASE_URL}/api/rule/queryTenantSelectRuleList`, {
+  return request<API.Result_T_>(`${BASE_URL}/api/rule/queryEffectRuleList`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

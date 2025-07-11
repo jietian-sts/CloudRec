@@ -121,9 +121,6 @@
     from rule r INNER JOIN rule_group_rel rgr ON r.id = rgr.rule_id INNER JOIN rule_group rg ON rgr.rule_group_id =
     rg.id INNER JOIN tenant_rule tr ON r.rule_code = tr.rule_code
     LEFT JOIN rule_scan_risk_count_statistics rsrcs ON r.id = rsrcs.rule_id
-    <if test="tenantId != null">
-      and tr.tenant_id = #{tenantId}
-    </if>
     <include refid="getLitWhere"></include>
     GROUP BY r.id
     <if test="sortParam!= null and sortParam != ''">
@@ -165,94 +162,97 @@
   </sql>
 
   <sql id="getLitWhere">
-    <where>
-      <if test="id != null">
-        r.id = #{id}
-      </if>
-      <if test="ruleIdList != null and ruleIdList.size() >0">
-        and r.id IN
-        <foreach collection="ruleIdList" item="item" open="(" separator="," close=")">
-          #{item}
-        </foreach>
-      </if>
-      <if test="tenantId != null">
-        AND tr.tenant_id = #{tenantId}
-      </if>
-      <if test="ruleName != null and ruleName != ''">
-        AND r.rule_name like CONCAT('%',#{ruleName},'%')
-      </if>
-      <if test="ruleCodeList != null and ruleCodeList.size > 0">
-        AND r.rule_code in
-        <foreach collection="ruleCodeList" item="item" open="(" separator="," close=")">
-          #{item}
-        </foreach>
-      </if>
-      <if test="ruleNameEqual != null and ruleNameEqual != ''">
-        AND r.rule_name = #{ruleNameEqual}
-      </if>
-      <if test="ruleDesc != null and ruleDesc != ''">
-        and r.rule_desc like CONCAT('%',#{ruleDesc},'%')
-      </if>
-      <if test="riskLevel != null">
-        and r.risk_level = #{riskLevel}
-      </if>
-      <if test="riskLevelList != null and riskLevelList.size > 0">
-        and r.risk_level IN
-        <foreach collection="riskLevelList" item="riskLevel" open="(" separator="," close=")">
-          #{riskLevel}
-        </foreach>
-      </if>
-      <if test="platform != null">
-        and r.platform = #{platform}
-      </if>
-      <if test="platformList != null and platformList.size() >0">
-        and r.platform IN
-        <foreach collection="platformList" item="platform" open="(" separator="," close=")">
-          #{platform}
-        </foreach>
-      </if>
-      <if test="resourceType != null">
-        and r.resource_type = #{resourceType}
-      </if>
-      <if test="ruleGroupId != null">
-        and rg.id = #{ruleGroupId}
-      </if>
-      <if test="groupName != null and groupName != ''">
-        and rg.group_name = #{groupName}
-      </if>
-      <if test="groupNameList != null and groupNameList.size() >0">
-        and rg.group_name IN
-        <foreach collection="groupNameList" item="groupName" open="(" separator="," close=")">
-          #{groupName}
-        </foreach>
-      </if>
-      <if test="status != null">
-        and r.status = #{status}
-      </if>
-      <if test="ruleTypeIdList != null">
-        AND EXISTS
-        (SELECT rt.id
-        FROM rule_type_rel rtr
-        INNER JOIN rule_type rt ON rtr.rule_type_id = rt.id
-        WHERE rtr.rule_id = r.id and rt.id IN
-        <foreach collection="ruleTypeIdList" item="ruleTypeId" open="(" separator="," close=")">
-          #{ruleTypeId}
-        </foreach>
-        )
-      </if>
-      <if test="resourceTypeList != null and resourceTypeList.size() > 0">
-        and r.resource_type IN
-        <foreach collection="resourceTypeList" item="type" open="(" separator="," close=")">
-          #{type}
-        </foreach>
-      </if>
-      <if test="ruleGroupIdList != null and ruleGroupIdList.size() > 0">
-        and rg.id IN
-        <foreach collection="ruleGroupIdList" item="ruleGroupId" open="(" separator="," close=")">
-          #{ruleGroupId}
-        </foreach>
-      </if>
-    </where>
+      <where>
+          <if test="id != null">
+              r.id = #{id}
+          </if>
+          <if test="ruleIdList != null and ruleIdList.size() >0">
+              AND r.id IN
+              <foreach collection="ruleIdList" item="item" open="(" separator="," close=")">
+                  #{item}
+              </foreach>
+          </if>
+          <if test="tenantIdList != null and tenantIdList.size() >0">
+              AND tr.tenant_id IN
+              <foreach collection="tenantIdList" item="tenantId" open="(" separator="," close=")">
+                  #{tenantId}
+              </foreach>
+          </if>
+          <if test="ruleName != null and ruleName != ''">
+              AND r.rule_name like CONCAT('%',#{ruleName},'%')
+          </if>
+          <if test="ruleCodeList != null and ruleCodeList.size > 0">
+              AND r.rule_code in
+              <foreach collection="ruleCodeList" item="item" open="(" separator="," close=")">
+                  #{item}
+              </foreach>
+          </if>
+          <if test="ruleNameEqual != null and ruleNameEqual != ''">
+              AND r.rule_name = #{ruleNameEqual}
+          </if>
+          <if test="ruleDesc != null and ruleDesc != ''">
+              AND r.rule_desc like CONCAT('%',#{ruleDesc},'%')
+          </if>
+          <if test="riskLevel != null">
+              AND r.risk_level = #{riskLevel}
+          </if>
+          <if test="riskLevelList != null and riskLevelList.size > 0">
+              AND r.risk_level IN
+              <foreach collection="riskLevelList" item="riskLevel" open="(" separator="," close=")">
+                  #{riskLevel}
+              </foreach>
+          </if>
+          <if test="platform != null">
+              AND r.platform = #{platform}
+          </if>
+          <if test="platformList != null and platformList.size() >0">
+              AND r.platform IN
+              <foreach collection="platformList" item="platform" open="(" separator="," close=")">
+                  #{platform}
+              </foreach>
+          </if>
+          <if test="resourceType != null">
+              AND r.resource_type = #{resourceType}
+          </if>
+          <if test="ruleGroupId != null">
+              AND rg.id = #{ruleGroupId}
+          </if>
+          <if test="groupName != null and groupName != ''">
+              AND rg.group_name = #{groupName}
+          </if>
+          <if test="groupNameList != null and groupNameList.size() >0">
+              AND rg.group_name IN
+              <foreach collection="groupNameList" item="groupName" open="(" separator="," close=")">
+                  #{groupName}
+              </foreach>
+          </if>
+          <if test="status != null">
+              AND r.status = #{status}
+          </if>
+          <if test="ruleTypeIdList != null">
+              AND EXISTS
+              (SELECT rt.id
+              FROM rule_type_rel rtr
+              INNER JOIN rule_type rt ON rtr.rule_type_id = rt.id
+              WHERE rtr.rule_id = r.id and rt.id IN
+              <foreach collection="ruleTypeIdList" item="ruleTypeId" open="(" separator="," close=")">
+                  #{ruleTypeId}
+              </foreach>
+              )
+          </if>
+          <if test="resourceTypeList != null and resourceTypeList.size() > 0">
+              AND r.resource_type IN
+              <foreach collection="resourceTypeList" item="type" open="(" separator="," close=")">
+                  #{type}
+              </foreach>
+          </if>
+          <if test="ruleGroupIdList != null and ruleGroupIdList.size() > 0">
+              AND rg.id IN
+              <foreach collection="ruleGroupIdList" item="ruleGroupId" open="(" separator="," close=")">
+                  #{ruleGroupId}
+              </foreach>
+          </if>
+      </where>
   </sql>
 
   <delete id="deleteByRuleCode">

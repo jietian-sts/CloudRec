@@ -50,5 +50,11 @@ public interface TenantRepository {
 
     boolean isSelected(Long tenantId, String ruleCode);
 
-    boolean isSelectedByGlobalTenant(String ruleCode);
+    boolean isDefaultRule(String ruleCode);
+
+    Tenant findGlobalTenant();
+
+    void removeSelectedRule(Long tenantId, String ruleCode);
+
+    List<String> findSelectTenantList(String ruleCode);
 }

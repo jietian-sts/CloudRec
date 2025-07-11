@@ -123,6 +123,8 @@ declare namespace API {
     ruleGroupNameList?: Array<string>;
     /** Whether the rule is selected by current tenant */
     tenantSelected?: boolean;
+    /** List of tenant names that have selected this rule */
+    selectedTenantNameList?: Array<string>;
   }
 
   /** Platform Results */

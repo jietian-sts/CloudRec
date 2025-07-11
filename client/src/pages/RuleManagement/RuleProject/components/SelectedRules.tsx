@@ -15,6 +15,7 @@ import {
   PlayCircleFilled,
   PauseCircleFilled,
   InfoCircleOutlined,
+  StarFilled,
 } from '@ant-design/icons';
 import {
   ActionType,
@@ -30,13 +31,14 @@ import {
   Grid,
   message,
   Popconfirm,
+  Radio,
   Space,
   Tooltip,
 } from 'antd';
 import { MessageType } from 'antd/es/message/interface';
 import { isEmpty } from 'lodash';
 import React, { useRef, useState, useEffect } from 'react';
-import { queryTenantSelectRuleList, removeTenantSelectRule, scanByRule, scanRuleList, batchDeleteTenantSelectRule } from '@/services/rule/RuleController';
+import { queryEffectRuleList, removeTenantSelectRule, scanByRule, scanRuleList, batchDeleteTenantSelectRule } from '@/services/rule/RuleController';
 import { createTableRowConfig } from '../utils/tableRowUtils';
 import RuleDetailDrawer from './RuleDetailDrawer';
 
@@ -91,6 +93,8 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
   // Data status for empty state message
   const [hasData, setHasData] = useState<boolean>(true);
   const [dataLoaded, setDataLoaded] = useState<boolean>(false);
+  // Rule type selection state (selected: 租户自选, default: 默认规则, all: 全部)
+  const [ruleType, setRuleType] = useState<'selected' | 'default' | 'all'>('all');
 
   // Current activation item Row
   const activeRowType = (record: Record<string, any>): string => {
@@ -103,7 +107,6 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
     setRuleDetailVisible(true);
   };
 
-  // 监听查询触发器变化，重新加载表格数据
   useEffect(() => {
     if (queryTrigger !== undefined && queryTrigger > 0) {
       tableActionRef.current?.reload();
@@ -131,72 +134,58 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
   const onClickRemoveFromSelected = async (record: any): Promise<void> => {
     const id = record.id;
     setRemoveLoading({ ...removeLoading, [id]: true });
-    const hide: MessageType = messageApi.loading('正在移出自选规则...');
 
     try {
       const result = await removeTenantSelectRule({ ruleCode: record.ruleCode });
 
       if (result.code === 200 || result.msg === 'success') {
-        messageApi.success('已移出自选规则');
+        messageApi.success(intl.formatMessage({ id: 'common.message.text.success' }));
         tableActionRef.current?.reloadAndRest?.();
-      } else {
-        const errorMsg = result.msg || result.errorMsg || '移出失败';
-        messageApi.error(errorMsg);
       }
     } catch (error) {
-      messageApi.error('移出失败，请稍后重试');
+      messageApi.error(intl.formatMessage({ id: 'common.message.text.fail' }));
     } finally {
       setRemoveLoading({ ...removeLoading, [id]: false });
-      hide();
     }
   };
 
   // Batch scan rules
   const onClickBatchScan = async (): Promise<void> => {
     if (selectedRowKeys.length === 0) {
-      messageApi.warning('请先选择要检测的规则');
       return;
     }
 
     setBatchScanLoading(true);
-    const hide: MessageType = messageApi.loading('正在批量检测规则...');
 
     try {
       const idList = selectedRowKeys.map(key => Number(key));
       const result = await scanRuleList({ idList });
 
       if (result.code === 200 || result.msg === 'success') {
-        messageApi.success('批量检测已启动');
+        messageApi.success(intl.formatMessage({ id: 'common.message.text.success' }));
         setSelectedRowKeys([]);
         tableActionRef.current?.reloadAndRest?.();
-      } else {
-        const errorMsg = result.msg || result.errorMsg || '批量检测失败';
-        messageApi.error(errorMsg);
       }
     } catch (error) {
-      messageApi.error('批量检测失败，请稍后重试');
+      messageApi.error(intl.formatMessage({ id: 'common.message.text.fail' }));
     } finally {
       setBatchScanLoading(false);
-      hide();
     }
   };
 
   // Batch remove from selected
   const onClickBatchRemove = async (): Promise<void> => {
     if (selectedRowKeys.length === 0) {
-      messageApi.warning('请先选择要移出的规则');
       return;
     }
 
     setBatchRemoveLoading(true);
-    const hide: MessageType = messageApi.loading('正在批量移出自选规则...');
 
     try {
-      // 通过重新查询获取选中行的ruleCode
       const formValues = form.getFieldsValue();
       const requestParams: API.ListRuleRequest = {
         page: 1,
-        size: 1000, // 获取足够多的数据
+        size: 1000,
         platformList: formValues.platformList,
         riskLevelList: formValues.riskLevelList,
         ruleCodeList: formValues.ruleCodeList,
@@ -205,31 +194,23 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
         ruleTypeIdList: formValues.ruleTypeIdList,
       };
 
-      const response = await queryTenantSelectRuleList(requestParams);
+      const response = await queryEffectRuleList(requestParams);
       const allData = response?.content?.data || [];
       const selectedData = allData.filter((item: any) => selectedRowKeys.includes(item.id));
       const ruleCodeList = selectedData.map((item: any) => item.ruleCode);
 
-      if (ruleCodeList.length === 0) {
-        messageApi.warning('未找到选中的规则数据');
-        return;
-      }
 
       const result = await batchDeleteTenantSelectRule({ ruleCodeList });
 
       if (result.code === 200 || result.msg === 'success') {
-        messageApi.success(`已成功移出 ${selectedRowKeys.length} 条自选规则`);
+        messageApi.success(intl.formatMessage({ id: 'common.message.text.success' }));
         setSelectedRowKeys([]);
         tableActionRef.current?.reloadAndRest?.();
-      } else {
-        const errorMsg = result.msg || result.errorMsg || '批量移出失败';
-        messageApi.error(errorMsg);
       }
     } catch (error) {
-      messageApi.error('批量移出失败，请稍后重试');
+      messageApi.error(intl.formatMessage({ id: 'common.message.text.fail' }));
     } finally {
       setBatchRemoveLoading(false);
-      hide();
     }
   };
 
@@ -241,24 +222,21 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
     const { pageSize, current, ...searchParams } = params;
 
     try {
-      // 获取表单筛选条件
       const formValues = form.getFieldsValue();
 
-      // 构建请求参数
-      const requestParams: API.ListRuleRequest = {
+      const requestParams: API.ListRuleRequest & { effectRuleType?: string } = {
         page: current || 1,
         size: pageSize || 10,
-        // 合并表单筛选条件
         platformList: formValues.platformList,
         riskLevelList: formValues.riskLevelList,
         ruleCodeList: formValues.ruleCodeList,
         resourceTypeList: formValues.resourceTypeList,
         ruleGroupIdList: formValues.ruleGroupIdList,
         ruleTypeIdList: formValues.ruleTypeIdList,
+        effectRuleType: ruleType,
         ...searchParams,
       };
 
-      // 处理排序参数
       if (sort && Object.keys(sort).length > 0) {
         const sortKey = Object.keys(sort)[0];
         const sortOrder = sort[sortKey];
@@ -266,13 +244,12 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
         requestParams.sortType = sortOrder === 'ascend' ? 'ASC' : 'DESC';
       }
 
-      const response = await queryTenantSelectRuleList(requestParams);
+      const response = await queryEffectRuleList(requestParams);
 
       if (response?.content) {
         const data = response.content.data || [];
         const total = response.content.total || 0;
         
-        // 更新数据状态
         setHasData(total > 0);
         setDataLoaded(true);
         
@@ -317,9 +294,17 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
               style={{
                 fontWeight: 500,
                 color: 'rgb(58, 58, 58)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
               }}
             >
-              {record?.ruleName || '-'}
+              <span>{record?.ruleName || '-'}</span>
+              {record?.defaultRuleSelected && (
+                <Tooltip title="default">
+                  <StarFilled style={{ color: '#faad14', fontSize: '14px' }} />
+                </Tooltip>
+              )}
             </div>
             <div
               style={{
@@ -371,8 +356,11 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
         return obtainPlatformEasyIcon(record.platform!, platformList);
       },
     },
+
     {
-      title: '风险数量',
+      title: intl.formatMessage({
+        id: 'asset.module.risk.number',
+      }),
       dataIndex: 'riskCount',
       valueType: 'text',
       hideInSearch: true,
@@ -390,7 +378,9 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
     },
 
     {
-      title: '最近扫描时间',
+      title: intl.formatMessage({
+        id: 'cloudAccount.extend.title.lastScanTime',
+      }),
       dataIndex: 'lastScanTime',
       valueType: 'text',
       hideInSearch: true,
@@ -409,7 +399,9 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
       },
     },
     {
-      title: '状态/操作',
+      title: intl.formatMessage({
+        id: 'cloudAccount.extend.title.cloud.operate',
+      }),
       dataIndex: 'option',
       valueType: 'option',
       align: 'center',
@@ -419,12 +411,11 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
          const isRunning = record?.isRunning;
          const canDetect = isRunning === 0;
          
-         // 根据运行状态选择按钮图标
          const getButtonIcon = () => {
            if (isRunning === 1) {
-             return <PlayCircleFilled />; // 运行中显示实心播放图标
+             return <PlayCircleFilled />;
            } else {
-             return <PlayCircleOutlined />; // 停止状态显示空心播放图标
+             return <PlayCircleOutlined />;
            }
          };
 
@@ -452,25 +443,34 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
                })}
              </Button>
 
-             <Popconfirm
-                title="确定要移出自选规则吗？"
-                onConfirm={(e) => {
-                  e?.stopPropagation();
-                  onClickRemoveFromSelected(record);
-                }}
-                okText="确定"
-                cancelText="取消"
-              >
-               <Button
-                 danger
-                 size="small"
-                 loading={removeLoading[Number(record.id)]}
-                 icon={<MinusOutlined />}
-                 onClick={(e) => e.stopPropagation()}
-               >
+             {ruleType === 'selected' && (
+               <Popconfirm
+                  title={intl.formatMessage({
+                    id: 'rule.module.selected.rules.popconfirm.content',
+                  })}
+                  onConfirm={(e) => {
+                    e?.stopPropagation();
+                    onClickRemoveFromSelected(record);
+                  }}
+                  onCancel={(e) => e?.stopPropagation()}
+                  okText={intl.formatMessage({
+                    id: 'common.button.text.ok',
+                  })}
+                  cancelText={intl.formatMessage({
+                    id: 'common.button.text.cancel',
+                  })}
+                >
+                 <Button
+                   danger
+                   size="small"
+                   loading={removeLoading[Number(record.id)]}
+                   icon={<MinusOutlined />}
+                   onClick={(e) => e.stopPropagation()}
+                 >
 
-               </Button>
-             </Popconfirm>
+                 </Button>
+               </Popconfirm>
+             )}
            </Space>
          );
        },
@@ -480,23 +480,6 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
   return (
     <>
       {contextHolder}
-      {/* 规则生效状态提示 */}
-      {dataLoaded && hasData && (
-         <div style={{
-           marginBottom: 16,
-           padding: '8px 12px',
-           backgroundColor: '#f0f9ff',
-           border: '1px solid #bae7ff',
-           borderRadius: '6px',
-           display: 'flex',
-           alignItems: 'center',
-           fontSize: '14px',
-           color: '#1890ff'
-         }}>
-           <InfoCircleOutlined style={{ marginRight: 8 }} />
-           当前租户自选规则与全局租户下的自选规则同时生效
-         </div>
-       )}
       <ProTable<any>
         scroll={{ x: 'max-content' }}
         rowSelection={{
@@ -508,7 +491,26 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
         headerTitle={
           <div className={styleType['customTitle']}>
             <Space>
-              自选规则
+              <Radio.Group
+                value={ruleType}
+                onChange={(e) => {
+                  setRuleType(e.target.value);
+                  setSelectedRowKeys([]);
+                  tableActionRef.current?.reload();
+                }}
+                size="middle"
+                buttonStyle="solid"
+              >
+                <Radio.Button value="all">{intl.formatMessage({
+                  id: 'common.module.text.all',
+                })}</Radio.Button>
+                <Radio.Button value="selected">{intl.formatMessage({
+                  id: 'common.module.text.selected',
+                })}</Radio.Button>
+                <Radio.Button value="default">{intl.formatMessage({
+                  id: 'common.module.text.default',
+                })}</Radio.Button>
+              </Radio.Group>
             </Space>
           </div>
         }
@@ -525,18 +527,24 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
             disabled={selectedRowKeys.length === 0}
             onClick={onClickBatchScan}
           >
-            批量检测
+            {intl.formatMessage({
+              id: 'rule.module.text.batch.test',
+            })}
           </Button>,
-          <Button
-            key="BATCH_REMOVE"
-            danger
-            loading={batchRemoveLoading}
-            disabled={selectedRowKeys.length === 0}
-            onClick={onClickBatchRemove}
-          >
-            批量移出自选
-          </Button>,
-        ]}
+          ruleType === 'selected' && (
+             <Button
+               key="BATCH_REMOVE"
+               danger
+               loading={batchRemoveLoading}
+               disabled={selectedRowKeys.length === 0}
+               onClick={onClickBatchRemove}
+             >
+               {intl.formatMessage({
+                 id: 'rule.module.text.batch.remove',
+               })}
+             </Button>
+           ),
+        ].filter(Boolean)}
         request={requestSelectedRulesData}
         columns={columns}
         pagination={{
@@ -544,13 +552,6 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
           showSizeChanger: true,
           defaultPageSize: 10,
           defaultCurrent: 1,
-        }}
-        locale={{
-          emptyText: (
-            <div style={{ textAlign: 'center', padding: '20px 0' }}>
-              <div>当前租户暂无自选规则，运行全局租户下的自选规则</div>
-            </div>
-          ),
         }}
         onRow={createTableRowConfig(handleRowClick)}
       />

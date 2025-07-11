@@ -187,6 +187,16 @@ public class RuleVO {
      */
     private Boolean tenantSelected;
 
+    /**
+     * 全局租户是否已选择当前规则
+     */
+    private Boolean defaultRuleSelected;
+
+    /**
+     * 使用中的租户名称列表
+     */
+    private List<String> selectedTenantNameList;
+
     private static RuleScanResultMapper ruleScanResultMapper = SpringUtils.getBean(RuleScanResultMapper.class);
 
     private static RuleGroupRepository ruleGroupRepository = SpringUtils.getBean(RuleGroupRepository.class);
@@ -212,8 +222,6 @@ public class RuleVO {
         RuleVO ruleVO = new RuleVO();
         BeanUtils.copyProperties(rulePO, ruleVO);
         ruleVO.setRuleTypeNameList(ruleService.queryRuleTypeNameList(rulePO.getId()));
-
-        // 资源类型
         List<String> resourceList = queryResource(rulePO.getPlatform(), rulePO.getResourceType());
         if (!resourceList.isEmpty()) {
             ruleVO.setResourceTypeStr(resourceList.get(1));
@@ -221,16 +229,15 @@ public class RuleVO {
             ruleVO.setResourceTypeStr(rulePO.getResourceType());
         }
 
-        // 创建人
         ruleVO.setUsername(queryUserName(rulePO.getUserId()));
-
-        // 规则组名称
         List<RuleGroup> list = ruleGroupRepository.findByRuleId(rulePO.getId());
         if (!list.isEmpty()) {
             ruleVO.setRuleGroupNameList(list.stream().map(RuleGroup::getGroupName).toList());
         }
 
         ruleVO.setTenantSelected(tenantRepository.isSelected(UserInfoContext.getCurrentUser().getUserTenantId(), rulePO.getRuleCode()));
+        ruleVO.setDefaultRuleSelected(tenantRepository.isDefaultRule(rulePO.getRuleCode()));
+        ruleVO.setSelectedTenantNameList(tenantRepository.findSelectTenantList(rulePO.getRuleCode()));
 
         return ruleVO;
     }

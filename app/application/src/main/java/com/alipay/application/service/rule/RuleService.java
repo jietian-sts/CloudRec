@@ -41,7 +41,7 @@ public interface RuleService {
 
     ApiResponse<ListVO<RuleVO>> queryRuleList(ListRuleRequest listRuleRequest);
 
-    ListVO<RuleVO> queryTenantSelectRuleList(ListRuleRequest listRuleRequest);
+    ListVO<RuleVO> queryEffectRuleList(ListRuleRequest listRuleRequest);
 
 
     ApiResponse<String> deleteRule(Long id);

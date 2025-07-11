@@ -82,7 +82,7 @@ public class AccountScanJob {
             log.info("scanByCloudAccountId start, cloudAccountId:{}, platform:{} start", cloudAccountId, cloudAccountPO.getPlatform());
             for (RuleAgg ruleAgg : ruleAggList) {
                 log.info("scanByCloudAccountId start, cloudAccountId:{}, platform:{}, ruleCode:{}", cloudAccountId, cloudAccountPO.getPlatform(), ruleAgg.getRuleCode());
-                scanService.scanByRule(ruleAgg, cloudAccountPO, tenantRepository.isSelectedByGlobalTenant(ruleAgg.getRuleCode()));
+                scanService.scanByRule(ruleAgg, cloudAccountPO, tenantRepository.isDefaultRule(ruleAgg.getRuleCode()));
                 log.info("scanByCloudAccountId end, cloudAccountId:{}, platform:{}, ruleCode:{} end", cloudAccountId, cloudAccountPO.getPlatform(), ruleAgg.getRuleCode());
             }
             log.info("scanByCloudAccountId end, cloudAccountId:{}, platform:{} end, spend time:{}", cloudAccountId, cloudAccountPO.getPlatform(), System.currentTimeMillis() - startTime);

@@ -31,6 +31,7 @@ import {
   PlusOutlined,
   MinusOutlined,
   SyncOutlined,
+  TeamOutlined,
 } from '@ant-design/icons';
 import {
   ActionType,
@@ -115,7 +116,6 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
   // Export Loading
   const [exportLoading, setExportLoading] = useState<boolean>(false);
 
-  // 监听查询触发器变化，重新加载表格数据
   useEffect(() => {
     if (queryTrigger !== undefined && queryTrigger > 0) {
       tableActionRef.current?.reload();
@@ -127,13 +127,11 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
     return record.id === activeRow ? 'ant-table-row-selected' : '';
   };
 
-  // 处理行点击事件
   const handleRowClick = (record: API.RuleProjectInfo) => {
     setSelectedRuleId(record.id);
     setRuleDetailVisible(true);
   };
 
-  // 关闭规则详情抽屉
   const handleCloseRuleDetail = () => {
     setRuleDetailVisible(false);
     setSelectedRuleId(undefined);
@@ -175,32 +173,18 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
   const onClickAddToSelected = async (record: API.RuleProjectInfo): Promise<void> => {
     const id = record.id!;
     setAddLoading({ ...addLoading, [id]: true });
-    const hide: MessageType = messageApi.loading('正在添加到自选规则...');
     
     try {
       const result = await addTenantSelectRule({ ruleCode: record.ruleCode! });
       
       if (result.code === 200 || result.msg === 'success') {
-        messageApi.success('已添加到自选规则');
+        messageApi.success(intl.formatMessage({ id: 'common.message.text.success' }));
         tableActionRef.current?.reloadAndRest?.();
-      } else {
-        // 处理特定的错误信息
-        const errorMsg = result.msg || result.errorMsg || '添加失败';
-        if (errorMsg.includes('The rules do not exist')) {
-          messageApi.error('规则不存在');
-        } else if (errorMsg.includes('The rules are not enabled')) {
-          messageApi.error('规则未启用');
-        } else if (errorMsg.includes('The rules have been added to the optional list')) {
-          messageApi.warning('规则已经添加到自选列表');
-        } else {
-          messageApi.error(errorMsg);
-        }
-      }
+      } 
     } catch (error) {
-      messageApi.error('添加失败，请稍后重试');
+      messageApi.error(intl.formatMessage({ id: 'common.message.text.failed' }));
     } finally {
       setAddLoading({ ...addLoading, [id]: false });
-      hide();
     }
   };
 
@@ -208,29 +192,18 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
   const onClickRemoveFromSelected = async (record: API.RuleProjectInfo): Promise<void> => {
     const id = record.id!;
     setRemoveLoading({ ...removeLoading, [id]: true });
-    const hide: MessageType = messageApi.loading('正在移出自选规则...');
     
     try {
       const result = await removeTenantSelectRule({ ruleCode: record.ruleCode! });
       
       if (result.code === 200 || result.msg === 'success') {
-        messageApi.success('已移出自选规则');
+        messageApi.success(intl.formatMessage({ id: 'common.message.text.success' }));
         tableActionRef.current?.reloadAndRest?.();
-      } else {
-        const errorMsg = result.msg || result.errorMsg || '移出失败';
-        if (errorMsg.includes('The rules do not exist')) {
-          messageApi.error('规则不存在');
-        } else if (errorMsg.includes('The rules do not belong to the current tenant')) {
-          messageApi.error('规则不属于当前租户');
-        } else {
-          messageApi.error(errorMsg);
-        }
-      }
+      } 
     } catch (error) {
-      messageApi.error('移出失败，请稍后重试');
+      messageApi.error(intl.formatMessage({ id: 'common.message.text.failed' }));
     } finally {
       setRemoveLoading({ ...removeLoading, [id]: false });
-      hide();
     }
   };
 
@@ -256,7 +229,6 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
       .finally(() => setExportLoading(false));
   };
 
-  // 规则状态切换
   const onClickChangeRuleStatus = async (
     id: number,
     status: string,
@@ -284,18 +256,44 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
       align: 'left',
       hideInSearch: true,
       render: (_, record: API.RuleProjectInfo) => {
+        const isInUse = record?.selectedTenantNameList && record.selectedTenantNameList.length > 0;
+        
         return (
           <div>
-            <DispositionPro
-              placement={'topLeft'}
-              maxWidth={breakpoints?.xxl ? 600 : 400}
-              rows={1}
-              text={record?.ruleName || '-'}
-              style={{
-                fontWeight: 500,
-                color: 'rgb(58, 58, 58)',
-              }}
-            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <DispositionPro
+                placement={'topLeft'}
+                maxWidth={breakpoints?.xxl ? 600 : 400}
+                rows={1}
+                text={record?.ruleName || '-'}
+                style={{
+                  fontWeight: 500,
+                  color: 'rgb(58, 58, 58)',
+                }}
+              />
+              {isInUse && (
+                <Tooltip
+                  title={
+                    <div>
+                      {record.selectedTenantNameList?.map((tenantName, index) => (
+                        <div key={index} style={{ fontSize: 12 }}>
+                          • {tenantName}
+                        </div>
+                      ))}
+                    </div>
+                  }
+                  placement="topRight"
+                >
+                  <TeamOutlined 
+                    style={{ 
+                      color: '#1890ff', 
+                      fontSize: 14,
+                      cursor: 'pointer'
+                    }} 
+                  />
+                </Tooltip>
+              )}
+            </div>
             <Disposition
               placement={'topLeft'}
               maxWidth={breakpoints?.xxl ? 600 : 400}
@@ -368,12 +366,6 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
       render: (_, record) => {
         return obtainPlatformEasyIcon(record.platform!, platformList);
       },
-      fieldProps: {
-        onChange: (value: any) => {
-          formActionRef.current?.setFieldValue('resourceTypeList', null);
-          // TODO: 实现资源类型列表请求
-        },
-      },
     },
     {
       title: intl.formatMessage({
@@ -420,7 +412,10 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
                   title={intl.formatMessage({
                     id: 'common.button.text.delete.confirm',
                   })}
-                  onConfirm={() => onClickDelRule(record.id!)}
+                  onConfirm={(e) => {
+                    e?.stopPropagation();
+                    onClickDelRule(record.id!);
+                  }}
                   okText={intl.formatMessage({
                     id: 'common.button.text.ok',
                   })}
@@ -428,7 +423,13 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
                     id: 'common.button.text.cancel',
                   })}
                 >
-                  <Button block type="link" danger size={'small'}>
+                  <Button 
+                    block 
+                    type="link" 
+                    danger 
+                    size={'small'}
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {intl.formatMessage({
                       id: 'common.button.text.delete',
                     })}
@@ -438,7 +439,10 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
                 <Button
                   block
                   loading={copyLoading[Number(record.id)]}
-                  onClick={() => onClickCopyByRule(record.id!)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClickCopyByRule(record.id!);
+                  }}
                   type="link"
                   target={'_blank'}
                   size={'small'}
@@ -458,19 +462,33 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
           </Popover>
 
           {record.tenantSelected ? (
-            <Button
-              type="default"
-              size="small"
-              loading={removeLoading[Number(record.id)]}
-              onClick={(e) => {
-                e.stopPropagation();
+            <Popconfirm
+              title={intl.formatMessage({
+                id: 'rule.module.selected.rules.popconfirm.content',
+              })}
+              onConfirm={(e) => {
+                e?.stopPropagation();
                 onClickRemoveFromSelected(record);
               }}
-              icon={<MinusOutlined />}
-              danger
+              onCancel={(e) => e?.stopPropagation()}
+              okText={intl.formatMessage({
+                id: 'common.button.text.ok',
+              })}
+              cancelText={intl.formatMessage({
+                id: 'common.button.text.cancel',
+              })}
             >
+              <Button
+                type="default"
+                size="small"
+                loading={removeLoading[Number(record.id)]}
+                onClick={(e) => e.stopPropagation()}
+                icon={<MinusOutlined />}
+                danger
+              >
 
-            </Button>
+              </Button>
+            </Popconfirm>
           ) : (
             <Button
               type="primary"
@@ -518,13 +536,6 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
           onChange: (selectedRowKeys) => setSelectedRowKeys(selectedRowKeys),
           preserveSelectedRowKeys: true,
         }}
-        headerTitle={
-          <div className={styleType['customTitle']}>
-            <Space>
-              规则市场
-            </Space>
-          </div>
-        }
         actionRef={tableActionRef}
         formRef={formActionRef}
         rowClassName={activeRowType}
@@ -695,7 +706,6 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
         onRow={createTableRowConfig(handleRowClick)}
       />
         
-        {/* 规则详情抽屉 */}
         <RuleDetailDrawer
           visible={ruleDetailVisible}
           onClose={handleCloseRuleDetail}
