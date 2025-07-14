@@ -92,12 +92,14 @@ const RiskManagement: React.FC = () => {
   const searchParams: URLSearchParams = new URLSearchParams(search);
   // Risk level
   const riskLevelQuery = searchParams.get('riskLevel');
-  // platform
+  // Platform
   const platformQuery = searchParams.get('platform');
   // Rule Code
   const ruleCodeQuery = searchParams.get('ruleCode');
-  // Resource Id
+  // Resource ID
   const resourceIdQuery = searchParams.get('resourceId');
+  // Cloud Account ID
+  const cloudAccountIdQuery = searchParams.get('cloudAccountId');
   // Message Instance
   const [messageApi, contextHolder] = message.useMessage();
   // Table Action
@@ -183,7 +185,11 @@ const RiskManagement: React.FC = () => {
     if (!isEmpty(resourceIdQuery)) {
       formActionRef.current?.setFieldValue('resourceId', resourceIdQuery);
     }
-  }, [platformQuery, riskLevelQuery, ruleCodeQuery, resourceIdQuery]);
+    // Set cloud account ID from URL query parameter
+    if (!isEmpty(cloudAccountIdQuery)) {
+      formActionRef.current?.setFieldValue('cloudAccountId', cloudAccountIdQuery);
+    }
+  }, [platformQuery, riskLevelQuery, ruleCodeQuery, resourceIdQuery, cloudAccountIdQuery]);
 
   // Cloud account list data
   const {

@@ -9,10 +9,11 @@ import {
   IgnoreReasonTypeList,
   RiskStatusList,
 } from '@/pages/RiskManagement/const';
+import EditDrawerForm from '@/pages/RuleManagement/WhiteList/components/EditDrawerForm';
 import { queryRiskDetailById } from '@/services/risk/RiskController';
 import { IValueType } from '@/utils/const';
 import { obtainPlatformIcon, obtainRiskStatus } from '@/utils/shared';
-import { ProfileOutlined } from '@ant-design/icons';
+import { ProfileOutlined, EyeOutlined } from '@ant-design/icons';
 import { ActionType, ProCard } from '@ant-design/pro-components';
 import { useIntl, useModel, useRequest } from '@umijs/max';
 import {
@@ -53,6 +54,9 @@ const RiskDrawer: React.FC<IRiskDrawerProps> = (props) => {
     useState<boolean>(false);
   // Asset Details
   const [resourceDrawerVisible, setResourceDrawerVisible] =
+    useState<boolean>(false);
+  // Whitelist Details
+  const [whiteListDrawerVisible, setWhiteListDrawerVisible] =
     useState<boolean>(false);
 
   const initDrawer = (): void => {
@@ -166,6 +170,20 @@ const RiskDrawer: React.FC<IRiskDrawerProps> = (props) => {
                       maxWidth={64}
                     />
                   </>
+                )}
+                {/* Whitelist button - show only when risk is whitelisted */}
+                {riskInfo?.whitedId && (
+                    <Button
+                      type="link"
+                      size="small"
+                      icon={<EyeOutlined />}
+                      onClick={() => setWhiteListDrawerVisible(true)}
+                      style={{
+                        padding: '0 4px',
+                        height: 'auto',
+                        color: '#1890ff',
+                      }}
+                    />
                 )}
               </Space>
             </span>
@@ -334,6 +352,18 @@ const RiskDrawer: React.FC<IRiskDrawerProps> = (props) => {
         setResourceDrawerVisible={setResourceDrawerVisible}
         riskDrawerInfo={riskDrawerInfo}
       />
+
+      {/* Whitelist Details Drawer */}
+      {riskInfo?.whitedId && (
+        <EditDrawerForm
+          editDrawerVisible={whiteListDrawerVisible}
+          setEditDrawerVisible={setWhiteListDrawerVisible}
+          whiteListDrawerInfo={{
+            id: riskInfo.whitedId,
+            isEditMode: false, // Read-only mode for viewing whitelist details
+          }}
+        />
+      )}
     </>
   );
 };
