@@ -278,6 +278,23 @@ export async function queryAllRuleList(
   });
 }
 
+/** Query all tenant selected rule list interface: GET /api/rule/queryAllTenantSelectRuleList */
+export async function queryAllTenantSelectRuleList(
+  params?: { [key: string]: any },
+  options?: { [key: string]: any },
+) {
+  return request<API.Result>(`${BASE_URL}/api/rule/queryAllTenantSelectRuleList`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  });
+}
+
 /** Query rule group details interface: GET /api/ruleGroup/queryRuleGroupDetail */
 export async function queryRuleGroupDetail(
   params?: { id: number },

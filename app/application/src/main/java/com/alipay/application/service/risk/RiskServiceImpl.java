@@ -48,7 +48,6 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /*
@@ -99,7 +98,7 @@ public class RiskServiceImpl implements RiskService {
         }
 
         ruleScanResultDTO.setCloudAccountIdList(cloudAccount.queryCloudAccountIdList(ruleScanResultDTO.getCloudAccountId()));
-        ruleScanResultDTO.setTenantId(UserInfoContext.getCurrentUser().getTenantId());
+        ruleScanResultDTO.setTenantId(UserInfoContext.getCurrentUser().getUserTenantId());
 
         ListVO<RuleScanResultVO> listVO = new ListVO<>();
         int count = ruleScanResultMapper.findCount(ruleScanResultDTO);
@@ -245,6 +244,7 @@ public class RiskServiceImpl implements RiskService {
      */
     @Override
     public List<RuleStatisticsDTO> listRuleStatistics(RuleScanResultDTO ruleScanResultDTO) {
+        long tenantId = UserInfoContext.getCurrentUser().getUserTenantId();
         boolean needCache = false;
         String key = CacheUtil.buildKey(dbCacheKey_agg, UserInfoContext.getCurrentUser().getUserTenantId());
         if (judgeCacheCond(ruleScanResultDTO)) {
@@ -255,6 +255,7 @@ public class RiskServiceImpl implements RiskService {
                 });
             }
         }
+        ruleScanResultDTO.setTenantId(tenantId);
         if (ruleScanResultDTO.getCloudAccountId() != null) {
             ruleScanResultDTO.setCloudAccountIdList(cloudAccount.queryCloudAccountIdList(ruleScanResultDTO.getCloudAccountId()));
         }

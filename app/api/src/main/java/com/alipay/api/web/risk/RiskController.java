@@ -94,11 +94,8 @@ public class RiskController {
     @AuthenticateToken
     @PostMapping("/listRuleStatistics")
     public ApiResponse<List<RuleStatisticsDTO>> listRuleStatistics(@RequestBody QueryRiskRequest req) {
-        UserInfoDTO currentUser = UserInfoContext.getCurrentUser();
-
         RuleScanResultDTO dto = RuleScanResultDTO.builder().build();
         BeanUtils.copyProperties(req, dto);
-        dto.setTenantId(currentUser.getTenantId());
 
         dto.setResourceTypeList(ListUtils.setList(req.getResourceTypeList()));
         dto.setRuleTypeIdList(ListUtils.setList(req.getRuleTypeIdList()));

@@ -20,6 +20,7 @@ import {
   listRuleStatistics,
   queryRiskList,
 } from '@/services/risk/RiskController';
+import { queryAllTenantSelectRuleList } from '@/services/rule/RuleController';
 import { RangePresets, RiskLevelList } from '@/utils/const';
 import {
   BlobExportXLSXFn,
@@ -69,8 +70,23 @@ const RiskManagement: React.FC = () => {
   // Ant Design Provide monitoring of screen width changes
   const breakpoints: Partial<Record<Breakpoint, boolean>> = useBreakpoint();
   // Platform Rule Group List
-  const { platformList, ruleGroupList, ruleTypeList, allRuleList } =
-    useModel('rule');
+  const { platformList, ruleGroupList, ruleTypeList } = useModel('rule');
+  
+  // Tenant selected rule list data
+  const { data: tenantRuleList }: any = useRequest(
+    () => {
+      return queryAllTenantSelectRuleList({});
+    },
+    {
+      formatResult: (r: any) =>
+        r.content?.map((item: { [key: string]: any }) => ({
+          ...item,
+          key: item?.id,
+          label: item?.ruleName,
+          value: item?.ruleCode,
+        })) || [],
+    },
+  );
   // Query Data
   const { search } = useLocation();
   const searchParams: URLSearchParams = new URLSearchParams(search);
@@ -246,7 +262,7 @@ const RiskManagement: React.FC = () => {
     };
     setExportLoading(true);
     exportRiskList({ ...postBody }, { responseType: 'blob' })
-      .then((r) => {
+      .then((r: any) => {
         if (r.type === 'application/json') {
           const reader = new FileReader();
           reader.onload = () => {
@@ -257,10 +273,10 @@ const RiskManagement: React.FC = () => {
               messageApi.error(intl.formatMessage({ id: 'common.message.text.export.failed' }));
             }
           };
-          reader.readAsText(r);
+          reader.readAsText(r as Blob);
         } else {
           BlobExportXLSXFn(
-            r,
+            r as Blob,
             `CloudRec ${intl.formatMessage({
               id: 'risk.module.text.risk.data',
             })}`,
@@ -367,7 +383,7 @@ const RiskManagement: React.FC = () => {
       }),
       dataIndex: 'ruleCodeList',
       valueType: 'select',
-      valueEnum: valueListAsValueEnum(allRuleList),
+      valueEnum: valueListAsValueEnum(tenantRuleList),
       hideInTable: true,
       fieldProps: {
         mode: 'multiple',
@@ -837,16 +853,27 @@ const RiskManagement: React.FC = () => {
           onChange: (key) => {
             setStatus(key as string);
             formActionRef.current?.setFieldValue('ignoreReasonTypeList', []);
-            // Reset some filtering criteria
-            formActionRef.current?.resetFields();
-            form.setFieldValue('platformList', []);
-            form.setFieldValue('riskLevelList', null);
-            // @ts-ignore
-            tableActionRef.current?.reset();
-            // Trigger a re request for TableList
-            setFilterFactor({
+            
+            // Preserve current query conditions when switching status
+            const currentFormData = form.getFieldsValue();
+            const currentSearchData = formActionRef.current?.getFieldsValue() || {};
+            
+            // Only reset ignore reason type list for status-specific filtering
+            // Keep other filter conditions intact
+            const preservedFilters = {
+              ...filterFactor,
+              ...currentFormData,
+              ...currentSearchData,
               status: key,
-            });
+              ignoreReasonTypeList: [], // Reset only this field
+            };
+            
+            // Update filter factor with preserved conditions
+            setFilterFactor(preservedFilters);
+            
+            // Reload table with preserved filters
+            // @ts-ignore
+            tableActionRef.current?.reload();
           },
         }}
       />

@@ -512,10 +512,47 @@ public class RuleServiceImpl implements RuleService {
         return ApiResponse.SUCCESS;
     }
 
+    /**
+     * Query all tenant selected rule list with deduplication by rule code
+     * This method combines tenant-specific rules and global default rules,
+     * removes duplicates based on rule code, and filters only valid rules
+     * Optimized to avoid duplicate queries when current tenant is global tenant
+     * 
+     * @return List of RuleVO containing unique valid rules
+     */
     @Override
     public List<RuleVO> queryAllTenantSelectRuleList() {
-        List<RulePO> all = tenantRuleMapper.findAllList(UserInfoContext.getCurrentUser().getUserTenantId());
-        return all.stream().map(po -> {
+        Long currentTenantId = UserInfoContext.getCurrentUser().getUserTenantId();
+        Long globalTenantId = tenantRepository.findGlobalTenant().getId();
+        
+        // Use LinkedHashMap to maintain insertion order and deduplicate by ruleCode
+        Map<String, RulePO> ruleMap = new LinkedHashMap<>();
+        
+        // Check if current tenant is global tenant to avoid duplicate queries
+        if (currentTenantId.equals(globalTenantId)) {
+            // Current tenant is global tenant, only query once
+            List<RulePO> globalRuleList = tenantRuleMapper.findAllList(globalTenantId);
+            globalRuleList.stream()
+                .filter(rule -> Status.valid.name().equals(rule.getStatus()))
+                .forEach(rule -> ruleMap.put(rule.getRuleCode(), rule));
+        } else {
+            // Current tenant is not global tenant, query both tenant and global rules
+            List<RulePO> tenantSelectList = tenantRuleMapper.findAllList(currentTenantId);
+            List<RulePO> defaultRuleList = tenantRuleMapper.findAllList(globalTenantId);
+            
+            // Add tenant rules first (higher priority)
+            tenantSelectList.stream()
+                .filter(rule -> Status.valid.name().equals(rule.getStatus()))
+                .forEach(rule -> ruleMap.put(rule.getRuleCode(), rule));
+            
+            // Add default rules only if not already present
+            defaultRuleList.stream()
+                .filter(rule -> Status.valid.name().equals(rule.getStatus()))
+                .forEach(rule -> ruleMap.putIfAbsent(rule.getRuleCode(), rule));
+        }
+        
+        // Convert to RuleVO list
+        return ruleMap.values().stream().map(po -> {
             RuleVO ruleVO = new RuleVO();
             ruleVO.setRuleCode(po.getRuleCode());
             ruleVO.setRuleName(po.getRuleName());

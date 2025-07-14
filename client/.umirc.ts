@@ -36,7 +36,9 @@ export default defineConfig({
             headerColor: '#333',
             borderColor: '#FFF',
             rowHoverBg: '#FAFAFA',
-            rowSelectedBg: '#FAFAFA',
+            rowSelectedBg: '#F0F4FF',
+            fontSize: 14,
+            fontSizeIcon: 12,
           },
         },
       },
@@ -72,7 +74,7 @@ export default defineConfig({
   hash: true, // Enable file content hash
   proxy: {
     '/achieve': {
-      target: 'http://lcoalhost:8080',
+      target: 'http://local.dev.alipay.net:8080',
       changeOrigin: true,
       pathRewrite: { '^/achieve': '' },
     },
