@@ -353,7 +353,7 @@ public class ScanServiceImpl implements ScanService {
             // Loading rules to opa
             ruleScanContext.loadByRuleId(ruleId);
             // Loading whitedConfigs to opa
-            whitedConfigContext.loadEnableWhitedConfigs();
+            whitedConfigContext.refreshWhitedConfigs();
 
             // Query the account account with this asset to optimize the speed
             List<String> cloudAccountIdList = cloudResourceInstanceMapper.findAccountList(ruleAgg.getPlatform(),
@@ -370,8 +370,6 @@ public class ScanServiceImpl implements ScanService {
             // Determine whether the rules are selected by the global tenant
             boolean selectedByGlobalTenant = tenantRepository.isDefaultRule(ruleAgg.getRuleCode());
 
-            // Get all whitelist rules
-            whitedConfigContext.initWhitedConfigCache();
             for (CloudAccountPO cloudAccountPO : cloudAccountPOS) {
                 if (!cloudAccountIdList.contains(cloudAccountPO.getCloudAccountId())) {
                     // 20250416 bugfix：云账号对应的资产已经不存在，将风险状态更新为已解决

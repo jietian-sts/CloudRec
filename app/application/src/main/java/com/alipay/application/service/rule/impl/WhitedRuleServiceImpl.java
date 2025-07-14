@@ -195,7 +195,9 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
 
         UserRepository userRepository = SpringUtils.getApplicationContext().getBean(UserRepository.class);
         User user = userRepository.find(whitedRuleConfigPO.getCreator());
-        vo.setCreatorName(user.getUsername());
+        if (Objects.nonNull(user)) {
+            vo.setCreatorName(user.getUsername());
+        }
 
         boolean isLockHolder = false;
         if (currentUser.getUserId().equals(whitedRuleConfigPO.getLockHolder())) {

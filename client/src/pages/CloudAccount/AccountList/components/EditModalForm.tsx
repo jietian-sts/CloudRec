@@ -250,7 +250,6 @@ const EditDrawerForm: React.FC<IEditFormProps> = (props) => {
             name="tenantId"
             rules={FORM_VALIDATION_RULES.tenantId}
             options={tenantListAll}
-            disabled={accountInfo.id && !accountInfo?.changeTenantPermission}
           />
         </Col>
 

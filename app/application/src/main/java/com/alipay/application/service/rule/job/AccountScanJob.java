@@ -76,11 +76,15 @@ public class AccountScanJob {
         }
 
         // load whited config
-        whitedConfigContext.initWhitedConfigCache();
+        whitedConfigContext.refreshWhitedConfigs();
         try {
             long startTime = System.currentTimeMillis();
             log.info("scanByCloudAccountId start, cloudAccountId:{}, platform:{} start", cloudAccountId, cloudAccountPO.getPlatform());
             for (RuleAgg ruleAgg : ruleAggList) {
+                if (ruleAgg.getIsRunning() == 1) {
+                    log.info("scanByCloudAccountId skip, cloudAccountId:{}, platform:{}, ruleCode:{}", cloudAccountId, cloudAccountPO.getPlatform(), ruleAgg.getRuleCode());
+                    continue;
+                }
                 log.info("scanByCloudAccountId start, cloudAccountId:{}, platform:{}, ruleCode:{}", cloudAccountId, cloudAccountPO.getPlatform(), ruleAgg.getRuleCode());
                 scanService.scanByRule(ruleAgg, cloudAccountPO, tenantRepository.isDefaultRule(ruleAgg.getRuleCode()));
                 log.info("scanByCloudAccountId end, cloudAccountId:{}, platform:{}, ruleCode:{} end", cloudAccountId, cloudAccountPO.getPlatform(), ruleAgg.getRuleCode());
