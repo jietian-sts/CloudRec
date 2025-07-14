@@ -285,15 +285,26 @@
     </select>
 
 
+  <select id="listRuleStatistics" resultType="com.alipay.dao.dto.RuleStatisticsDTO">
+        SELECT
+        rsr.rule_id AS ruleId,r.rule_name AS ruleName,count(rsr.id) as count,r.rule_desc AS ruleDesc,r.risk_level AS
+        riskLevel
+        FROM rule_scan_result rsr INNER JOIN rule r on r.id = rsr.rule_id INNER JOIN tenant_rule tr on tr.rule_code = r.rule_code
+        <include refid="findListWhere"/>
+        GROUP BY r.id
+        HAVING count > 0
+        ORDER BY count DESC
+    </select>
+    
     <select id="findCount" resultType="java.lang.Integer">
         SELECT COUNT(*)
-        FROM rule_scan_result rsr INNER JOIN rule r on r.id = rsr.rule_id INNER JOIN tenant_rule tr on tr.rule_code = r.rule_code
+        FROM rule_scan_result rsr INNER JOIN rule r on r.id = rsr.rule_id
         <include refid="findListWhere"></include>
     </select>
     <select id="findList" resultMap="ResultMapWithBLOBs">
         SELECT
         rsr.*
-        FROM rule_scan_result rsr INNER JOIN rule r on r.id = rsr.rule_id INNER JOIN tenant_rule tr on tr.rule_code = r.rule_code
+        FROM rule_scan_result rsr INNER JOIN rule r on r.id = rsr.rule_id
         <include refid="findListWhere"></include>
         ORDER BY rsr.id DESC
         <include refid="com.alipay.dao.mapper.RuleMapper.getListLimit"></include>
@@ -441,7 +452,7 @@
                 AND rsr.region = #{region,jdbcType=VARCHAR}
             </if>
             <if test="tenantId != null">
-                AND rsr.tenant_id = #{tenantId,jdbcType=BIGINT} AND tr.tenant_id = #{tenantId,jdbcType=BIGINT}
+                AND rsr.tenant_id = #{tenantId,jdbcType=BIGINT}
             </if>
             <if test="status != null and status != ''">
                 AND rsr.status = #{status,jdbcType=VARCHAR}
@@ -621,16 +632,6 @@
 
     </update>
 
-    <select id="listRuleStatistics" resultType="com.alipay.dao.dto.RuleStatisticsDTO">
-        SELECT
-        rsr.rule_id AS ruleId,r.rule_name AS ruleName,count(rsr.id) as count,r.rule_desc AS ruleDesc,r.risk_level AS
-        riskLevel
-        FROM rule_scan_result rsr INNER JOIN rule r on r.id = rsr.rule_id INNER JOIN tenant_rule tr on tr.rule_code = r.rule_code
-        <include refid="findListWhere"/>
-        GROUP BY r.id
-        HAVING count > 0
-        ORDER BY count DESC
-    </select>
     <select id="findBaseInfoWithScrollId" resultMap="ResultMapWithBLOBs">
         SELECT
         id, gmt_create, gmt_modified, rule_id, cloud_account_id, resource_id, resource_name,

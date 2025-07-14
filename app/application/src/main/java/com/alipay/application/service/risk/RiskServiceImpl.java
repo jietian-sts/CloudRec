@@ -98,7 +98,7 @@ public class RiskServiceImpl implements RiskService {
         }
 
         ruleScanResultDTO.setCloudAccountIdList(cloudAccount.queryCloudAccountIdList(ruleScanResultDTO.getCloudAccountId()));
-        ruleScanResultDTO.setTenantId(UserInfoContext.getCurrentUser().getUserTenantId());
+        ruleScanResultDTO.setTenantId(UserInfoContext.getCurrentUser().getTenantId());
 
         ListVO<RuleScanResultVO> listVO = new ListVO<>();
         int count = ruleScanResultMapper.findCount(ruleScanResultDTO);
