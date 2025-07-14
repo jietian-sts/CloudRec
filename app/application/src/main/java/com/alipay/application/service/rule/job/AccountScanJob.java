@@ -66,17 +66,19 @@ public class AccountScanJob {
 
         // load rule form cache
         List<RuleAgg> ruleAggList;
-        List<RuleAgg> cacheRuleAggList = ruleCache.getIfPresent(cloudAccountPO.getPlatform());
-        if (!CollectionUtils.isEmpty(cacheRuleAggList)) {
-            ruleAggList = cacheRuleAggList;
-        } else {
-            // load rule from db
-            ruleAggList = ruleRepository.findAll(cloudAccountPO.getPlatform());
-            ruleCache.put(cloudAccountPO.getPlatform(), ruleAggList);
+        synchronized (this) {
+            List<RuleAgg> cacheRuleAggList = ruleCache.getIfPresent(cloudAccountPO.getPlatform());
+            if (!CollectionUtils.isEmpty(cacheRuleAggList)) {
+                ruleAggList = cacheRuleAggList;
+            } else {
+                // load rule from db
+                ruleAggList = ruleRepository.findAll(cloudAccountPO.getPlatform());
+                ruleCache.put(cloudAccountPO.getPlatform(), ruleAggList);
+                // load whited config
+                whitedConfigContext.refreshWhitedConfigs();
+            }
         }
 
-        // load whited config
-        whitedConfigContext.refreshWhitedConfigs();
         try {
             long startTime = System.currentTimeMillis();
             log.info("scanByCloudAccountId start, cloudAccountId:{}, platform:{} start", cloudAccountId, cloudAccountPO.getPlatform());
@@ -94,9 +96,7 @@ public class AccountScanJob {
             log.error("scanByCloudAccountId error, cloudAccountId:{}", cloudAccountId, e);
         } finally {
             // clear whited config cache
-            if (Thread.currentThread().isAlive()) {
-                whitedConfigContext.clear();
-            }
+            whitedConfigContext.clear();
         }
     }
 }
