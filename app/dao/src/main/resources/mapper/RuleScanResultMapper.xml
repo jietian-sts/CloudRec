@@ -559,6 +559,12 @@
             <if test="status != null and status != ''">
                 AND status = #{status}
             </if>
+            <if test="statusList != null and statusList.size() > 0">
+                AND status IN
+                <foreach collection="statusList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
             <if test="tenantId != null">
                 AND tenant_id = #{tenantId}
             </if>

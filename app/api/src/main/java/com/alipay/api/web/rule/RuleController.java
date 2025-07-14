@@ -291,7 +291,7 @@ public class RuleController {
         if (result.hasErrors()) {
             return new ApiResponse<>(result);
         }
-        return ruleService.addTenantSelectRule(req);
+        return ruleService.addTenantSelectRule(req.getRuleCode());
     }
 
     /**
@@ -317,6 +317,20 @@ public class RuleController {
         }
         return ruleService.batchDeleteTenantSelectRule(req.getRuleCodeList());
     }
+
+    /**
+     * Batch delete tenant select rule interface
+     */
+    @AuthenticateToken
+    @PostMapping("/batchAddTenantSelectRule")
+    public ApiResponse<String> batchAddTenantSelectRule(HttpServletRequest request, @Validated @RequestBody BatchAddTenantSelectRuleRequest req, BindingResult result) {
+        if (result.hasErrors()) {
+            return new ApiResponse<>(result);
+        }
+        return ruleService.batchAddTenantSelectRule(req.getRuleCodeList());
+    }
+
+
 
     /**
      * 查询租户已自选规则名称列表

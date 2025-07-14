@@ -13,6 +13,7 @@ import {
   changeRuleStatus,
   addTenantSelectRule,
   removeTenantSelectRule,
+  batchAddTenantSelectRule,
 } from '@/services/rule/RuleController';
 import RuleDetailDrawer from './RuleDetailDrawer';
 import { RiskLevelList } from '@/utils/const';
@@ -115,6 +116,8 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
   const [syncLoading, setSyncLoading] = useState<boolean>(false);
   // Export Loading
   const [exportLoading, setExportLoading] = useState<boolean>(false);
+  // Batch Add to Selected Loading
+  const [batchAddLoading, setBatchAddLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (queryTrigger !== undefined && queryTrigger > 0) {
@@ -204,6 +207,38 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
       messageApi.error(intl.formatMessage({ id: 'common.message.text.failed' }));
     } finally {
       setRemoveLoading({ ...removeLoading, [id]: false });
+    }
+  };
+
+  /**
+   * Batch add selected rules to tenant
+   * @param selectedRowKeys - Array of selected rule IDs
+   */
+  const onClickBatchAddToSelected = async (): Promise<void> => {
+    setBatchAddLoading(true);
+    try {
+      // Get rule codes from selected rows
+      const selectedRules = allRuleList?.filter((rule: API.RuleProjectInfo) => 
+        selectedRowKeys.includes(rule.id!)
+      );
+      const ruleCodeList = selectedRules?.map((rule: API.RuleProjectInfo) => rule.ruleCode!) || [];
+
+      if (ruleCodeList.length === 0) {
+        messageApi.warning(intl.formatMessage({ id: 'common.message.text.no.valid.data' }));
+        return;
+      }
+
+      const result = await batchAddTenantSelectRule({ ruleCodeList });
+      
+      if (result.code === 200 || result.msg === 'success') {
+        messageApi.success(intl.formatMessage({ id: 'common.message.text.success' }));
+        tableActionRef.current?.reloadAndRest?.();
+        setSelectedRowKeys([]);
+      }
+    } catch (error) {
+      messageApi.error(intl.formatMessage({ id: 'common.message.text.failed' }));
+    } finally {
+      setBatchAddLoading(false);
     }
   };
 
@@ -542,6 +577,15 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
         rowKey="id"
         search={false}
         toolBarRender={() => [
+          <Button
+            key="CREATE"
+            type="primary"
+            href={'/ruleManagement/ruleProject/edit'}
+          >
+            {intl.formatMessage({
+              id: 'rule.extend.basic.add',
+            })}
+          </Button>,
           <Popover
             key="sync"
             open={popoverVisible}
@@ -553,7 +597,7 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
               <Space>
                 <Button
                   danger
-                  type="primary"
+                  type="default"
                   loading={syncLoading}
                   onClick={async () => {
                     setSyncLoading(true);
@@ -581,7 +625,7 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
                   })}
                 </Button>
                 <Button
-                  type="primary"
+                  type="default"
                   loading={syncLoading}
                   onClick={async () => {
                     setSyncLoading(true);
@@ -622,7 +666,7 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
             trigger="click"
           >
             <div style={{ position: 'relative', display: 'inline-block' }}>
-              <Button type="primary">
+              <Button type="default">
                 {intl.formatMessage({
                   id: 'rule.module.text.sync.button',
                 })}
@@ -652,18 +696,21 @@ const RuleMarket: React.FC<RuleMarketProps> = ({
             </div>
           </Popover>,
           <Button
-            key="CREATE"
-            type="primary"
-            href={'/ruleManagement/ruleProject/edit'}
+            key="BATCH_ADD_TO_FAVORITES"
+            type="default"
+            loading={batchAddLoading}
+            disabled={selectedRowKeys.length === 0}
+            onClick={onClickBatchAddToSelected}
           >
             {intl.formatMessage({
-              id: 'rule.extend.basic.add',
+              id: 'rule.module.text.batch.add.to.favorites',
             })}
           </Button>,
           <Button
             loading={exportLoading}
             key="EXPORT"
-            type="primary"
+            type="default"
+            disabled={selectedRowKeys.length === 0}
             onClick={() => onClickExportRuleList(selectedRowKeys)}
           >
             {intl.formatMessage({

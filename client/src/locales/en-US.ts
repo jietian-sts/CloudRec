@@ -318,6 +318,7 @@ export default {
     'module.selected.rules.popconfirm.content':'The risk data generated under the current tenant will be deleted. Are you sure you want to remove the self-selected rules?',
     'module.text.batch.test':'Batch test',
     'module.text.batch.remove':'Batch remove',
+    'module.text.batch.add.to.favorites':'Batch Add to Favorites',
   },
   risk: {
     'module.text.not.fixed': 'Not fixed',

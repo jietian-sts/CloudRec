@@ -17,7 +17,9 @@
 package com.alipay.application.service.rule;
 
 import com.alipay.application.share.request.base.IdRequest;
-import com.alipay.application.share.request.rule.*;
+import com.alipay.application.share.request.rule.ChangeStatusRequest;
+import com.alipay.application.share.request.rule.ListRuleRequest;
+import com.alipay.application.share.request.rule.SaveRuleRequest;
 import com.alipay.application.share.vo.ApiResponse;
 import com.alipay.application.share.vo.ListVO;
 import com.alipay.application.share.vo.rule.RuleTypeVO;
@@ -68,11 +70,13 @@ public interface RuleService {
 
     List<RuleVO> queryAllRuleList();
 
-    ApiResponse<String> addTenantSelectRule(AddTenantSelectRuleRequest req);
+    ApiResponse<String> addTenantSelectRule(String ruleCode);
 
     ApiResponse<String> deleteTenantSelectRule(String ruleCode);
 
     ApiResponse<String> batchDeleteTenantSelectRule(List<String> ruleCodeList);
 
     List<RuleVO> queryAllTenantSelectRuleList();
+
+    ApiResponse<String> batchAddTenantSelectRule(List<String> ruleCodeList);
 }

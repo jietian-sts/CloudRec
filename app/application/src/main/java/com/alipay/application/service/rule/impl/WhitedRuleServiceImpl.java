@@ -59,7 +59,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -303,6 +302,7 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
         //获取当前租户下的风险数据
         QueryScanResultDTO queryScanResultDTO = new QueryScanResultDTO();
         queryScanResultDTO.setTenantId(UserInfoContext.getCurrentUser().getTenantId());
+        queryScanResultDTO.setStatusList(Arrays.asList(RiskStatusManager.RiskStatus.UNREPAIRED.name(), RiskStatusManager.RiskStatus.WHITED.name()));
         queryScanResultDTO.setLimit(100);
 
         String scrollId = null;
@@ -315,7 +315,7 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
             }
             queryScanResultDTO.setRuleId(rulePO.getId());
         }
-        List<RuleScanResultPO> listWithScrollId = new ArrayList<>();
+        List<RuleScanResultPO> listWithScrollId;
         while (true) {
             queryScanResultDTO.setScrollId(scrollId);
             listWithScrollId = ruleScanResultMapper.findListWithScrollId(queryScanResultDTO);
@@ -348,12 +348,10 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
             }
         }
 
-        TestRunWhitedRuleResultDTO resultDTO = TestRunWhitedRuleResultDTO.builder()
+        return TestRunWhitedRuleResultDTO.builder()
                 .count(count)
                 .ruleScanResultList(preWhitedList)
                 .build();
-
-        return resultDTO;
     }
 
     @Override
@@ -417,37 +415,37 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
         return saveWhitedRuleRequestDTO;
     }
 
-    private TestRunWhitedRuleResultDTO runRegoWithInput(TestRunWhitedRuleRequestDTO dto) {
-        //rego模式下且选择了风险规则
-        if (dto.getRuleType().equals(WhitedRuleTypeEnum.REGO.name()) && !StringUtils.isEmpty(dto.getRiskRuleCode())) {
-
-            RuleScanResultDTO ruleScanResultDTO = RuleScanResultDTO.builder()
-                    .status(RiskStatusManager.RiskStatus.UNREPAIRED.name())
-                    .ruleCodeList(Collections.singletonList(dto.getRiskRuleCode()))
-                    .build();
-
-            List<RuleScanResultPO> ruleScanResultList = ruleScanResultMapper.findList(ruleScanResultDTO);
-            RuleScanResultPO ruleScanResultPO = null;
-            if (!CollectionUtils.isEmpty(ruleScanResultList)) {
-                ruleScanResultPO = ruleScanResultList.get(0);
-            }
-            WhitedScanInputDataDTO whitedExampleDataResultDTO = JSON.parseObject(dto.getInput(), WhitedScanInputDataDTO.class);
-
-            // 无示例数据的情况
-            if (!areAllFieldsNull(whitedExampleDataResultDTO)) {
-                boolean scanResult = executeRegoScan(dto, whitedExampleDataResultDTO);
-                if (scanResult) {
-                    return TestRunWhitedRuleResultDTO.builder()
-                            .count(1)
-                            .ruleScanResultList(Collections.singletonList(ruleScanResultPO))
-                            .build();
-                }
-            }
-        }
-        return TestRunWhitedRuleResultDTO.builder()
-                .count(0)
-                .build();
-    }
+//    private TestRunWhitedRuleResultDTO runRegoWithInput(TestRunWhitedRuleRequestDTO dto) {
+//        //rego模式下且选择了风险规则
+//        if (dto.getRuleType().equals(WhitedRuleTypeEnum.REGO.name()) && !StringUtils.isEmpty(dto.getRiskRuleCode())) {
+//
+//            RuleScanResultDTO ruleScanResultDTO = RuleScanResultDTO.builder()
+//                    .status(RiskStatusManager.RiskStatus.UNREPAIRED.name())
+//                    .ruleCodeList(Collections.singletonList(dto.getRiskRuleCode()))
+//                    .build();
+//
+//            List<RuleScanResultPO> ruleScanResultList = ruleScanResultMapper.findList(ruleScanResultDTO);
+//            RuleScanResultPO ruleScanResultPO = null;
+//            if (!CollectionUtils.isEmpty(ruleScanResultList)) {
+//                ruleScanResultPO = ruleScanResultList.get(0);
+//            }
+//            WhitedScanInputDataDTO whitedExampleDataResultDTO = JSON.parseObject(dto.getInput(), WhitedScanInputDataDTO.class);
+//
+//            // 无示例数据的情况
+//            if (!areAllFieldsNull(whitedExampleDataResultDTO)) {
+//                boolean scanResult = executeRegoScan(dto, whitedExampleDataResultDTO);
+//                if (scanResult) {
+//                    return TestRunWhitedRuleResultDTO.builder()
+//                            .count(1)
+//                            .ruleScanResultList(Collections.singletonList(ruleScanResultPO))
+//                            .build();
+//                }
+//            }
+//        }
+//        return TestRunWhitedRuleResultDTO.builder()
+//                .count(0)
+//                .build();
+//    }
 
     private void testRunParamCheck(TestRunWhitedRuleRequestDTO dto) {
         if (WhitedRuleTypeEnum.REGO.name().equals(dto.getRuleType()) && StringUtils.isEmpty(dto.getRegoContent())) {
@@ -536,39 +534,39 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
         return whitedRegoMatcher.executeRegoMatch(dto.getRegoContent(), null, ruleScanResultPO, cloudAccountPO, null);
     }
 
-    /**
-     * REGO规则引擎扫描器执行-
-     *
-     * @param dto
-     * @param whitedScanInputDataDTO
-     * @return
-     */
-    private boolean executeRegoScan(TestRunWhitedRuleRequestDTO dto, WhitedScanInputDataDTO whitedScanInputDataDTO) {
-        return whitedRegoMatcher.executeRegoMatch(dto.getRegoContent(), null, whitedScanInputDataDTO);
-    }
+//    /**
+//     * REGO规则引擎扫描器执行-
+//     *
+//     * @param dto
+//     * @param whitedScanInputDataDTO
+//     * @return
+//     */
+//    private boolean executeRegoScan(TestRunWhitedRuleRequestDTO dto, WhitedScanInputDataDTO whitedScanInputDataDTO) {
+//        return whitedRegoMatcher.executeRegoMatch(dto.getRegoContent(), null, whitedScanInputDataDTO);
+//    }
 
 
-    public static boolean areAllFieldsNull(WhitedScanInputDataDTO whitedScanInputDataDTO) {
-        if (whitedScanInputDataDTO == null) {
-            return true;
-        }
-        // 遍历所有字段
-        for (Field field : whitedScanInputDataDTO.getClass().getDeclaredFields()) {
-            field.setAccessible(true);
-            try {
-                Object value = field.get(whitedScanInputDataDTO);
-                if (value != null) {
-                    if (value instanceof String && !((String) value).trim().isEmpty()) {
-                        return false;
-                    } else if (!(value instanceof String)) {
-                        return false;
-                    }
-                }
-            } catch (IllegalAccessException e) {
-                log.error("areAllFieldsNull error", e);
-            }
-        }
-
-        return true;
-    }
+//    public static boolean areAllFieldsNull(WhitedScanInputDataDTO whitedScanInputDataDTO) {
+//        if (whitedScanInputDataDTO == null) {
+//            return true;
+//        }
+//        // 遍历所有字段
+//        for (Field field : whitedScanInputDataDTO.getClass().getDeclaredFields()) {
+//            field.setAccessible(true);
+//            try {
+//                Object value = field.get(whitedScanInputDataDTO);
+//                if (value != null) {
+//                    if (value instanceof String && !((String) value).trim().isEmpty()) {
+//                        return false;
+//                    } else if (!(value instanceof String)) {
+//                        return false;
+//                    }
+//                }
+//            } catch (IllegalAccessException e) {
+//                log.error("areAllFieldsNull error", e);
+//            }
+//        }
+//
+//        return true;
+//    }
 }

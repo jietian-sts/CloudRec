@@ -574,3 +574,18 @@ export async function batchDeleteTenantSelectRule(
     ...(options || {}),
   });
 }
+
+/** 批量添加自选规则: POST /api/rule/batchAddTenantSelectRule */
+export async function batchAddTenantSelectRule(
+  body?: { ruleCodeList: string[] },
+  options?: { [key: string]: any },
+) {
+  return request<API.Result_String_>(`${BASE_URL}/api/rule/batchAddTenantSelectRule`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}

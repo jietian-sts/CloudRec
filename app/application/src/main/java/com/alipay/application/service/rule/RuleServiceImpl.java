@@ -32,7 +32,10 @@ import com.alipay.application.service.rule.enums.RuleType;
 import com.alipay.application.service.rule.exposed.GroupJoinService;
 import com.alipay.application.service.system.domain.repo.TenantRepository;
 import com.alipay.application.share.request.base.IdRequest;
-import com.alipay.application.share.request.rule.*;
+import com.alipay.application.share.request.rule.ChangeStatusRequest;
+import com.alipay.application.share.request.rule.ListRuleRequest;
+import com.alipay.application.share.request.rule.RegoRequest;
+import com.alipay.application.share.request.rule.SaveRuleRequest;
 import com.alipay.application.share.vo.ApiResponse;
 import com.alipay.application.share.vo.ListVO;
 import com.alipay.application.share.vo.rule.RuleTypeVO;
@@ -441,8 +444,8 @@ public class RuleServiceImpl implements RuleService {
     }
 
     @Override
-    public synchronized ApiResponse<String> addTenantSelectRule(AddTenantSelectRuleRequest req) {
-        RulePO rulePO = ruleMapper.findOne(req.getRuleCode());
+    public synchronized ApiResponse<String> addTenantSelectRule(String ruleCode) {
+        RulePO rulePO = ruleMapper.findOne(ruleCode);
         if (rulePO == null) {
             return new ApiResponse<>(ApiResponse.FAIL_CODE, "The rules do not exist");
         }
@@ -452,17 +455,17 @@ public class RuleServiceImpl implements RuleService {
         }
 
         Long tenantId = UserInfoContext.getCurrentUser().getUserTenantId();
-        TenantRulePO tenantRulePO = tenantRuleMapper.findOne(tenantId, req.getRuleCode());
+        TenantRulePO tenantRulePO = tenantRuleMapper.findOne(tenantId, ruleCode);
         if (tenantRulePO != null) {
             return new ApiResponse<>(ApiResponse.FAIL_CODE, "The rules have been added to the optional list");
         }
 
         tenantRulePO = new TenantRulePO();
         tenantRulePO.setTenantId(tenantId);
-        tenantRulePO.setRuleCode(req.getRuleCode());
+        tenantRulePO.setRuleCode(ruleCode);
         tenantRuleMapper.insertSelective(tenantRulePO);
 
-        log.info("user:{}, addTenantSelectRule, req:{}", UserInfoContext.getCurrentUser(), req);
+        log.info("user:{}, addTenantSelectRule, ruleCode:{}", UserInfoContext.getCurrentUser(), ruleCode);
 
         dbCacheUtil.clear(tenantSelectRuleCacheKey);
         dbCacheUtil.clear(ruleMarketCacheKey);
@@ -495,6 +498,15 @@ public class RuleServiceImpl implements RuleService {
     public ApiResponse<String> batchDeleteTenantSelectRule(List<String> ruleCodeList) {
         for (String ruleCode : ruleCodeList) {
             deleteTenantSelectRule(ruleCode);
+        }
+
+        return ApiResponse.SUCCESS;
+    }
+
+    @Override
+    public ApiResponse<String> batchAddTenantSelectRule(List<String> ruleCodeList) {
+        for (String ruleCode : ruleCodeList) {
+            addTenantSelectRule(ruleCode);
         }
 
         return ApiResponse.SUCCESS;

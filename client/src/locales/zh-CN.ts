@@ -10,7 +10,7 @@ export default {
     'button.text.close': '关闭',
     'button.text.add': '添加',
     'button.text.test': '立即检测',
-    'button.text.export': '导出列表',
+    'button.text.export': '批量导出',
     'button.text.white': '加白',
     'button.text.ignore': '忽略',
     'button.text.cancelIgnore': '取消忽略',
@@ -315,6 +315,7 @@ export default {
     'module.selected.rules.popconfirm.content':'将删除当前租户下已生成的风险数据，确定要移出自选规则吗?',
     'module.text.batch.test':'批量检测',
     'module.text.batch.remove':'批量移出自选',
+    'module.text.batch.add.to.favorites':'批量自选',
   },
   risk: {
     'module.text.not.fixed': '未修复',

@@ -47,7 +47,11 @@ const WhiteList: React.FC = () => {
     }
   };
 
-
+// Edit white list
+  const onClickEditWhiteList = (record: API.BaseWhiteListRuleInfo) => {
+    setEditDrawerVisible(true);
+    whiteListInfoRef.current = record;
+  };
 
   // View white list (根据锁状态决定模式)
   const onClickViewWhiteList = (record: API.BaseWhiteListRuleInfo) => {
@@ -296,6 +300,15 @@ const WhiteList: React.FC = () => {
           };
         }}
         toolBarRender={() => [
+          <Button
+            key="create"
+            type="primary"
+            onClick={() => onClickEditWhiteList({})}
+          >
+            {intl.formatMessage({
+              id: 'rule.module.text.createWhiteList',
+            })}
+          </Button>,
         ]}
         columns={columns}
         pagination={{
