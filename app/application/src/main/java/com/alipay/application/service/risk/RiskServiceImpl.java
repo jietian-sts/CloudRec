@@ -174,12 +174,13 @@ public class RiskServiceImpl implements RiskService {
         RuleScanResultPO ruleScanResultPO = ruleScanResultMapper.selectByPrimaryKey(riskId);
 
         if (ruleScanResultPO == null) {
-            throw new BizException(BizErrorCodeEnum.FORBIDDEN, "Risk ID not found");
+            throw new BizException(BizErrorCodeEnum.FORBIDDEN, "The risk not found");
         }
 
         Long tenantId = UserInfoContext.getCurrentUser().getTenantId();
+        //  Global tenants do not continue to judge
         if (tenantId == null) {
-            throw new BizException(BizErrorCodeEnum.FORBIDDEN, "Please log in first");
+            return ruleScanResultPO;
         }
 
         // If the tenant ID does not match, an exception is thrown
