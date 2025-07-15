@@ -281,6 +281,7 @@
             1=1
             <if test="cloudAccountId != null and cloudAccountId != ''">
                 AND (cloud_account_id LIKE CONCAT('%',#{cloudAccountId},'%')
+                OR email LIKE CONCAT('%',#{cloudAccountId},'%')
                 OR alias LIKE CONCAT('%',#{cloudAccountId},'%'))
             </if>
             <if test="cloudAccountSearch != null and cloudAccountSearch != ''">
