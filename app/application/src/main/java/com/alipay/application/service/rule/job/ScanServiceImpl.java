@@ -523,7 +523,6 @@ public class ScanServiceImpl implements ScanService {
         ruleScanResultPO.setVersion(version);
         ruleScanResultPO.setRuleId(ruleId);
         ruleScanResultPO.setCloudAccountId(resourceInstance.getCloudAccountId());
-        ruleScanResultPO.setTenantId(resourceInstance.getTenantId());
         ruleScanResultPO.setPlatform(resourceInstance.getPlatform());
         ruleScanResultPO.setResourceType(resourceInstance.getResourceType());
         ruleScanResultPO.setResourceId(resourceInstance.getResourceId());

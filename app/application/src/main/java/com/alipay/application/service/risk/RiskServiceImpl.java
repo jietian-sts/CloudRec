@@ -246,9 +246,10 @@ public class RiskServiceImpl implements RiskService {
      */
     @Override
     public List<RuleStatisticsDTO> listRuleStatistics(RuleScanResultDTO ruleScanResultDTO) {
-        long tenantId = UserInfoContext.getCurrentUser().getUserTenantId();
+        // When the global tenant is in, the ID is null, which means that all
+        Long tenantId = UserInfoContext.getCurrentUser().getTenantId();
         boolean needCache = false;
-        String key = CacheUtil.buildKey(dbCacheKey_agg, UserInfoContext.getCurrentUser().getUserTenantId());
+        String key = CacheUtil.buildKey(dbCacheKey_agg, tenantId);
         if (judgeCacheCond(ruleScanResultDTO)) {
             needCache = true;
             DbCachePO dbCachePO = dbCacheUtil.get(key);

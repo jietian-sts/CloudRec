@@ -286,15 +286,17 @@
 
 
   <select id="listRuleStatistics" resultType="com.alipay.dao.dto.RuleStatisticsDTO">
-        SELECT
-        rsr.rule_id AS ruleId,r.rule_name AS ruleName,count(rsr.id) as count,r.rule_desc AS ruleDesc,r.risk_level AS
-        riskLevel
-        FROM rule_scan_result rsr INNER JOIN rule r on r.id = rsr.rule_id INNER JOIN tenant_rule tr on tr.rule_code = r.rule_code
-        <include refid="findListWhere"/>
-        GROUP BY r.id
-        HAVING count > 0
-        ORDER BY count DESC
-    </select>
+      SELECT
+      rsr.rule_id AS ruleId,r.rule_name AS ruleName,count(rsr.id) as count,r.rule_desc AS ruleDesc,r.risk_level AS
+      riskLevel
+      FROM rule_scan_result rsr
+      INNER JOIN rule r on r.id = rsr.rule_id
+      INNER JOIN ( SELECT DISTINCT rule_code FROM tenant_rule ) tr on tr.rule_code = r.rule_code
+      <include refid="findListWhere"/>
+      GROUP BY r.id
+      HAVING count > 0
+      ORDER BY count DESC
+  </select>
     
     <select id="findCount" resultType="java.lang.Integer">
         SELECT COUNT(*)
