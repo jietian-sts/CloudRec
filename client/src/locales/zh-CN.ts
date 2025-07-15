@@ -10,6 +10,7 @@ export default {
     'button.text.close': '关闭',
     'button.text.add': '添加',
     'button.text.test': '立即检测',
+    'button.text.running': '运行中',
     'button.text.export': '批量导出',
     'button.text.white': '加白',
     'button.text.ignore': '忽略',
@@ -21,6 +22,7 @@ export default {
     'button.text.cancel': '取消',
     'button.text.ok': '确定',
     'button.text.copy': '拷贝',
+    'button.text.share': '分享',
     'button.text.return': '返回',
     'button.text.pre': '上一步',
     'button.text.next': '下一步',
@@ -82,6 +84,7 @@ export default {
     'message.text.batch.add.success': '批量添加成功',
     'message.text.copy.loading': '拷贝中...',
     'message.text.copy.success': '拷贝成功',
+    'message.text.copy.failed': '拷贝失败',
     'message.text.export.success': '导出成功',
     'message.text.export.failed': '导出失败',
     'message.text.success':'操作成功',
@@ -89,6 +92,8 @@ export default {
     'module.text.all':'全部',
     'module.text.selected':'自选',
     'module.text.default':'默认',
+    'message.text.no.permission.title':'无权限',
+    'message.text.no.permission.subtitle':'暂无权限'
   },
   layout: {
     'routes.title.home': '指标大盘',

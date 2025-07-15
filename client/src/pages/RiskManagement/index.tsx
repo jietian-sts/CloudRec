@@ -12,6 +12,7 @@ import {
   RiskStatusList,
 } from '@/pages/RiskManagement/const';
 import EditDrawerForm from '@/pages/RuleManagement/WhiteList/components/EditDrawerForm';
+import RuleDetailDrawer from '@/pages/RuleManagement/RuleProject/components/RuleDetailDrawer';
 import { cloudAccountBaseInfoList } from '@/services/account/AccountController';
 import { queryGroupTypeList } from '@/services/resource/ResourceController';
 import {
@@ -57,6 +58,7 @@ import {
   Select,
   Spin,
   Tag,
+  Typography,
   message,
 } from 'antd';
 import { debounce, isEmpty } from 'lodash';
@@ -123,6 +125,10 @@ const RiskManagement: React.FC = () => {
   // White List Drawer Visible
   const [editWhiteDrawerVisible, setEditWhiteDrawerVisible] =
     useState<boolean>(false);
+  // Rule Detail Drawer Visible
+  const [ruleDetailDrawerVisible, setRuleDetailDrawerVisible] = useState<boolean>(false);
+  // Rule Detail Info
+  const [ruleDetailInfo, setRuleDetailInfo] = useState<{ ruleId?: number; ruleCode?: string }>({});
   // Filter Factor
   const [filterFactor, setFilterFactor] = useState({});
   // Risk status
@@ -360,6 +366,13 @@ const RiskManagement: React.FC = () => {
       align: 'left',
       hideInSearch: true,
       render: (_, record: API.BaseRiskResultInfo) => {
+        const handleRuleNameClick = () => {
+          if (record?.ruleVO?.id) {
+            setRuleDetailInfo({ ruleId: record.ruleVO.id, ruleCode: record.ruleId?.toString() });
+            setRuleDetailDrawerVisible(true);
+          }
+        };
+
         return (
           <Flex align={'center'}>
             <img
@@ -367,17 +380,20 @@ const RiskManagement: React.FC = () => {
               alt="RESOURCE_ICON"
               style={{ width: 18, height: 18 }}
             />
-            <Disposition
-              text={record?.ruleVO?.ruleName || '-'}
-              maxWidth={breakpoints?.xxl ? 280 : 240}
-              rows={1}
+            <Typography.Text
+              copyable={record?.ruleVO?.ruleName ? { text: record.ruleVO.ruleName } : false}
               style={{
-                color: '#333',
+                color: record?.ruleVO?.id ? '#1890ff' : '#333',
                 fontSize: 14,
                 marginLeft: 8,
+                maxWidth: breakpoints?.xxl ? 280 : 240,
+                cursor: record?.ruleVO?.id ? 'pointer' : 'default',
               }}
-              placement={'topLeft'}
-            />
+              ellipsis={{ tooltip: record?.ruleVO?.ruleName || '-' }}
+              onClick={record?.ruleVO?.id ? handleRuleNameClick : undefined}
+            >
+              {record?.ruleVO?.ruleName || '-'}
+            </Typography.Text>
           </Flex>
         );
       },
@@ -492,9 +508,13 @@ const RiskManagement: React.FC = () => {
       render: (_, record) => {
         return (
           <div>
-            <section style={{ color: 'rgb(51, 51, 51)' }}>
+            <Typography.Text
+              copyable={record?.cloudAccountId ? { text: record.cloudAccountId } : false}
+              style={{ color: 'rgb(51, 51, 51)' }}
+              ellipsis={{ tooltip: record?.cloudAccountId || '-' }}
+            >
               {record?.cloudAccountId || '-'}
-            </section>
+            </Typography.Text>
             <Flex style={{ fontSize: '12px', color: '#999' }}>
               {obtainPlatformEasyIcon(record.platform!, platformList)}
               {record?.alias || '-'}
@@ -524,27 +544,23 @@ const RiskManagement: React.FC = () => {
       align: 'left',
       width: 200,
       render: (_, record: API.BaseRiskResultInfo) => {
+        const tooltipText = record?.resourceStatus === AssetStatusList[1].value
+          ? `(${intl.formatMessage({
+              id: 'risk.module.text.not.exist',
+            })}) ` + record.resourceName
+          : record.resourceName || '-';
+        
         return (
-          <>
-            <DispositionPro
-              placement={'topLeft'}
-              maxWidth={400}
-              rows={1}
-              text={
-                <>
-                  {record.resourceName || '-'}
-                  <ExistTag status={record?.resourceStatus} />
-                </>
-              }
-              tooltipText={
-                record?.resourceStatus === AssetStatusList[1].value
-                  ? `(${intl.formatMessage({
-                      id: 'risk.module.text.not.exist',
-                    })}) ` + record.resourceName
-                  : record.resourceName || '-'
-              }
-            />
-          </>
+          <Flex align={'center'}>
+            <Typography.Text
+              copyable={record?.resourceName ? { text: record.resourceName } : false}
+              style={{ maxWidth: 350 }}
+              ellipsis={{ tooltip: tooltipText }}
+            >
+              {record.resourceName || '-'}
+            </Typography.Text>
+            <ExistTag status={record?.resourceStatus} />
+          </Flex>
         );
       },
     },
@@ -955,6 +971,13 @@ const RiskManagement: React.FC = () => {
         setEditDrawerVisible={setEditWhiteDrawerVisible}
         whiteListDrawerInfo={whiteListInfoRef.current}
         tableActionRef={tableActionRef}
+      />
+
+      <RuleDetailDrawer
+        visible={ruleDetailDrawerVisible}
+        onClose={() => setRuleDetailDrawerVisible(false)}
+        ruleId={ruleDetailInfo.ruleId}
+        ruleCode={ruleDetailInfo.ruleCode}
       />
     </PageContainer>
   );

@@ -28,8 +28,8 @@ import com.alipay.application.share.vo.ApiResponse;
 import com.alipay.application.share.vo.ListVO;
 import com.alipay.application.share.vo.rule.RuleScanResultExportVO;
 import com.alipay.application.share.vo.rule.RuleScanResultVO;
+import com.alipay.common.exception.BizErrorCodeEnum;
 import com.alipay.common.exception.BizException;
-import com.alipay.common.exception.RoleCheckException;
 import com.alipay.common.utils.ExcelUtils;
 import com.alipay.common.utils.ListUtils;
 import com.alipay.dao.context.UserInfoContext;
@@ -173,17 +173,17 @@ public class RiskServiceImpl implements RiskService {
         RuleScanResultPO ruleScanResultPO = ruleScanResultMapper.selectByPrimaryKey(riskId);
 
         if (ruleScanResultPO == null) {
-            throw new BizException("Risk ID not found");
+            throw new BizException(BizErrorCodeEnum.FORBIDDEN, "Risk ID not found");
         }
 
         Long tenantId = UserInfoContext.getCurrentUser().getTenantId();
         if (tenantId == null) {
-            return ruleScanResultPO;
+            throw new BizException(BizErrorCodeEnum.FORBIDDEN, "Please log in first");
         }
 
         // If the tenant ID does not match, an exception is thrown
         if (!tenantId.equals(ruleScanResultPO.getTenantId())) {
-            throw new RoleCheckException("Tenant not match");
+            throw new BizException(BizErrorCodeEnum.FORBIDDEN, "Tenant not match");
         }
 
         return ruleScanResultPO;

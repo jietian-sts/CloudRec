@@ -10,6 +10,7 @@ export default {
     'button.text.close': 'Close',
     'button.text.add': 'Add',
     'button.text.test': 'Test',
+    'button.text.running': 'Running',
     'button.text.export': 'Export',
     'button.text.white': 'Allow',
     'button.text.ignore': 'Ignore',
@@ -21,6 +22,7 @@ export default {
     'button.text.cancel': 'Cancel',
     'button.text.ok': 'Ok',
     'button.text.copy': 'Copy',
+    'button.text.share': 'Share',
     'button.text.return': 'Return',
     'button.text.pre': 'Previous',
     'button.text.next': 'Next',
@@ -82,6 +84,7 @@ export default {
     'message.text.batch.add.success': 'Batch added successfully',
     'message.text.copy.loading': 'Copying in progress...',
     'message.text.copy.success': 'Copy successfully',
+    'message.text.copy.failed': 'Copy failed',
     'message.text.export.success': 'Export successfully',
     'message.text.export.failed': 'Export failed',
     'message.text.success':'Success',
@@ -89,6 +92,8 @@ export default {
     'module.text.all':'All',
     'module.text.selected':'Selected',
     'module.text.default':'Default',
+    'message.text.no.permission.title':'No permission',
+    'message.text.no.permission.subtitle':'No permission'
   },
   layout: {
     'routes.title.home': 'Dashboard',

@@ -439,7 +439,7 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
                }}
              >
                {intl.formatMessage({
-                 id: 'common.button.text.test',
+                 id: isRunning === 1 ? 'common.button.text.running' : 'common.button.text.test',
                })}
              </Button>
 
@@ -464,6 +464,7 @@ const SelectedRules: React.FC<SelectedRulesProps> = ({
                    danger
                    size="small"
                    loading={removeLoading[Number(record.id)]}
+                   disabled={isRunning === 1}
                    icon={<MinusOutlined />}
                    onClick={(e) => e.stopPropagation()}
                  >
