@@ -543,7 +543,7 @@
     <delete id="deleteByCloudAccountId">
         DELETE
         FROM rule_scan_result
-        WHERE cloud_account_id = #{cloudAccountId}
+        WHERE cloud_account_id = #{cloudAccountId} LIMIT 10000
     </delete>
     <delete id="cancelIgnoreRisk">
         UPDATE rule_scan_result

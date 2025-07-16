@@ -25,6 +25,7 @@ import com.alipay.application.service.collector.enums.CollectorTaskType;
 import com.alipay.application.service.common.utils.CacheUtil;
 import com.alipay.application.service.common.utils.DbCacheUtil;
 import com.alipay.application.service.resource.IQueryResource;
+import com.alipay.application.service.risk.domain.repo.RiskRepository;
 import com.alipay.application.share.request.account.AcceptAccountRequest;
 import com.alipay.application.share.request.account.CreateCollectTaskRequest;
 import com.alipay.application.share.request.account.QueryCloudAccountListRequest;
@@ -70,6 +71,8 @@ public class CloudAccountServiceImpl implements CloudAccountService {
     private CloudAccountMapper cloudAccountMapper;
     @Resource
     private RuleScanResultMapper ruleScanResultMapper;
+    @Resource
+    private RiskRepository riskRepository;
     @Resource
     private IQueryResource iQueryResource;
     @Resource
@@ -189,7 +192,7 @@ public class CloudAccountServiceImpl implements CloudAccountService {
         cloudAccountMapper.deleteByPrimaryKey(id);
 
         // delete account risk information
-        ruleScanResultMapper.deleteByCloudAccountId(cloudAccountPO.getCloudAccountId());
+        riskRepository.remove(cloudAccountPO.getCloudAccountId());
 
         // delete account resource information
         iQueryResource.removeResource(cloudAccountPO.getCloudAccountId());

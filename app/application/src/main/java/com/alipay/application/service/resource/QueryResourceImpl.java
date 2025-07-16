@@ -39,7 +39,10 @@ import com.alipay.common.utils.ListUtils;
 import com.alipay.dao.context.UserInfoContext;
 import com.alipay.dao.context.UserInfoDTO;
 import com.alipay.dao.dto.*;
-import com.alipay.dao.mapper.*;
+import com.alipay.dao.mapper.CloudResourceInstanceMapper;
+import com.alipay.dao.mapper.CloudResourceRiskCountStatisticsMapper;
+import com.alipay.dao.mapper.ResourceMapper;
+import com.alipay.dao.mapper.RuleScanResultMapper;
 import com.alipay.dao.po.CloudResourceInstancePO;
 import com.alipay.dao.po.CloudResourceRiskCountStatisticsPO;
 import com.alipay.dao.po.DbCachePO;
@@ -174,7 +177,12 @@ public class QueryResourceImpl implements IQueryResource {
 
     @Override
     public void removeResource(String cloudAccountId) {
-        cloudResourceInstanceMapper.deleteByCloudAccountId(cloudAccountId);
+        while (true) {
+            int i = cloudResourceInstanceMapper.deleteByCloudAccountId(cloudAccountId);
+            if (i == 0) {
+                break;
+            }
+        }
     }
 
     @Override
