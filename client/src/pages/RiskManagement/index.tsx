@@ -33,7 +33,7 @@ import {
   valueListAddTag,
   valueListAsValueEnum,
 } from '@/utils/shared';
-import { SearchOutlined } from '@ant-design/icons';
+import { SearchOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
 import {
   ActionType,
   PageContainer,
@@ -73,7 +73,7 @@ const RiskManagement: React.FC = () => {
   const breakpoints: Partial<Record<Breakpoint, boolean>> = useBreakpoint();
   // Platform Rule Group List
   const { platformList, ruleGroupList, ruleTypeList } = useModel('rule');
-  
+
   // Tenant selected rule list data
   const { data: tenantRuleList }: any = useRequest(
     () => {
@@ -171,6 +171,9 @@ const RiskManagement: React.FC = () => {
   );
 
   useEffect((): void => {
+    // Initialize filter factor with URL parameters to trigger default request
+    const urlParams: Record<string, any> = {};
+    
     // Cloud platform
     if (!isEmpty(platformQuery)) {
       form?.setFieldValue('platformList', [platformQuery]);
@@ -178,22 +181,32 @@ const RiskManagement: React.FC = () => {
       form.setFieldValue('resourceType', null);
       setResourceTypeList([]);
       requestResourceTypeList([platformQuery!]);
+      urlParams.platformList = [platformQuery];
     }
     // Risk Level
     if (!isEmpty(riskLevelQuery)) {
       form?.setFieldValue('riskLevelList', [riskLevelQuery]);
+      urlParams.riskLevelList = [riskLevelQuery];
     }
     // Rule Name
     if (!isEmpty(ruleCodeQuery)) {
       formActionRef.current?.setFieldValue('ruleCodeList', [ruleCodeQuery]);
+      urlParams.ruleCodeList = [ruleCodeQuery];
     }
     // Resource Id
     if (!isEmpty(resourceIdQuery)) {
       formActionRef.current?.setFieldValue('resourceId', resourceIdQuery);
+      urlParams.resourceId = resourceIdQuery;
     }
     // Set cloud account ID from URL query parameter
     if (!isEmpty(cloudAccountIdQuery)) {
       formActionRef.current?.setFieldValue('cloudAccountId', cloudAccountIdQuery);
+      urlParams.cloudAccountId = cloudAccountIdQuery;
+    }
+    
+    // Update filter factor to trigger table request with URL parameters
+    if (Object.keys(urlParams).length > 0) {
+      setFilterFactor(urlParams);
     }
   }, [platformQuery, riskLevelQuery, ruleCodeQuery, resourceIdQuery, cloudAccountIdQuery]);
 
@@ -336,7 +349,7 @@ const RiskManagement: React.FC = () => {
               setRuleIdList(value);
               confirm();
             }, 1000)}
-            style={{ minWidth: 180 }}
+            style={{ minWidth: 320 }}
           />
         </div>
       );
@@ -345,7 +358,13 @@ const RiskManagement: React.FC = () => {
       onOpenChange: handleFilterDropdownVisibleChange,
     },
     filterIcon: (filtered: boolean) => (
-      <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
+      <SearchOutlined
+        style={{
+          color: filtered ? '#1677ff' : '#1890ff',
+          fontSize: '18px',
+          fontWeight: 'bold'
+        }}
+      />
     ),
     destroyOnClose: true,
   });
@@ -362,6 +381,7 @@ const RiskManagement: React.FC = () => {
         id: 'home.module.inform.columns.ruleName',
       }),
       dataIndex: 'ruleName',
+      width: 400,
       valueType: 'text',
       align: 'left',
       hideInSearch: true,
@@ -378,7 +398,7 @@ const RiskManagement: React.FC = () => {
             <img
               src={record?.icon || DEFAULT_RESOURCE_ICON}
               alt="RESOURCE_ICON"
-              style={{ width: 18, height: 18 }}
+              style={{ width: 20, height: 20 }}
             />
             <Typography.Text
               copyable={record?.ruleVO?.ruleName ? { text: record.ruleVO.ruleName } : false}
@@ -386,7 +406,7 @@ const RiskManagement: React.FC = () => {
                 color: record?.ruleVO?.id ? '#1890ff' : '#333',
                 fontSize: 14,
                 marginLeft: 8,
-                maxWidth: breakpoints?.xxl ? 280 : 240,
+                maxWidth: breakpoints?.xxl ? 450 : 400,
                 cursor: record?.ruleVO?.id ? 'pointer' : 'default',
               }}
               ellipsis={{ tooltip: record?.ruleVO?.ruleName || '-' }}
@@ -407,68 +427,9 @@ const RiskManagement: React.FC = () => {
       valueType: 'select',
       valueEnum: valueListAsValueEnum(tenantRuleList),
       hideInTable: true,
+      colSize: 2, // Rule name takes half width (12/24)
       fieldProps: {
         mode: 'multiple',
-      },
-    },
-    {
-      title: intl.formatMessage({
-        id: 'risk.module.text.firstAndLast.discovered',
-      }),
-      dataIndex: 'gmtCreated',
-      valueType: 'text',
-      align: 'left',
-      hideInSearch: true,
-      render: (_, record) => {
-        return (
-          <div>
-            <section style={{ color: '#999' }}>
-              {record?.gmtCreate || '-'}
-            </section>
-            <section style={{ color: '#999' }}>
-              {record?.gmtModified || '-'}
-            </section>
-          </div>
-        );
-      },
-    },
-    {
-      title: intl.formatMessage({
-        id: 'risk.module.text.ignore.type',
-      }),
-      dataIndex: 'ignoreReasonTypeList',
-      valueType: 'checkbox',
-      valueEnum: valueListAsValueEnum(IgnoreReasonTypeList),
-      align: 'left',
-      hideInTable: true,
-      hideInSearch: status !== 'IGNORED',
-    },
-    {
-      title: intl.formatMessage({
-        id: 'layout.routes.title.ruleGroup',
-      }),
-      dataIndex: 'ruleGroupIdList',
-      valueType: 'select',
-      valueEnum: valueListAsValueEnum(ruleGroupList),
-      hideInTable: true,
-      fieldProps: {
-        mode: 'multiple',
-      },
-    },
-    {
-      title: intl.formatMessage({
-        id: 'cloudAccount.extend.title.asset.type',
-      }),
-      dataIndex: 'resourceTypeList',
-      valueType: 'cascader',
-      align: 'left',
-      hideInTable: true,
-      fieldProps: {
-        multiple: true,
-        showCheckedStrategy: SHOW_CHILD,
-        options: resourceTypeList,
-        showSearch: true,
-        allowClear: true,
       },
     },
     {
@@ -478,6 +439,7 @@ const RiskManagement: React.FC = () => {
       dataIndex: 'ruleTypeIdList',
       valueType: 'cascader',
       hideInTable: true,
+      colSize: 1, // Rule type takes 1/4 width (6/24)
       fieldProps: {
         multiple: true,
         options: ruleTypeList,
@@ -491,10 +453,24 @@ const RiskManagement: React.FC = () => {
     },
     {
       title: intl.formatMessage({
+        id: 'layout.routes.title.ruleGroup',
+      }),
+      dataIndex: 'ruleGroupIdList',
+      valueType: 'select',
+      valueEnum: valueListAsValueEnum(ruleGroupList),
+      hideInTable: true,
+      colSize: 1, // Rule group takes 1/4 width (6/24)
+      fieldProps: {
+        mode: 'multiple',
+      },
+    },
+    {
+      title: intl.formatMessage({
         id: 'common.select.label.cloudAccount',
       }),
       dataIndex: 'cloudAccountId',
       valueType: 'select',
+      colSize: 1, // Cloud account takes 1/4 width (6/24)
       fieldProps: {
         placeholder: intl.formatMessage({
           id: 'common.select.query.text.placeholder',
@@ -527,6 +503,76 @@ const RiskManagement: React.FC = () => {
       title: intl.formatMessage({
         id: 'cloudAccount.extend.title.asset.type',
       }),
+      dataIndex: 'resourceTypeList',
+      valueType: 'cascader',
+      align: 'left',
+      hideInTable: true,
+      colSize: 1, // Resource type takes 1/4 width (6/24)
+      fieldProps: {
+        multiple: true,
+        showCheckedStrategy: SHOW_CHILD,
+        options: resourceTypeList,
+        showSearch: true,
+        allowClear: true,
+      },
+    },
+    {
+      title: intl.formatMessage({
+        id: 'common.table.columns.assetId',
+      }),
+      dataIndex: 'resourceId',
+      valueType: 'text',
+      align: 'left',
+      hideInTable: true,
+      colSize: 1, // Resource ID takes 1/4 width (6/24)
+    },
+    {
+      title: intl.formatMessage({
+        id: 'cloudAccount.extend.title.asset.name',
+      }),
+      dataIndex: 'resourceName',
+      valueType: 'text',
+      align: 'left',
+      hideInTable: true,
+      colSize: 1, // Resource name takes 1/4 width (6/24)
+    },
+    {
+      title: intl.formatMessage({
+        id: 'risk.module.text.firstAndLast.discovered',
+      }),
+      dataIndex: 'gmtCreated',
+      valueType: 'text',
+      align: 'left',
+      hideInSearch: true,
+      render: (_, record) => {
+        return (
+          <div>
+            <section style={{ color: '#999' }}>
+              {record?.gmtCreate || '-'}
+            </section>
+            <section style={{ color: '#999' }}>
+              {record?.gmtModified || '-'}
+            </section>
+          </div>
+        );
+      },
+    },
+    {
+      title: intl.formatMessage({
+        id: 'risk.module.text.ignore.type',
+      }),
+      dataIndex: 'ignoreReasonTypeList',
+      valueType: 'checkbox',
+      valueEnum: valueListAsValueEnum(IgnoreReasonTypeList),
+      align: 'left',
+      hideInTable: true,
+      hideInSearch: status !== 'IGNORED',
+      colSize: 6, // Ignore type takes full width when visible
+    },
+    {
+      title: intl.formatMessage({
+        id: 'cloudAccount.extend.title.asset.type',
+      }),
       dataIndex: 'resourceType',
       valueType: 'text',
       align: 'left',
@@ -539,22 +585,23 @@ const RiskManagement: React.FC = () => {
       title: intl.formatMessage({
         id: 'cloudAccount.extend.title.asset.name',
       }),
-      dataIndex: 'resourceName',
+      dataIndex: 'resourceNameDisplay',
       valueType: 'text',
       align: 'left',
-      width: 200,
+      width: 300,
+      hideInSearch: true,
       render: (_, record: API.BaseRiskResultInfo) => {
         const tooltipText = record?.resourceStatus === AssetStatusList[1].value
           ? `(${intl.formatMessage({
               id: 'risk.module.text.not.exist',
             })}) ` + record.resourceName
           : record.resourceName || '-';
-        
+
         return (
           <Flex align={'center'}>
             <Typography.Text
               copyable={record?.resourceName ? { text: record.resourceName } : false}
-              style={{ maxWidth: 350 }}
+              style={{ maxWidth: 450 }}
               ellipsis={{ tooltip: tooltipText }}
             >
               {record.resourceName || '-'}
@@ -566,30 +613,12 @@ const RiskManagement: React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'common.table.columns.assetId',
-      }),
-      dataIndex: 'resourceId',
-      valueType: 'text',
-      align: 'left',
-      hideInTable: true,
-    },
-    {
-      title: intl.formatMessage({
-        id: 'common.table.columns.assetStatus',
-      }),
-      dataIndex: 'resourceStatus',
-      valueType: 'select',
-      valueEnum: valueListAsValueEnum(AssetStatusList),
-      align: 'left',
-      hideInTable: true,
-    },
-    {
-      title: intl.formatMessage({
         id: 'risk.module.text.first.discovery',
       }),
       dataIndex: 'createTimeRange',
       valueType: 'dateTimeRange',
       hideInTable: true,
+      colSize: 1, // First discovery takes 1/4 width (6/24)
       fieldProps: {
         presets: RangePresets,
       },
@@ -607,6 +636,7 @@ const RiskManagement: React.FC = () => {
       dataIndex: 'modifiedTimeRange',
       valueType: 'dateTimeRange',
       hideInTable: true,
+      colSize: 1, // Recent discovery takes 1/4 width (6/24)
       fieldProps: {
         presets: RangePresets,
       },
@@ -616,6 +646,17 @@ const RiskManagement: React.FC = () => {
           gmtModifiedEnd: value[1],
         }),
       },
+    },
+    {
+      title: intl.formatMessage({
+        id: 'common.table.columns.assetStatus',
+      }),
+      dataIndex: 'resourceStatus',
+      valueType: 'select',
+      valueEnum: valueListAsValueEnum(AssetStatusList),
+      align: 'left',
+      hideInTable: true,
+      colSize: 1, // Asset status takes 1/4 width (6/24)
     },
     {
       title: intl.formatMessage({
@@ -875,11 +916,11 @@ const RiskManagement: React.FC = () => {
           onChange: (key) => {
             setStatus(key as string);
             formActionRef.current?.setFieldValue('ignoreReasonTypeList', []);
-            
+
             // Preserve current query conditions when switching status
             const currentFormData = form.getFieldsValue();
             const currentSearchData = formActionRef.current?.getFieldsValue() || {};
-            
+
             // Only reset ignore reason type list for status-specific filtering
             // Keep other filter conditions intact
             const preservedFilters = {
@@ -889,10 +930,10 @@ const RiskManagement: React.FC = () => {
               status: key,
               ignoreReasonTypeList: [], // Reset only this field
             };
-            
+
             // Update filter factor with preserved conditions
             setFilterFactor(preservedFilters);
-            
+
             // Reload table with preserved filters
             // @ts-ignore
             tableActionRef.current?.reload();
@@ -904,9 +945,8 @@ const RiskManagement: React.FC = () => {
         rowKey={'id'}
         search={{
           span: 6,
-          defaultCollapsed: false, // Default Expand
-          collapseRender: false, // Hide expand/close button
           labelWidth: 0,
+          defaultColsNumber: 6, // Show 6 fields in collapsed state to include asset-related fields
         }}
         headerTitle={
           <div className={styleType['customTitle']}>

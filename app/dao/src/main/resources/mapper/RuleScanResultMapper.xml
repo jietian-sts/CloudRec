@@ -290,7 +290,7 @@
       rsr.rule_id AS ruleId,r.rule_name AS ruleName,count(rsr.id) as count,r.rule_desc AS ruleDesc,r.risk_level AS
       riskLevel
       FROM rule_scan_result rsr
-      INNER JOIN rule r on r.id = rsr.rule_id
+      INNER JOIN rule r on r.id = rsr.rule_id AND r.status = "valid"
       INNER JOIN ( SELECT DISTINCT rule_code FROM tenant_rule ) tr on tr.rule_code = r.rule_code
       <include refid="findListWhere"/>
       GROUP BY r.id
@@ -300,13 +300,13 @@
     
     <select id="findCount" resultType="java.lang.Integer">
         SELECT COUNT(*)
-        FROM rule_scan_result rsr INNER JOIN rule r on r.id = rsr.rule_id
+        FROM rule_scan_result rsr INNER JOIN rule r on r.id = rsr.rule_id AND r.status = "valid"
         <include refid="findListWhere"></include>
     </select>
     <select id="findList" resultMap="ResultMapWithBLOBs">
         SELECT
         rsr.*
-        FROM rule_scan_result rsr INNER JOIN rule r on r.id = rsr.rule_id
+        FROM rule_scan_result rsr INNER JOIN rule r on r.id = rsr.rule_id AND r.status = "valid"
         <include refid="findListWhere"></include>
         ORDER BY rsr.id DESC
         <include refid="com.alipay.dao.mapper.RuleMapper.getListLimit"></include>
@@ -404,7 +404,7 @@
 
     <sql id="findListWhere">
         <where>
-            r.status = "valid"
+            1=1
             <if test="cloudAccountIdList != null and cloudAccountIdList.size() > 0">
                 AND rsr.cloud_account_id IN
                 <foreach collection="cloudAccountIdList" item="cloudAccountId" open="(" separator="," close=")">

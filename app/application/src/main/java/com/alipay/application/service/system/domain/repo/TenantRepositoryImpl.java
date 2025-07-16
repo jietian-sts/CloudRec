@@ -137,6 +137,9 @@ public class TenantRepositoryImpl implements TenantRepository {
 
     @Override
     public boolean isSelected(Long tenantId, String ruleCode) {
+        if (tenantId == null || ruleCode == null) {
+            return false;
+        }
         TenantRulePO tenantRulePO = tenantRuleMapper.findOne(tenantId, ruleCode);
         return tenantRulePO != null;
     }
