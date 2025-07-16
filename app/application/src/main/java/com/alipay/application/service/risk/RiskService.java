@@ -20,6 +20,7 @@ import com.alipay.application.share.vo.ApiResponse;
 import com.alipay.application.share.vo.ListVO;
 import com.alipay.application.share.vo.rule.RuleScanResultVO;
 import com.alipay.dao.dto.CloudAccountStatisticsDTO;
+import com.alipay.dao.dto.ResourceTypeStatisticsDTO;
 import com.alipay.dao.dto.RuleScanResultDTO;
 import com.alipay.dao.dto.RuleStatisticsDTO;
 import jakarta.servlet.http.HttpServletResponse;
@@ -52,4 +53,6 @@ public interface RiskService {
     List<RuleStatisticsDTO> listRuleStatistics(RuleScanResultDTO ruleScanResultDTO);
 
     List<CloudAccountStatisticsDTO> listCloudAccountStatistics(RuleScanResultDTO dto);
+
+    List<ResourceTypeStatisticsDTO> listResourceTypeStatistics(RuleScanResultDTO dto);
 }

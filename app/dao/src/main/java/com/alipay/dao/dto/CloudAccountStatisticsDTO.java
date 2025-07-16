@@ -27,9 +27,6 @@ public class CloudAccountStatisticsDTO {
 
     private String alias;
 
-    /**
-     * The number of risks corresponding to the rule
-     */
     private Long count;
 
 }

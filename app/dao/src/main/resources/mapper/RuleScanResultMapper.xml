@@ -288,7 +288,7 @@
   <select id="listRuleStatistics" resultType="com.alipay.dao.dto.RuleStatisticsDTO">
       SELECT
       rsr.rule_id AS ruleId,r.rule_name AS ruleName,count(rsr.id) as count,r.rule_desc AS ruleDesc,r.risk_level AS
-      riskLevel
+      riskLevel,r.rule_code AS ruleCode
       FROM rule_scan_result rsr
       INNER JOIN rule r on r.id = rsr.rule_id AND r.status = "valid"
       INNER JOIN ( SELECT DISTINCT rule_code FROM tenant_rule ) tr on tr.rule_code = r.rule_code
@@ -310,6 +310,18 @@
       HAVING count > 0
       ORDER BY count DESC
   </select>
+
+    <select id="listResourceTypeStatistics" resultType="com.alipay.dao.dto.ResourceTypeStatisticsDTO">
+        SELECT
+        rsr.resource_type AS resourceType,count(rsr.id) as count
+        FROM rule_scan_result rsr
+        INNER JOIN rule r on r.id = rsr.rule_id AND r.status = "valid"
+        INNER JOIN ( SELECT DISTINCT rule_code FROM tenant_rule ) tr on tr.rule_code = r.rule_code
+        <include refid="findListWhere"/>
+        GROUP BY rsr.resouce_type
+        HAVING count > 0
+        ORDER BY count DESC
+    </select>
     
     <select id="findCount" resultType="java.lang.Integer">
         SELECT COUNT(*)
@@ -691,5 +703,6 @@
         ORDER BY id ASC
         limit #{limit}
     </select>
+
 
 </mapper>

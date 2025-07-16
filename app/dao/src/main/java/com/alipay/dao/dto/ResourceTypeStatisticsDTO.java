@@ -21,32 +21,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class RuleStatisticsDTO {
+public class ResourceTypeStatisticsDTO {
 
-    /**
-     * rule id
-     */
-    private Long ruleId;
+    private String resourceType;
 
-    /**
-     * Rule description
-     */
-    private String ruleDesc;
-
-    /**
-     * RISK LEVEL
-     */
-    private String riskLevel;
-
-    /**
-     * Rule name
-     */
-    private String ruleName;
-
-    /**
-     * Rule Code
-     */
-    private String ruleCode;
+    private String resourceTypeName;
 
     /**
      * The number of risks corresponding to the rule

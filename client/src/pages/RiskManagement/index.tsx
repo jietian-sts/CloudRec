@@ -131,7 +131,7 @@ const RiskManagement: React.FC = () => {
   // Rule Detail Info
   const [ruleDetailInfo, setRuleDetailInfo] = useState<{ ruleId?: number; ruleCode?: string }>({});
   // Filter Factor
-  const [filterFactor, setFilterFactor] = useState({});
+  const [filterFactor, setFilterFactor] = useState<Record<string, any>>({});
   // Risk status
   const [status, setStatus] = useState<string>(
     RiskStatusList[0]?.value as string,
@@ -174,7 +174,7 @@ const RiskManagement: React.FC = () => {
   useEffect((): void => {
     // Initialize filter factor with URL parameters to trigger default request
     const urlParams: Record<string, any> = {};
-    
+
     // Cloud platform
     if (!isEmpty(platformQuery)) {
       form?.setFieldValue('platformList', [platformQuery]);
@@ -204,7 +204,7 @@ const RiskManagement: React.FC = () => {
       formActionRef.current?.setFieldValue('cloudAccountId', cloudAccountIdQuery);
       urlParams.cloudAccountId = cloudAccountIdQuery;
     }
-    
+
     // Update filter factor to trigger table request with URL parameters
     if (Object.keys(urlParams).length > 0) {
       setFilterFactor(urlParams);
@@ -272,7 +272,7 @@ const RiskManagement: React.FC = () => {
                 </Flex>
               </div>
             ),
-            value: item.ruleId,
+            value: item.ruleCode,
           };
         });
         return array;
@@ -280,10 +280,9 @@ const RiskManagement: React.FC = () => {
     },
   );
 
-  // Cloud account statistics for search dropdown
   const {
-    data: riskListGroupByCloudAccountList,
-    run: requestRiskListGroupByCloudAccount,
+    data: cloudAccountStatisticsList,
+    run: requestCloudAccountStatistics,
   } = useRequest(
     (params: API.RiskInfo) => {
       return listCloudAccountStatistics({ ...params });
@@ -299,7 +298,6 @@ const RiskManagement: React.FC = () => {
                 <span>{item?.alias || item?.cloudAccountId}</span>
                 <Flex align={'center'}>
                   <Tag
-                    color={'blue'}
                     style={{ margin: '0 0 0 8px' }}
                   >
                     {item?.count || '-'}
@@ -355,8 +353,6 @@ const RiskManagement: React.FC = () => {
   };
 
   // Table Column Search
-  const [ruleIdList, setRuleIdList] = useState<Array<number>>();
-  const [cloudAccountIdList, setCloudAccountIdList] = useState<Array<string>>();
 
   const handleFilterDropdownVisibleChange = async (visible: boolean) => {
     if (visible) {
@@ -369,7 +365,6 @@ const RiskManagement: React.FC = () => {
     }
   };
 
-  // Handle cloud account filter dropdown visibility change
   const handleCloudAccountFilterDropdownVisibleChange = async (visible: boolean) => {
     if (visible) {
       const postBody = {
@@ -377,7 +372,19 @@ const RiskManagement: React.FC = () => {
         ...form?.getFieldsValue(),
         ...formActionRef?.current?.getFieldsValue(),
       };
-      await requestRiskListGroupByCloudAccount(postBody);
+      
+      // Ensure ruleCodeList is included if it exists in formActionRef
+      if (!postBody.ruleCodeList && formActionRef.current?.getFieldValue('ruleCodeList')) {
+        postBody.ruleCodeList = formActionRef.current.getFieldValue('ruleCodeList');
+      }
+      
+      // Remove ruleIdList from the request if it exists as we use ruleCodeList instead
+      if (postBody.ruleIdList) {
+        delete postBody.ruleIdList;
+      }
+      
+      // Keep cloudAccountId in the request to ensure proper filtering
+      await requestCloudAccountStatistics(postBody);
     }
   };
 
@@ -394,10 +401,21 @@ const RiskManagement: React.FC = () => {
             })}
             popupMatchSelectWidth={false}
             options={riskListGroupByRuleNameList || []}
-            onChange={debounce((value): void => {
-              setRuleIdList(value);
+            onChange={(value): void => {
+              // Update ruleCodeList in formActionRef instead of using ruleIdList
+              formActionRef.current?.setFieldValue('ruleCodeList', value);
+              // Update filterFactor to include the selected ruleCodeList
+              setFilterFactor(prev => ({
+                ...prev,
+                ruleCodeList: value
+              }));
+              // Trigger table reload
+              tableActionRef.current?.reload();
               confirm();
-            }, 1000)}
+            }}
+            onBlur={(): void => {
+              confirm();
+            }}
             style={{ minWidth: 320 }}
           />
         </div>
@@ -405,44 +423,6 @@ const RiskManagement: React.FC = () => {
     },
     filterDropdownProps: {
       onOpenChange: handleFilterDropdownVisibleChange,
-    },
-    filterIcon: (filtered: boolean) => (
-      <SearchOutlined
-        style={{
-          color: filtered ? '#1677ff' : '#1890ff',
-          fontSize: '18px',
-          fontWeight: 'bold'
-        }}
-      />
-    ),
-    destroyOnClose: true,
-  });
-
-  // Get cloud account column search properties
-  const getCloudAccountColumnSearchProps = () => ({
-    filterDropdown: ({ confirm }: { confirm: any }) => {
-      return (
-        <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
-          <Select
-            maxTagCount={'responsive'}
-            allowClear
-            mode={'multiple'}
-            placeholder={intl.formatMessage({
-              id: 'common.select.text.placeholder',
-            })}
-            popupMatchSelectWidth={false}
-            options={riskListGroupByCloudAccountList || []}
-            onChange={debounce((value): void => {
-              setCloudAccountIdList(value);
-              confirm();
-            }, 1000)}
-            style={{ minWidth: 320 }}
-          />
-        </div>
-      );
-    },
-    filterDropdownProps: {
-      onOpenChange: handleCloudAccountFilterDropdownVisibleChange,
     },
     filterIcon: (filtered: boolean) => (
       <SearchOutlined
@@ -534,8 +514,56 @@ const RiskManagement: React.FC = () => {
         notFoundContent: fetching && <Spin size="small" />,
         onSearch: debounceFetcher,
         options: baseCloudAccountList || [],
+        onChange: (value) => {
+          // 当表格上方的云账号搜索组件值变化时，更新filterFactor
+          setFilterFactor(prev => ({
+            ...prev,
+            cloudAccountId: value
+          }));
+        },
       },
       align: 'left',
+      filterDropdown: ({ confirm }: { confirm: any }) => {
+        return (
+          <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+            <Select
+              allowClear
+              placeholder={intl.formatMessage({
+                id: 'common.select.text.placeholder',
+              })}
+              popupMatchSelectWidth={false}
+              options={cloudAccountStatisticsList || []}
+              onChange={(value): void => {
+                formActionRef.current?.setFieldValue('cloudAccountId', value);
+                // Update filterFactor to include the selected cloudAccountId
+                setFilterFactor(prev => ({
+                  ...prev,
+                  cloudAccountId: value
+                }));
+                // Trigger table reload
+                tableActionRef.current?.reload();
+                confirm();
+              }}
+              onBlur={(): void => {
+                confirm();
+              }}
+              style={{ minWidth: 320 }}
+            />
+          </div>
+        );
+      },
+      filterDropdownProps: {
+        onOpenChange: handleCloudAccountFilterDropdownVisibleChange,
+      },
+      filterIcon: (filtered: boolean) => (
+        <SearchOutlined
+          style={{
+            color: filtered ? '#1677ff' : '#1890ff',
+            fontSize: '18px',
+            fontWeight: 'bold'
+          }}
+        />
+      ),
       render: (_, record) => {
         return (
           <div>
@@ -553,7 +581,6 @@ const RiskManagement: React.FC = () => {
           </div>
         );
       },
-      ...getCloudAccountColumnSearchProps(),
     },
     {
       title: intl.formatMessage({
@@ -587,6 +614,7 @@ const RiskManagement: React.FC = () => {
         mode: 'multiple',
       },
     },
+    
     {
       title: intl.formatMessage({
         id: 'cloudAccount.extend.title.asset.type',
@@ -671,17 +699,6 @@ const RiskManagement: React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'common.table.columns.assetStatus',
-      }),
-      dataIndex: 'resourceStatus',
-      valueType: 'select',
-      valueEnum: valueListAsValueEnum(AssetStatusList),
-      align: 'left',
-      hideInTable: true,
-      colSize: 1, // Asset status takes 1/4 width (6/24)
-    },
-    {
-      title: intl.formatMessage({
         id: 'cloudAccount.extend.title.asset.name',
       }),
       dataIndex: 'resourceNameDisplay',
@@ -692,8 +709,8 @@ const RiskManagement: React.FC = () => {
       render: (_, record: API.BaseRiskResultInfo) => {
         const tooltipText = record?.resourceStatus === AssetStatusList[1].value
           ? `(${intl.formatMessage({
-              id: 'risk.module.text.not.exist',
-            })}) ` + record.resourceName
+          id: 'risk.module.text.not.exist',
+        })}) ` + record.resourceName
           : record.resourceName || '-';
 
         return (
@@ -746,7 +763,17 @@ const RiskManagement: React.FC = () => {
         }),
       },
     },
-    
+    {
+      title: intl.formatMessage({
+        id: 'common.table.columns.assetStatus',
+      }),
+      dataIndex: 'resourceStatus',
+      valueType: 'select',
+      valueEnum: valueListAsValueEnum(AssetStatusList),
+      align: 'left',
+      hideInTable: true,
+      colSize: 1, // Asset status takes 1/4 width (6/24)
+    },
     {
       title: intl.formatMessage({
         id: 'home.module.inform.columns.riskLevel',
@@ -899,8 +926,7 @@ const RiskManagement: React.FC = () => {
       resourceTypeList, // resourceTypeList
       status = 'UNREPAIRED', // Risk status
       ignoreReasonTypeList, // Ignore type
-      ruleTypeIdList,
-      ruleIdList, // Table rule name filtering
+      ruleTypeIdList, // Rule type filtering
       gmtCreateStart, // Start time of risk creation
       gmtCreateEnd, // End time of risk creation
       gmtModifiedStart, // Start time of risk update
@@ -936,7 +962,24 @@ const RiskManagement: React.FC = () => {
     if (riskLevelList) postBody.riskLevelList = riskLevelList;
     if (ruleCodeList) postBody.ruleCodeList = ruleCodeList;
     if (resourceId) postBody.resourceId = resourceId;
-    if (ruleIdList && !isEmpty(ruleIdList)) postBody.ruleIdList = ruleIdList;
+    
+    // 确保cloudAccountId被正确传递
+    // 1. 如果params中有cloudAccountId，直接使用
+    // 2. 如果formActionRef中有cloudAccountId，使用formActionRef中的值
+    // 3. 如果filterFactor中有cloudAccountId，使用filterFactor中的值
+    const formCloudAccountId = formActionRef.current?.getFieldValue('cloudAccountId');
+    const filterFactorCloudAccountId = filterFactor.cloudAccountId;
+    
+    if (cloudAccountId) {
+      postBody.cloudAccountId = cloudAccountId;
+    } else if (formCloudAccountId) {
+      postBody.cloudAccountId = formCloudAccountId;
+    } else if (filterFactorCloudAccountId) {
+      postBody.cloudAccountId = filterFactorCloudAccountId;
+    }
+    
+    // We now use ruleCodeList instead of ruleIdList
+    // No cloudAccountIdList variable exists in this scope, so this condition should be removed
     const { content, code } = await queryRiskList(postBody);
     return {
       data: content?.data || [],
@@ -1066,12 +1109,14 @@ const RiskManagement: React.FC = () => {
         }}
         onSubmit={(): void => {
           const customFormData = form.getFieldsValue();
+          const searchFormData = formActionRef.current?.getFieldsValue() || {};
           setFilterFactor({
             ...filterFactor,
             ...customFormData,
+            ...searchFormData, // 确保搜索表单中的值也被包含在filterFactor中
           });
         }}
-        params={{ ...filterFactor, ruleIdList }}
+        params={{ ...filterFactor }}
         pagination={{
           showQuickJumper: false,
           showSizeChanger: true,
