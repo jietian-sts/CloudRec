@@ -201,6 +201,7 @@ const WhiteList: React.FC = () => {
       dataIndex: 'option',
       valueType: 'option',
       align: 'center',
+      fixed: 'right',
       render: (_, record: API.BaseWhiteListRuleInfo) => (
         <>
           <Button

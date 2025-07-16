@@ -297,6 +297,19 @@
       HAVING count > 0
       ORDER BY count DESC
   </select>
+
+  <select id="listCloudAccountStatistics" resultType="com.alipay.dao.dto.CloudAccountStatisticsDTO">
+      SELECT
+      rsr.cloud_account_id AS cloudAccountId,count(rsr.id) as count,ca.alias AS alias
+      FROM rule_scan_result rsr
+      INNER JOIN rule r on r.id = rsr.rule_id AND r.status = "valid"
+      INNER JOIN ( SELECT DISTINCT rule_code FROM tenant_rule ) tr on tr.rule_code = r.rule_code
+      INNER JOIN cloud_account ca on ca.cloud_account_id = rsr.cloud_account_id
+      <include refid="findListWhere"/>
+      GROUP BY rsr.cloud_account_id
+      HAVING count > 0
+      ORDER BY count DESC
+  </select>
     
     <select id="findCount" resultType="java.lang.Integer">
         SELECT COUNT(*)
@@ -411,7 +424,7 @@
                     #{cloudAccountId}
                 </foreach>
             </if>
-            <if test="cloudAccountId != null">
+            <if test="cloudAccountId != null and cloudAccountId != ''">
                 AND rsr.cloud_account_id = #{cloudAccountId}
             </if>
             <if test="ruleId != null">

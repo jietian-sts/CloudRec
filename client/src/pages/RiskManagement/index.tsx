@@ -18,6 +18,7 @@ import { queryGroupTypeList } from '@/services/resource/ResourceController';
 import {
   cancelIgnoreRisk,
   exportRiskList,
+  listCloudAccountStatistics,
   listRuleStatistics,
   queryRiskList,
 } from '@/services/risk/RiskController';
@@ -279,6 +280,41 @@ const RiskManagement: React.FC = () => {
     },
   );
 
+  // Cloud account statistics for search dropdown
+  const {
+    data: riskListGroupByCloudAccountList,
+    run: requestRiskListGroupByCloudAccount,
+  } = useRequest(
+    (params: API.RiskInfo) => {
+      return listCloudAccountStatistics({ ...params });
+    },
+    {
+      manual: true,
+      formatResult: (r) => {
+        let array = [];
+        array = r?.content?.map((item: Record<string, any>) => {
+          return {
+            label: (
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>{item?.alias || item?.cloudAccountId}</span>
+                <Flex align={'center'}>
+                  <Tag
+                    color={'blue'}
+                    style={{ margin: '0 0 0 8px' }}
+                  >
+                    {item?.count || '-'}
+                  </Tag>
+                </Flex>
+              </div>
+            ),
+            value: item.cloudAccountId,
+          };
+        });
+        return array;
+      },
+    },
+  );
+
   const onClickExportRiskList = async () => {
     const postBody = {
       status: status,
@@ -320,6 +356,7 @@ const RiskManagement: React.FC = () => {
 
   // Table Column Search
   const [ruleIdList, setRuleIdList] = useState<Array<number>>();
+  const [cloudAccountIdList, setCloudAccountIdList] = useState<Array<string>>();
 
   const handleFilterDropdownVisibleChange = async (visible: boolean) => {
     if (visible) {
@@ -329,6 +366,18 @@ const RiskManagement: React.FC = () => {
         ...formActionRef?.current?.getFieldsValue(),
       };
       await requestRiskListGroupByRuleName(postBody);
+    }
+  };
+
+  // Handle cloud account filter dropdown visibility change
+  const handleCloudAccountFilterDropdownVisibleChange = async (visible: boolean) => {
+    if (visible) {
+      const postBody = {
+        status: status,
+        ...form?.getFieldsValue(),
+        ...formActionRef?.current?.getFieldsValue(),
+      };
+      await requestRiskListGroupByCloudAccount(postBody);
     }
   };
 
@@ -356,6 +405,44 @@ const RiskManagement: React.FC = () => {
     },
     filterDropdownProps: {
       onOpenChange: handleFilterDropdownVisibleChange,
+    },
+    filterIcon: (filtered: boolean) => (
+      <SearchOutlined
+        style={{
+          color: filtered ? '#1677ff' : '#1890ff',
+          fontSize: '18px',
+          fontWeight: 'bold'
+        }}
+      />
+    ),
+    destroyOnClose: true,
+  });
+
+  // Get cloud account column search properties
+  const getCloudAccountColumnSearchProps = () => ({
+    filterDropdown: ({ confirm }: { confirm: any }) => {
+      return (
+        <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
+          <Select
+            maxTagCount={'responsive'}
+            allowClear
+            mode={'multiple'}
+            placeholder={intl.formatMessage({
+              id: 'common.select.text.placeholder',
+            })}
+            popupMatchSelectWidth={false}
+            options={riskListGroupByCloudAccountList || []}
+            onChange={debounce((value): void => {
+              setCloudAccountIdList(value);
+              confirm();
+            }, 1000)}
+            style={{ minWidth: 320 }}
+          />
+        </div>
+      );
+    },
+    filterDropdownProps: {
+      onOpenChange: handleCloudAccountFilterDropdownVisibleChange,
     },
     filterIcon: (filtered: boolean) => (
       <SearchOutlined
@@ -434,38 +521,6 @@ const RiskManagement: React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'home.module.inform.columns.ruleTypeName',
-      }),
-      dataIndex: 'ruleTypeIdList',
-      valueType: 'cascader',
-      hideInTable: true,
-      colSize: 1, // Rule type takes 1/4 width (6/24)
-      fieldProps: {
-        multiple: true,
-        options: ruleTypeList,
-        showCheckedStrategy: SHOW_CHILD,
-        fieldNames: {
-          label: 'typeName',
-          value: 'id',
-          children: 'childList',
-        },
-      },
-    },
-    {
-      title: intl.formatMessage({
-        id: 'layout.routes.title.ruleGroup',
-      }),
-      dataIndex: 'ruleGroupIdList',
-      valueType: 'select',
-      valueEnum: valueListAsValueEnum(ruleGroupList),
-      hideInTable: true,
-      colSize: 1, // Rule group takes 1/4 width (6/24)
-      fieldProps: {
-        mode: 'multiple',
-      },
-    },
-    {
-      title: intl.formatMessage({
         id: 'common.select.label.cloudAccount',
       }),
       dataIndex: 'cloudAccountId',
@@ -497,6 +552,39 @@ const RiskManagement: React.FC = () => {
             </Flex>
           </div>
         );
+      },
+      ...getCloudAccountColumnSearchProps(),
+    },
+    {
+      title: intl.formatMessage({
+        id: 'home.module.inform.columns.ruleTypeName',
+      }),
+      dataIndex: 'ruleTypeIdList',
+      valueType: 'cascader',
+      hideInTable: true,
+      colSize: 1, // Rule type takes 1/4 width (6/24)
+      fieldProps: {
+        multiple: true,
+        options: ruleTypeList,
+        showCheckedStrategy: SHOW_CHILD,
+        fieldNames: {
+          label: 'typeName',
+          value: 'id',
+          children: 'childList',
+        },
+      },
+    },
+    {
+      title: intl.formatMessage({
+        id: 'layout.routes.title.ruleGroup',
+      }),
+      dataIndex: 'ruleGroupIdList',
+      valueType: 'select',
+      valueEnum: valueListAsValueEnum(ruleGroupList),
+      hideInTable: true,
+      colSize: 1, // Rule group takes 1/4 width (6/24)
+      fieldProps: {
+        mode: 'multiple',
       },
     },
     {
@@ -583,6 +671,17 @@ const RiskManagement: React.FC = () => {
     },
     {
       title: intl.formatMessage({
+        id: 'common.table.columns.assetStatus',
+      }),
+      dataIndex: 'resourceStatus',
+      valueType: 'select',
+      valueEnum: valueListAsValueEnum(AssetStatusList),
+      align: 'left',
+      hideInTable: true,
+      colSize: 1, // Asset status takes 1/4 width (6/24)
+    },
+    {
+      title: intl.formatMessage({
         id: 'cloudAccount.extend.title.asset.name',
       }),
       dataIndex: 'resourceNameDisplay',
@@ -647,17 +746,7 @@ const RiskManagement: React.FC = () => {
         }),
       },
     },
-    {
-      title: intl.formatMessage({
-        id: 'common.table.columns.assetStatus',
-      }),
-      dataIndex: 'resourceStatus',
-      valueType: 'select',
-      valueEnum: valueListAsValueEnum(AssetStatusList),
-      align: 'left',
-      hideInTable: true,
-      colSize: 1, // Asset status takes 1/4 width (6/24)
-    },
+    
     {
       title: intl.formatMessage({
         id: 'home.module.inform.columns.riskLevel',

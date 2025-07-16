@@ -29,6 +29,7 @@ import com.alipay.common.enums.LogType;
 import com.alipay.common.utils.ListUtils;
 import com.alipay.dao.context.UserInfoContext;
 import com.alipay.dao.context.UserInfoDTO;
+import com.alipay.dao.dto.CloudAccountStatisticsDTO;
 import com.alipay.dao.dto.OperationLogDTO;
 import com.alipay.dao.dto.RuleScanResultDTO;
 import com.alipay.dao.dto.RuleStatisticsDTO;
@@ -101,6 +102,20 @@ public class RiskController {
         dto.setRuleTypeIdList(ListUtils.setList(req.getRuleTypeIdList()));
 
         List<RuleStatisticsDTO> ruleNameDTOS = riskService.listRuleStatistics(dto);
+
+        return new ApiResponse<>(ruleNameDTOS);
+    }
+
+    @AuthenticateToken
+    @PostMapping("/listCloudAccountStatistics")
+    public ApiResponse<List<CloudAccountStatisticsDTO>> listCloudAccountStatistics(@RequestBody QueryRiskRequest req) {
+        RuleScanResultDTO dto = RuleScanResultDTO.builder().build();
+        BeanUtils.copyProperties(req, dto);
+
+        dto.setResourceTypeList(ListUtils.setList(req.getResourceTypeList()));
+        dto.setRuleTypeIdList(ListUtils.setList(req.getRuleTypeIdList()));
+
+        List<CloudAccountStatisticsDTO> ruleNameDTOS = riskService.listCloudAccountStatistics(dto);
 
         return new ApiResponse<>(ruleNameDTOS);
     }
