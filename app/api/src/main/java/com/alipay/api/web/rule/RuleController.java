@@ -276,7 +276,7 @@ public class RuleController {
     @AuthenticateToken
     @PostMapping("/queryEffectRuleList")
     public ApiResponse<ListVO<RuleVO>> queryEffectRuleList(@RequestBody ListRuleRequest req) {
-        PreventingSQLJoint.checkSortParamField(req.getSortParam(), List.of("riskCount"));
+        PreventingSQLJoint.checkSortParamField(req.getSortParam(), List.of("riskCount", "lastScanTime"));
         PreventingSQLJoint.checkSortTypeField(req.getSortType());
         ListVO<RuleVO> result = ruleService.queryEffectRuleList(req);
         return new ApiResponse<>(result);
@@ -329,7 +329,6 @@ public class RuleController {
         }
         return ruleService.batchAddTenantSelectRule(req.getRuleCodeList());
     }
-
 
 
     /**
