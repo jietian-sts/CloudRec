@@ -130,6 +130,11 @@ public class ScanServiceImpl implements ScanService {
      */
     private static final String localLockPrefix = "rule::scan::running::";
 
+    /**
+     * 最大等待时间
+     */
+    private static final int MAX_WAIT_HOURS = 6;
+
     @Override
     public void scanByGroup(Long groupId) {
         RuleGroup ruleGroup = ruleGroupRepository.findOne(groupId);
@@ -340,9 +345,9 @@ public class ScanServiceImpl implements ScanService {
             return new ApiResponse<>(ApiResponse.FAIL_CODE, "The current rule is running");
         }
 
-        // 业务逻辑判断，防止1小时未运行完成的规则，再次运行
-        if (ruleAgg.getIsRunning() == 1) {
-            return new ApiResponse<>(ApiResponse.FAIL_CODE, "The current rule is running");
+        // 上次扫描时间是否在12小时内
+        if (ruleAgg.getIsRunning() == 1 && DateUtil.getDiffHours(new Date(), ruleAgg.getLastScanTimeStart()) < MAX_WAIT_HOURS) {
+            return new ApiResponse<>(ApiResponse.FAIL_CODE, "The current rule is running, please try again after 6 hours");
         }
 
         // 修改状态
