@@ -256,8 +256,12 @@ const RiskManagement: React.FC = () => {
     {
       manual: true,
       formatResult: (r) => {
+        const originalData = r?.content || [];
+        // Store original data for search filtering
+        setOriginalRuleData(originalData);
+        
         let array = [];
-        array = r?.content?.map((item: Record<string, any>) => {
+        array = originalData.map((item: Record<string, any>) => {
           return {
             label: (
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -280,6 +284,12 @@ const RiskManagement: React.FC = () => {
     },
   );
 
+  // Store original cloud account data for search filtering
+  const [originalCloudAccountData, setOriginalCloudAccountData] = useState<Record<string, any>[]>([]);
+  
+  // Store original rule data for search filtering
+  const [originalRuleData, setOriginalRuleData] = useState<Record<string, any>[]>([]);
+
   const {
     data: cloudAccountStatisticsList,
     run: requestCloudAccountStatistics,
@@ -290,8 +300,12 @@ const RiskManagement: React.FC = () => {
     {
       manual: true,
       formatResult: (r) => {
+        const originalData = r?.content || [];
+        // Store original data for search filtering
+        setOriginalCloudAccountData(originalData);
+        
         let array = [];
-        array = r?.content?.map((item: Record<string, any>) => {
+        array = originalData.map((item: Record<string, any>) => {
           return {
             label: (
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -396,11 +410,33 @@ const RiskManagement: React.FC = () => {
             maxTagCount={'responsive'}
             allowClear
             mode={'multiple'}
+            showSearch
             placeholder={intl.formatMessage({
               id: 'common.select.text.placeholder',
             })}
             popupMatchSelectWidth={false}
             options={riskListGroupByRuleNameList || []}
+            filterOption={(input, option) => {
+              // Filter by ruleName and ruleCode for better search experience
+              // Since label is a React component, we need to search in the original data
+              const searchText = input.toLowerCase();
+              const value = option?.value?.toString().toLowerCase() || '';
+              
+              // Find the original data item to get ruleName and ruleCode
+              const originalItem = originalRuleData?.find(
+                (item: any) => item.ruleCode === option?.value
+              );
+              
+              if (originalItem) {
+                // Search in both ruleName and ruleCode from the original data
+                const ruleName = originalItem.ruleName?.toLowerCase() || '';
+                const ruleCode = originalItem.ruleCode?.toLowerCase() || '';
+                return ruleName.includes(searchText) || ruleCode.includes(searchText) || value.includes(searchText);
+              }
+              
+              // Fallback to value search if original item not found
+              return value.includes(searchText);
+            }}
             onChange={(value): void => {
               // Update ruleCodeList in formActionRef instead of using ruleIdList
               formActionRef.current?.setFieldValue('ruleCodeList', value);
@@ -528,11 +564,33 @@ const RiskManagement: React.FC = () => {
           <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
             <Select
               allowClear
+              showSearch
               placeholder={intl.formatMessage({
                 id: 'common.select.text.placeholder',
               })}
               popupMatchSelectWidth={false}
               options={cloudAccountStatisticsList || []}
+              filterOption={(input, option) => {
+                // Filter by cloudAccountId and alias for better search experience
+                // Since label is a React component, we need to search in the original data
+                const searchText = input.toLowerCase();
+                const value = option?.value?.toString().toLowerCase() || '';
+                
+                // Find the original data item to get alias and cloudAccountId
+                const originalItem = originalCloudAccountData?.find(
+                  (item: any) => item.cloudAccountId === option?.value
+                );
+                
+                if (originalItem) {
+                  // Search in both alias and cloudAccountId from the original data
+                  const alias = originalItem.alias?.toLowerCase() || '';
+                  const cloudAccountId = originalItem.cloudAccountId?.toLowerCase() || '';
+                  return alias.includes(searchText) || cloudAccountId.includes(searchText) || value.includes(searchText);
+                }
+                
+                // Fallback to value search if original item not found
+                return value.includes(searchText);
+              }}
               onChange={(value): void => {
                 formActionRef.current?.setFieldValue('cloudAccountId', value);
                 // Update filterFactor to include the selected cloudAccountId
