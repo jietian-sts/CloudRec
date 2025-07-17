@@ -24,7 +24,7 @@ import com.alipay.application.service.collector.domain.repo.CollectorTaskReposit
 import com.alipay.application.service.collector.enums.CollectorTaskType;
 import com.alipay.application.service.common.utils.CacheUtil;
 import com.alipay.application.service.common.utils.DbCacheUtil;
-import com.alipay.application.service.resource.IQueryResource;
+import com.alipay.application.service.resource.DelResourceService;
 import com.alipay.application.service.risk.domain.repo.RiskRepository;
 import com.alipay.application.share.request.account.AcceptAccountRequest;
 import com.alipay.application.share.request.account.CreateCollectTaskRequest;
@@ -41,7 +41,6 @@ import com.alipay.dao.context.UserInfoContext;
 import com.alipay.dao.context.UserInfoDTO;
 import com.alipay.dao.dto.CloudAccountDTO;
 import com.alipay.dao.mapper.CloudAccountMapper;
-import com.alipay.dao.mapper.RuleScanResultMapper;
 import com.alipay.dao.mapper.TenantMapper;
 import com.alipay.dao.po.CloudAccountPO;
 import com.alipay.dao.po.DbCachePO;
@@ -70,11 +69,9 @@ public class CloudAccountServiceImpl implements CloudAccountService {
     @Resource
     private CloudAccountMapper cloudAccountMapper;
     @Resource
-    private RuleScanResultMapper ruleScanResultMapper;
-    @Resource
     private RiskRepository riskRepository;
     @Resource
-    private IQueryResource iQueryResource;
+    private DelResourceService delResourceService;
     @Resource
     private TenantMapper tenantMapper;
     @Resource
@@ -195,7 +192,7 @@ public class CloudAccountServiceImpl implements CloudAccountService {
         riskRepository.remove(cloudAccountPO.getCloudAccountId());
 
         // delete account resource information
-        iQueryResource.removeResource(cloudAccountPO.getCloudAccountId());
+        delResourceService.removeResource(cloudAccountPO.getCloudAccountId());
 
         dbCacheUtil.clear(cacheKey);
 

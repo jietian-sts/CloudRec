@@ -176,16 +176,6 @@ public class QueryResourceImpl implements IQueryResource {
     }
 
     @Override
-    public void removeResource(String cloudAccountId) {
-        while (true) {
-            int i = cloudResourceInstanceMapper.deleteByCloudAccountId(cloudAccountId);
-            if (i == 0) {
-                break;
-            }
-        }
-    }
-
-    @Override
     public ApiResponse<List<ResourcePO>> queryTypeList(String platform) {
         List<ResourcePO> list = resourceMapper.findByPlatform(platform);
         return new ApiResponse<>(list);
