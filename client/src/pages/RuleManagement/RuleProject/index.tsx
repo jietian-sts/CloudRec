@@ -37,11 +37,23 @@ import SelectedRules from './components/SelectedRules';
 import styles from './index.less';
 const { SHOW_CHILD } = Cascader;
 
-// Rule Name Custom-Filter-Option
+/**
+ * Custom filter option for rule name selection
+ * Supports filtering by both label and value
+ * @param input - The search input string
+ * @param item - The option item containing label and value
+ * @returns boolean indicating if the item matches the filter
+ */
 const filterOption = (
   input: string,
   item: { [key: string]: string },
-): boolean => item.label?.includes(input);
+): boolean => {
+  const searchText = input.toLowerCase();
+  const label = item.label?.toLowerCase() || '';
+  const value = item.value?.toLowerCase() || '';
+  
+  return label.includes(searchText) || value.includes(searchText);
+};
 
 const RuleProject: React.FC = () => {
   // Global Props
@@ -168,7 +180,7 @@ const RuleProject: React.FC = () => {
         className={styles['customFilterCard']}
       >
         <Form form={form}>
-          <Row gutter={[24, 10]}>
+          <Row gutter={[24, 10]} style={{ marginBottom: 20 }}>
             <Col span={24}>
               <Form.Item
                 name="platformList"
@@ -200,26 +212,6 @@ const RuleProject: React.FC = () => {
             </Col>
             <Col span={6}>
               <Form.Item
-                name="ruleCodeList"
-                label={intl.formatMessage({
-                  id: 'home.module.inform.columns.ruleName',
-                })}
-                style={{ marginBottom: 0 }}
-              >
-                <Select
-                  // @ts-ignore
-                  filterOption={filterOption}
-                  placeholder={intl.formatMessage({
-                    id: 'common.select.text.placeholder',
-                  })}
-                  allowClear
-                  options={allRuleList}
-                  mode={'multiple'}
-                />
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item
                 name="resourceTypeList"
                 label={intl.formatMessage({
                   id: 'cloudAccount.extend.title.asset.type',
@@ -235,24 +227,6 @@ const RuleProject: React.FC = () => {
                   showCheckedStrategy={SHOW_CHILD}
                   allowClear
                   showSearch
-                />
-              </Form.Item>
-            </Col>
-            <Col span={6}>
-              <Form.Item
-                name="ruleGroupIdList"
-                label={intl.formatMessage({
-                  id: 'layout.routes.title.ruleGroup',
-                })}
-                style={{ marginBottom: 0, width: '100%' }}
-              >
-                <Select
-                  placeholder={intl.formatMessage({
-                    id: 'common.select.text.placeholder',
-                  })}
-                  options={ruleGroupList}
-                  allowClear
-                  mode={'multiple'}
                 />
               </Form.Item>
             </Col>
@@ -281,7 +255,47 @@ const RuleProject: React.FC = () => {
                 />
               </Form.Item>
             </Col>
-            <Col span={24}>
+            <Col span={6}>
+              <Form.Item
+                name="ruleGroupIdList"
+                label={intl.formatMessage({
+                  id: 'layout.routes.title.ruleGroup',
+                })}
+                style={{ marginBottom: 0, width: '100%' }}
+              >
+                <Select
+                  placeholder={intl.formatMessage({
+                    id: 'common.select.text.placeholder',
+                  })}
+                  options={ruleGroupList}
+                  allowClear
+                  mode={'multiple'}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={18}>
+              <Form.Item
+                name="ruleCodeList"
+                label={intl.formatMessage({
+                  id: 'home.module.inform.columns.ruleName',
+                })}
+                style={{ marginBottom: 0 }}
+              >
+                <Select
+                  // @ts-ignore
+                  filterOption={filterOption}
+                  placeholder={intl.formatMessage({
+                    id: 'common.select.text.placeholder',
+                  })}
+                  allowClear
+                  options={allRuleList}
+                  mode={'multiple'}
+                />
+              </Form.Item>
+            </Col>
+            
+            
+            <Col span={6}>
               <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
                 <Space>
                   <Button
