@@ -121,10 +121,6 @@
       from rule r INNER JOIN rule_group_rel rgr ON r.id = rgr.rule_id INNER JOIN rule_group rg ON rgr.rule_group_id =
       rg.id INNER JOIN tenant_rule tr ON r.rule_code = tr.rule_code
       LEFT JOIN rule_scan_risk_count_statistics rsrcs ON r.id = rsrcs.rule_id
-      AND rsrcs.tenant_id IN
-      <foreach collection="tenantIdList" item="tenantId" open="(" separator="," close=")">
-          #{tenantId}
-      </foreach>
       <include refid="getLitWhere"></include>
       GROUP BY r.id
       <choose>
@@ -179,6 +175,12 @@
               AND r.id IN
               <foreach collection="ruleIdList" item="item" open="(" separator="," close=")">
                   #{item}
+              </foreach>
+          </if>
+          <if test="tenantIdList != null and tenantIdList.size() >0">
+              AND tr.tenant_id IN
+              <foreach collection="tenantIdList" item="tenantId" open="(" separator="," close=")">
+                  #{tenantId}
               </foreach>
           </if>
           <if test="ruleName != null and ruleName != ''">
