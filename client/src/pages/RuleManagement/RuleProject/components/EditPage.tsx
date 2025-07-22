@@ -207,7 +207,8 @@ const EditPage: React.FC = () => {
     loading: resourceExampleDataLoading,
   } = useRequest(
     (values) => {
-      return queryResourceExampleData(values);
+      // Using type assertion to match the expected API.RuleGroupInfo type
+      return queryResourceExampleData(values as API.RuleGroupInfo);
     },
     {
       formatResult: (result): void => {
@@ -588,30 +589,58 @@ const EditPage: React.FC = () => {
     if (type === EVALUATE_TYPE_LIST[0].value) {
       const instanceId = form.getFieldValue('instanceId');
       
+      // Prepare the base postBody with common fields
+      postBody.ruleRego = codeEditor;
+      postBody.globalVariableConfigIdList = selectedRowKeys;
+      postBody.linkedDataList = formData?.linkedDataList || [];
+      
       // If instanceId is provided, call queryResourceExampleData first
       if (instanceId) {
         try {
-          const exampleDataParams = {
+          // Prepare parameters for resource example data query
+          // Using type assertion to match the expected API.RuleGroupInfo type
+          const exampleDataParams: any = {
             platform: form.getFieldValue('platform'),
             resourceType: form.getFieldValue('resourceType'),
             linkedDataList: formData?.linkedDataList || [],
             resourceId: instanceId
           };
           
-          // Wait for the API call to complete and update the inputEditor
-          await requestResourceExampleData(exampleDataParams);
+          // Call the API and get the result directly
+          const result = await queryResourceExampleData(exampleDataParams);
           
-          // Wait for 2 seconds after the input editor is updated to ensure it's fully rendered
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          // Process the result and update the input for the next API call
+          if (result.msg === 'success') {
+            const { content } = result;
+            try {
+              // Create JSON string for the input
+              const jsonString = JSON.stringify(content, null, 4) || '';
+              
+              // Update the React state (this is async and might not be reflected immediately)
+              setInputEditor(jsonString);
+              
+              // But also use the value directly in the postBody
+              postBody.input = jsonString;
+              
+              // Wait for the UI to update before proceeding
+              await new Promise(resolve => setTimeout(resolve, 2000));
+            } catch (e) {
+              console.info('Error processing input data:', e);
+              // If there's an error, use the current inputEditor state
+              postBody.input = inputEditor;
+            }
+          } else {
+            // If the API call wasn't successful, use the current inputEditor state
+            postBody.input = inputEditor;
+          }
         } catch (error) {
+          console.error('Error fetching resource example data:', error);
           return;
         }
+      } else {
+        // If no instanceId, just use the current inputEditor state
+        postBody.input = inputEditor;
       }
-      
-      postBody.ruleRego = codeEditor;
-      postBody.input = inputEditor;
-      postBody.globalVariableConfigIdList = selectedRowKeys;
-      postBody.linkedDataList = formData?.linkedDataList || [];
       
       if (instanceId) {
         postBody.instanceId = instanceId;
@@ -676,6 +705,7 @@ const EditPage: React.FC = () => {
   const onClickNextStep = (): any => {
     form.validateFields().then(async (values): Promise<any> => {
       if (current === 0) {
+        // Using type assertion to match the expected API.RuleGroupInfo type
         await requestResourceExampleData({
           platform: values?.platform,
           resourceType: values?.resourceType,
