@@ -584,11 +584,37 @@ const EditPage: React.FC = () => {
   const onClickEvaluate = async (): Promise<any> => {
     const postBody: Record<string, any> = {};
     const type = form.getFieldValue('type');
+    
     if (type === EVALUATE_TYPE_LIST[0].value) {
+      const instanceId = form.getFieldValue('instanceId');
+      
+      // If instanceId is provided, call queryResourceExampleData first
+      if (instanceId) {
+        try {
+          const exampleDataParams = {
+            platform: form.getFieldValue('platform'),
+            resourceType: form.getFieldValue('resourceType'),
+            linkedDataList: formData?.linkedDataList || [],
+            resourceId: instanceId
+          };
+          
+          await requestResourceExampleData(exampleDataParams);
+          
+          // Wait a moment for the input editor to be updated
+          await new Promise(resolve => setTimeout(resolve, 100));
+        } catch (error) {
+          return;
+        }
+      }
+      
       postBody.ruleRego = codeEditor;
       postBody.input = inputEditor;
       postBody.globalVariableConfigIdList = selectedRowKeys;
       postBody.linkedDataList = formData?.linkedDataList || [];
+      
+      if (instanceId) {
+        postBody.instanceId = instanceId;
+      }
     } else {
       // Tenant ||  Cloud Account
       postBody.type = type;
@@ -601,14 +627,16 @@ const EditPage: React.FC = () => {
       );
       postBody.linkedDataList = formData?.linkedDataList || [];
       if (type === EVALUATE_TYPE_LIST[1].value && !selectId) {
-        return messageApi.error(`请选择${EVALUATE_TYPE_LIST[1].label}`);
+        return messageApi.error(`Please Select${EVALUATE_TYPE_LIST[1].label}`);
       } else if (type === EVALUATE_TYPE_LIST[2].value && !selectId) {
-        return messageApi.error(`请选择${EVALUATE_TYPE_LIST[2].label}`);
+        return messageApi.error(`Please Select${EVALUATE_TYPE_LIST[2].label}`);
       }
     }
+    
     setEvaluateRegoLoading(true);
     const res: API.Result_T_ = await evaluateRego(postBody);
     setEvaluateRegoLoading(false);
+    
     if (type === EVALUATE_TYPE_LIST[0].value) {
       if (res.code === 200 && res.msg === 'success') {
         messageApi.success(
@@ -1161,6 +1189,7 @@ const EditPage: React.FC = () => {
                                 style={{ width: 114 }}
                                 onChange={(value): void => {
                                   form.setFieldValue('selectId', null);
+                                  form.setFieldValue('instanceId', null);
                                   if (value === EVALUATE_TYPE_LIST[2].value)
                                     debounceFetcher();
                                 }}
@@ -1169,7 +1198,20 @@ const EditPage: React.FC = () => {
                             <ProFormDependency name={['type']}>
                               {({ type }) => {
                                 let element = <></>;
-                                if (type === EVALUATE_TYPE_LIST[1].value) {
+                                if (type === EVALUATE_TYPE_LIST[0].value) {
+                                  // Show instanceId input for example data type
+                                  element = (
+                                    <Form.Item name="instanceId" noStyle>
+                                      <Input
+                                        placeholder={intl.formatMessage({
+                                          id: 'rule.extend.placeholder.input',
+                                        })}
+                                        style={{ width: 160 }}
+                                        allowClear
+                                      />
+                                    </Form.Item>
+                                  );
+                                } else if (type === EVALUATE_TYPE_LIST[1].value) {
                                   element = (
                                     <Form.Item noStyle name={'selectId'}>
                                       <Select

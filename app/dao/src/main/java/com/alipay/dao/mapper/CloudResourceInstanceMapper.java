@@ -39,6 +39,10 @@ public interface CloudResourceInstanceMapper {
                                     @Param("cloudAccountId") String cloudAccountId,
                                     @Param("resourceId") String resourceId);
 
+    CloudResourceInstancePO findByResourceId(@Param("platform") String platform,
+                                             @Param("resourceType") String resourceType,
+                                             @Param("resourceId") String resourceId);
+
     CloudResourceInstancePO findExampleLimit1(@Param("platform") String platform,
                                               @Param("resourceType") String resourceType);
 

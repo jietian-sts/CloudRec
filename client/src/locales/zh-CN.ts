@@ -321,6 +321,7 @@ export default {
     'module.text.batch.test':'批量检测',
     'module.text.batch.remove':'批量移出自选',
     'module.text.batch.add.to.favorites':'批量自选',
+    'extend.placeholder.input': '请输入资产ID',
   },
   risk: {
     'module.text.not.fixed': '未修复',

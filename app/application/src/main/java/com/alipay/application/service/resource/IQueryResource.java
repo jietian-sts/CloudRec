@@ -48,10 +48,10 @@ public interface IQueryResource {
     List<CloudResourceInstancePO> queryByCond(String platform,
                                               String resourceType,
                                               String cloudAccountId,
-                                              Long scrollId,Integer size);
+                                              Long scrollId, Integer size);
 
 
-    List<CloudResourceInstancePO> queryByCond(String platform, String resourceType, String cloudAccountId, Integer limit);
+    List<CloudResourceInstancePO> queryByCondX(String platform, String resourceType, String cloudAccountId, String resourceId, Integer limit);
 
 
     CloudResourceInstancePO queryResource(IQueryResourceDTO request);

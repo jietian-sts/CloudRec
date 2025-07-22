@@ -324,6 +324,7 @@ export default {
     'module.text.batch.test':'Batch test',
     'module.text.batch.remove':'Batch remove',
     'module.text.batch.add.to.favorites':'Batch Add to Favorites',
+    'extend.placeholder.input': 'Input Asset ID',
   },
   risk: {
     'module.text.not.fixed': 'Not fixed',
