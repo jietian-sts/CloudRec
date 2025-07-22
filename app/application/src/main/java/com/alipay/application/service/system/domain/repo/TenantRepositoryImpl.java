@@ -178,7 +178,15 @@ public class TenantRepositoryImpl implements TenantRepository {
             return;
         }
 
+        // Delete tenant select rule
         tenantRuleMapper.deleteByPrimaryKey(tenantRulePO.getId());
+
+        // Delete risk data
+        if (isDefaultRule(tenantRulePO.getRuleCode()) && !TenantConstants.GLOBAL_TENANT.equals(tenantPO.getTenantName())) {
+            log.info("Non-global tenants cancel self-selection and do not delete data");
+            return;
+        }
+
         if (TenantConstants.GLOBAL_TENANT.equals(tenantPO.getTenantName())) {
             // Delete risk data for non-selected rules tenants
             List<TenantRulePO> selectRuleList = tenantRuleMapper.findByCode(ruleCode);

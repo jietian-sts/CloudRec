@@ -598,10 +598,11 @@ const EditPage: React.FC = () => {
             resourceId: instanceId
           };
           
+          // Wait for the API call to complete and update the inputEditor
           await requestResourceExampleData(exampleDataParams);
           
-          // Wait a moment for the input editor to be updated
-          await new Promise(resolve => setTimeout(resolve, 100));
+          // Wait for 2 seconds after the input editor is updated to ensure it's fully rendered
+          await new Promise(resolve => setTimeout(resolve, 2000));
         } catch (error) {
           return;
         }
