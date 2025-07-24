@@ -10,6 +10,14 @@ declare namespace API {
     };
   }
 
+  interface Result_List {
+    code: number;
+    errorCode: string;
+    errorMsg: string;
+    msg: string;
+    content: Array<Record<string, any>>;
+  }
+
   interface Result_String_ {
     msg?: string;
     code?: number;
@@ -164,6 +172,7 @@ declare namespace API {
     tenantId?: number;
     tenantName?: string;
     roleName?: string;
+    selectTenantRoleName?: string;
     token?: string;
     tenantIds?: string;
   }
@@ -180,6 +189,7 @@ declare namespace API {
     memberCount?: number;
     tenantId?: number;
     pageLimit?: boolean;
+    disable?: boolean;
   }
 
   interface AgentInfo {

@@ -18,6 +18,7 @@ package com.alipay.application.service.system;
 
 import com.alipay.application.service.system.domain.Tenant;
 import com.alipay.application.service.system.domain.User;
+import com.alipay.application.service.system.domain.enums.RoleNameType;
 import com.alipay.application.service.system.domain.enums.Status;
 import com.alipay.application.service.system.domain.repo.TenantRepository;
 import com.alipay.application.service.system.domain.repo.UserRepository;
@@ -77,7 +78,8 @@ public class TenantServiceImpl implements TenantService {
             return listVO;
         }
 
-        if (tenantDTO.getPageLimit() !=null && tenantDTO.getPageLimit()) {
+        if (tenantDTO.getPageLimit() != null && tenantDTO.getPageLimit()) {
+            // 只返回当前用户加入的租户列表
             tenantDTO.setOffset();
             List<TenantPO> list = tenantMapper.findList(tenantDTO);
             List<TenantVO> collect = list.stream().map(TenantVO::toVO).sorted(tenantComparator()).collect(Collectors.toList());
@@ -93,6 +95,26 @@ public class TenantServiceImpl implements TenantService {
             listVO.setData(collect);
         }
         return listVO;
+    }
+
+    @Override
+    public List<TenantVO> findListV2(String userId) {
+        User user = userRepository.find(userId);
+        if (user == null) {
+            return List.of();
+        }
+
+        if (Objects.equals(user.getRoleName(), RoleNameType.admin)) {
+            List<TenantPO> list = tenantMapper.findAll();
+            return list.stream().map(TenantVO::toVO).sorted(tenantComparator()).toList();
+        } else {
+            List<TenantPO> list = tenantMapper.findListByUserId(userId);
+            if (CollectionUtils.isEmpty(list)) {
+                return List.of();
+            }
+
+            return list.stream().map(TenantVO::toVO).sorted(tenantComparator()).toList();
+        }
     }
 
     @Override
@@ -137,7 +159,7 @@ public class TenantServiceImpl implements TenantService {
         }
 
         tenantDTO.setOffset();
-        List<UserPO> list = userMapper.findMemberList(tenantDTO);
+        List<UserPO> list = tenantMapper.findMemberList(tenantDTO);
         List<UserVO> collect = list.stream().map(UserVO::toVo).toList();
         listVO.setTotal(count);
         listVO.setData(collect);
@@ -242,17 +264,17 @@ public class TenantServiceImpl implements TenantService {
 
         List<Tenant> tenantList = new ArrayList<>();
         //check before tenant&user
-        if(StringUtils.isNotBlank(tenantIds)){
+        if (StringUtils.isNotBlank(tenantIds)) {
             //check before tenant_user
             List<TenantPO> tenantPOList = tenantMapper.findListByUserId(user.getUserId());
-            for (TenantPO tenantPO : tenantPOList){
+            for (TenantPO tenantPO : tenantPOList) {
                 tenantRepository.remove(user.getId(), tenantPO.getId());
             }
 
             for (String tenantIdStr : StringUtils.split(tenantIds, ",")) {
                 Long tenantId = Long.valueOf(tenantIdStr);
                 Tenant tenant = tenantRepository.find(tenantId);
-                if(Objects.nonNull(tenant)){
+                if (Objects.nonNull(tenant)) {
                     tenantRepository.join(user.getId(), tenantId);
                     tenantList.add(tenant);
                 }
@@ -260,15 +282,41 @@ public class TenantServiceImpl implements TenantService {
         }
 
         //若没有符合的租户，默认设置default租户
-        if(CollectionUtils.isEmpty(tenantList)){
+        if (CollectionUtils.isEmpty(tenantList)) {
             joinDefaultTenant(userId);
             Tenant tenant = tenantRepository.find(TenantConstants.DEFAULT_TENANT);
             tenantList.add(tenant);
-        }else {
+        } else {
             //更新user携带租户
             user.setTenantId(tenantList.get(0).getId());
             userRepository.save(user);
         }
         return tenantList;
+    }
+
+    @Override
+    public void changeUserTenantRole(String roleName, Long tenantId, String userId) {
+        User user = userRepository.find(userId);
+        if (user == null) {
+            throw new BizException("User does not exist:" + userId);
+        }
+
+        Tenant tenant = tenantRepository.find(tenantId);
+        if (tenant == null) {
+            throw new BizException("Tenant does not exist:" + tenantId);
+        }
+
+        int count = tenantRepository.exist(userId, tenantId);
+        if (count == 0) {
+            throw new BizException("The user has not joined the tenant:" + tenantId);
+        }
+
+//        // The current user must be an administrator under the tenant to modify the tenant member role
+//        boolean isTenantAdmin = tenantRepository.isTenantAdmin(UserInfoContext.getCurrentUser().getUserId(), tenantId);
+//        if (!isTenantAdmin){
+//            throw new BizException("The user is not the tenant admin:" + tenantId);
+//        }
+
+        tenantRepository.changeUserTenantRole(roleName, tenantId, userId);
     }
 }

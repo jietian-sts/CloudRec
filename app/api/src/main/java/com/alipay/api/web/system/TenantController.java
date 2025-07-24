@@ -22,10 +22,7 @@ import com.alipay.api.web.system.request.QueryTenantListRequest;
 import com.alipay.application.service.system.TenantService;
 import com.alipay.application.service.system.domain.Tenant;
 import com.alipay.application.service.system.domain.enums.Status;
-import com.alipay.application.share.request.admin.ChangeTenantRequest;
-import com.alipay.application.share.request.admin.JoinUserRequest;
-import com.alipay.application.share.request.admin.QueryMemberRequest;
-import com.alipay.application.share.request.admin.SaveTenantRequest;
+import com.alipay.application.share.request.admin.*;
 import com.alipay.application.share.vo.ApiResponse;
 import com.alipay.application.share.vo.ListVO;
 import com.alipay.application.share.vo.system.TenantVO;
@@ -34,6 +31,7 @@ import com.alipay.dao.context.UserInfoContext;
 import com.alipay.dao.context.UserInfoDTO;
 import com.alipay.dao.dto.TenantDTO;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.BeanUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -70,6 +68,16 @@ public class TenantController {
         BeanUtils.copyProperties(request, tenantDTO);
         ListVO<TenantVO> listVO = tenantService.findList(tenantDTO);
         return new ApiResponse<>(listVO);
+    }
+
+    /**
+     * Get a list of tenants
+     */
+    @AuthenticateToken
+    @PostMapping("/queryTenantListV2")
+    public ApiResponse<List<TenantVO>> findListV2(HttpServletRequest request) {
+        List<TenantVO> list = tenantService.findListV2(UserInfoContext.getCurrentUser().getUserId());
+        return new ApiResponse<>(list);
     }
 
     @GetMapping("/queryAllTenantList")
@@ -151,6 +159,20 @@ public class TenantController {
             return new ApiResponse<>(error);
         }
         return tenantService.changeTenant(UserInfoContext.getCurrentUser().getUserId(), changeTenantRequest.getTenantId());
+    }
+
+
+    /**
+     * change tenant user role
+     */
+    @PostMapping("/changeUserTenantRole")
+    @AuthenticateToken
+    public ApiResponse<String> changeUserTenantRole(@Validated @RequestBody ChangeUserTenantRoleRequest request, BindingResult error) {
+        if (error.hasErrors()) {
+            return new ApiResponse<>(error);
+        }
+        tenantService.changeUserTenantRole(request.getRoleName(), request.getTenantId(), request.getUserId());
+        return ApiResponse.SUCCESS;
     }
 
     /**

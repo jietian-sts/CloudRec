@@ -57,4 +57,8 @@ public interface TenantRepository {
     void removeSelectedRule(Long tenantId, String ruleCode);
 
     List<String> findSelectTenantList(String ruleCode);
+
+    boolean isTenantAdmin(String userId, Long tenantId);
+
+    void changeUserTenantRole(String roleName, Long tenantId, String userId);
 }

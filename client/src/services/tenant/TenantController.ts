@@ -18,6 +18,40 @@ export async function queryTenantList(
   });
 }
 
+/** Current user information query interface: POST /api/tenant/queryTenantListV2 */
+export async function queryTenantListV2(
+  body?: API.TenantInfo,
+  options?: { [key: string]: any },
+) {
+  return request<API.Result_List>(`${BASE_URL}/api/tenant/queryTenantListV2`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: {
+      ...body,
+    },
+    ...(options || {}),
+  });
+}
+
+/**Change User Tenant Role POST /api/tenant/changeUserTenantRole */
+export async function changeUserTenantRole(
+  body?: API.TenantInfo,
+  options?: { [key: string]: any },
+) {
+  return request<API.Result>(`${BASE_URL}/api/tenant/changeUserTenantRole`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: {
+      ...body,
+    },
+    ...(options || {}),
+  });
+}
+
 /** Current all tenant information query interface: POST /api/tenant/queryAllTenantList */
 export async function queryAllTenantList(
   params?: { [key: string]: any },

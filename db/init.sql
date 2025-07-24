@@ -925,3 +925,6 @@ CREATE TABLE `tenant_rule` (
   `rule_code` varchar(255) NOT NULL COMMENT '规则code',
   PRIMARY KEY(`id`)
 ) DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '租户自选规则';
+
+ALTER TABLE `tenant_user`
+  ADD COLUMN `role_name` varchar(100) NOT NULL DEFAULT 'user' COMMENT '用户角色，user、admin';

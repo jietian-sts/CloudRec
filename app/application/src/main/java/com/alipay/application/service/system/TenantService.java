@@ -37,6 +37,8 @@ public interface TenantService {
 
     ListVO<TenantVO> findList(TenantDTO tenantDTO);
 
+    List<TenantVO> findListV2(String userId);
+
     ListVO<TenantVO> findAll();
 
 
@@ -61,4 +63,6 @@ public interface TenantService {
     void joinDefaultTenant(String userId);
 
     List<Tenant>  joinUserByTenants(String userId, String tenantIds);
+
+    void changeUserTenantRole(String roleName, Long tenantId, String userId);
 }

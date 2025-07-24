@@ -18,6 +18,7 @@ package com.alipay.application.service.system.domain.repo;
 
 
 import com.alipay.application.service.system.domain.Tenant;
+import com.alipay.application.service.system.domain.enums.RoleNameType;
 import com.alipay.common.constant.TenantConstants;
 import com.alipay.dao.dto.TenantDTO;
 import com.alipay.dao.mapper.*;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /*
@@ -122,6 +124,8 @@ public class TenantRepositoryImpl implements TenantRepository {
             tenantUserPO = new TenantUserPO();
             tenantUserPO.setUserId(uid);
             tenantUserPO.setTenantId(tenantId);
+            // The default role is normal user
+            tenantUserPO.setRoleName(RoleNameType.user.name());
             tenantUserMapper.insertSelective(tenantUserPO);
         }
     }
@@ -211,5 +215,23 @@ public class TenantRepositoryImpl implements TenantRepository {
             }
         }
         return tenantNameList;
+    }
+
+    @Override
+    public boolean isTenantAdmin(String userId, Long tenantId) {
+        UserPO userPO = userMapper.findOne(userId);
+        TenantUserPO tenantUserPO = tenantUserMapper.findOne(userPO.getId(), tenantId);
+        return tenantUserPO != null && Objects.equals(tenantUserPO.getRoleName(), RoleNameType.admin.name());
+    }
+
+    @Override
+    public void changeUserTenantRole(String roleName, Long tenantId, String userId) {
+        UserPO userPO = userMapper.findOne(userId);
+        TenantUserPO tenantUserPO = tenantUserMapper.findOne(userPO.getId(), tenantId);
+        if (tenantUserPO == null) {
+            return;
+        }
+        tenantUserPO.setRoleName(roleName);
+        tenantUserMapper.updateByPrimaryKeySelective(tenantUserPO);
     }
 }
