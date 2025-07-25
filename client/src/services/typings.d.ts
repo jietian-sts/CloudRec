@@ -25,7 +25,7 @@ declare namespace API {
     errorCode?: string;
     errorMsg?: string;
   }
-  
+
   interface Result_Number_ {
     msg?: string;
     code?: number;
@@ -175,6 +175,8 @@ declare namespace API {
     selectTenantRoleName?: string;
     token?: string;
     tenantIds?: string;
+    code?: string;
+    inviteCode?: string;
   }
 
   interface TenantInfo {
@@ -209,7 +211,7 @@ declare namespace API {
   }
 
   interface TenantUser {
-    userId: number;
+    userId: string;
     tenantId: number;
   }
 
@@ -230,7 +232,7 @@ declare namespace API {
     tenantId?: number;
     tenantName?: string;
     resourceCount?: number;
-    riskCount?:number;
+    riskCount?: number;
     lastScanTime?: string;
     resourceTypeList?: Array<string>;
     collectorStatus?: string;

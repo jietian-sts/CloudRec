@@ -427,6 +427,8 @@ export default {
     'extend.member.edit': '编辑租户成员',
     'extend.member.select': '请输入用户名称并选择用户',
     'extend.member.delete.user': '确定从当前租户删除吗?',
+    'invite.code.created.success':"邀请链接已生成并复制到剪贴板",
+    'invite.code.created.failed':"邀请链接生成失败",
   },
   collector: {
     'module.text.collector.inquiry': 'Collector 查询',
@@ -539,5 +541,37 @@ export default {
     'module.text.view.more.tenant': '* 滑动可查看更多',
     'module.text.my.tenants': '我的租户',
     'button.text.sign.in': '登陆',
+    'button.text.register': '注册',
+    'message.join.success': '加入租户成功',
+    'message.join.failed': '加入租户失败',
+    'message.password.mismatch': '密码确认不匹配',
+    'message.register.success': '注册成功',
+    'message.register.failed': '注册失败',
+  },
+  invitation: {
+    // 消息翻译
+    'message.join.success': '成功加入租户',
+    'message.join.failed': '加入租户失败',
+    'message.join.success.subtitle': '您已成功加入租户，即将跳转到首页',
+    'message.password.mismatch': '密码确认不匹配',
+    'message.register.success': '注册成功',
+    'message.register.failed': '注册失败',
+    'message.invalid': '邀请码无效',
+    'message.invalid.subtitle': '邀请码无效或已过期',
+    'message.invitation.received': '邀请您加入',
+    'message.already.have.account': '已有账号？',
+    'message.already.have.account.login': '立即登录',
+    
+    // 输入框翻译
+    'input.text.username': '请输入用户名',
+    'input.text.user.id': '请输入用户ID',
+    'input.text.email': '请输入邮箱地址',
+    'input.text.email.invalid': '请输入有效的邮箱地址',
+    'input.text.password': '请输入密码',
+    'input.text.password.length': '密码长度至少6位',
+    'input.text.password.confirm': '请确认密码',
+    
+    // 按钮翻译
+    'button.text.return.home': '返回首页',
   },
 };

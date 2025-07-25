@@ -30,7 +30,7 @@
             <property name="enableSubPackages" value="true"/>
         </javaClientGenerator>
 
-        <table tableName="tenant_rule" domainObjectName="TenantRulePO" mapperName="TenantRuleMapper"
+        <table tableName="invite_code" domainObjectName="InviteCodePO" mapperName="InviteCodeMapper"
                enableCountByExample="false"
                enableUpdateByExample="false"
                enableDeleteByExample="false"

@@ -120,9 +120,9 @@ export async function joinUser(
   });
 }
 
-/** Remove Members: POST /api/tenant/removeUser */
+/** Remove Members: DELETE /api/tenant/removeUser */
 export async function removeUser(
-  params?: API.TenantUser,
+  body?: API.TenantUser,
   options?: { [key: string]: any },
 ) {
   return request<API.Result_String_>(`${BASE_URL}/api/tenant/removeUser`, {
@@ -130,8 +130,8 @@ export async function removeUser(
     headers: {
       'Content-Type': 'application/json',
     },
-    params: {
-      ...params,
+    data: {
+      ...body,
     },
     ...(options || {}),
   });
@@ -161,6 +161,40 @@ export async function listAddedTenants(
 ) {
   return request<API.Result>(`${BASE_URL}/api/tenant/listAddedTenants`, {
     method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: {
+      ...body,
+    },
+    ...(options || {}),
+  });
+}
+
+/** create InviteCode POST /api/tenant/createInviteCode */
+export async function createInviteCode(
+  body?: { currentTenantId: number },
+  options?: { [key: string]: any },
+) {
+  return request<API.Result_String_>(`${BASE_URL}/api/tenant/createInviteCode`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: {
+      ...body,
+    },
+    ...(options || {}),
+  });
+}
+
+/** check InviteCode POST /api/tenant/checkInviteCode */
+export async function checkInviteCode(
+  body?: { inviteCode: string },
+  options?: { [key: string]: any },
+) {
+  return request<API.Result>(`${BASE_URL}/api/tenant/checkInviteCode`, {
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },

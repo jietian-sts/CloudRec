@@ -434,8 +434,9 @@ export default {
     'extend.member.add': 'Add Member',
     'extend.member.edit': 'Edit Tenant Member',
     'extend.member.select': 'Please enter the user name and select the user',
-    'extend.member.delete.user':
-      'Are you sure to delete from the current tenant?',
+    'extend.member.delete.user':'Are you sure to delete from the current tenant?',
+    'invite.code.created.success':"Invite link generated and copied to clipboard",
+    'invite.code.created.failed':"Invite link generation failed",
   },
   collector: {
     'module.text.collector.inquiry': 'Collector Inquiry',
@@ -558,5 +559,37 @@ export default {
     'module.text.view.more.tenant': '* Swipe to view more',
     'module.text.my.tenants': 'My Tenants',
     'button.text.sign.in': 'Sign In',
+    'button.text.register': 'Register',
+    'message.join.success': 'Join tenant successfully',
+    'message.join.failed': 'Join tenant failed',  
+    'message.password.mismatch': 'Password confirmation does not match',
+    'message.register.success': 'Register successfully',
+    'message.register.failed': 'Register failed',
+  },
+  invitation: {
+    // Message translations
+    'message.join.success': 'Successfully joined the tenant',
+    'message.join.failed': 'Failed to join tenant',
+    'message.join.success.subtitle': 'You have successfully joined the tenant and will be redirected to the homepage shortly',
+    'message.password.mismatch': 'Password confirmation does not match',
+    'message.register.success': 'Registration successful',
+    'message.register.failed': 'Registration failed',
+    'message.invalid': 'Invalid invitation code',
+    'message.invalid.subtitle': 'The invitation code is invalid or has expired',
+    'message.invitation.received': 'invited you to join',
+    'message.already.have.account': 'Already have an account?',
+    'message.already.have.account.login': 'Sign in',
+    
+    // Input field translations
+    'input.text.username': 'Please enter username',
+    'input.text.user.id': 'Please enter user ID',
+    'input.text.email': 'Please enter email address',
+    'input.text.email.invalid': 'Please enter a valid email address',
+    'input.text.password': 'Please enter password',
+    'input.text.password.length': 'Password must be at least 6 characters',
+    'input.text.password.confirm': 'Please confirm password',
+    
+    // Button translations
+    'button.text.return.home': 'Return to Home',
   },
 };

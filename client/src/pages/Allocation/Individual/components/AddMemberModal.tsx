@@ -1,5 +1,5 @@
 import { BASE_URL } from '@/services';
-import { joinUser } from '@/services/tenant/TenantController';
+import { joinUser, createInviteCode } from '@/services/tenant/TenantController';
 import {
   ActionType,
   ModalForm,
@@ -9,7 +9,6 @@ import { request, useIntl } from '@umijs/max';
 import { Empty, Form, FormInstance, Spin, message, Typography, Button } from 'antd';
 import { isEmpty } from 'lodash';
 import React, { Dispatch, SetStateAction, useState } from 'react';
-import AddUserModal from './AddUserModal';
 
 const { Text } = Typography;
 
@@ -38,10 +37,7 @@ const AddMemberModal: React.FC<IAddMemberModalProps> = (props) => {
     drawerTableActionRef,
   } = props;
   
-  // Create user modal state
-  const [createUserVisible, setCreateUserVisible] = useState<boolean>(false);
-  // Empty user info for creating new user
-  const [userInfo] = useState<Record<string, any>>({});
+
 
   /**
    * Handle form submission to add member to tenant
@@ -79,10 +75,57 @@ const AddMemberModal: React.FC<IAddMemberModalProps> = (props) => {
   const [fetching, setFetching] = useState(false);
 
   /**
-   * Handle create user button click
+   * Handle invite join button click - create invite code and generate invitation URL
    */
-  const handleCreateUser = (): void => {
-    setCreateUserVisible(true);
+  const handleInviteJoin = async (): Promise<void> => {
+    try {
+      const res: API.Result_String_ = await createInviteCode({
+        currentTenantId: addTenantInfo.id
+      });
+      console.log(res);
+       if (res.msg === 'success' || [200].includes(res.code!)) {
+         const currentUrl = window.location.origin;
+         const invitationUrl = `${currentUrl}/invitation?code=${res.content}`;
+         
+         // Copy to clipboard with fallback
+         try {
+           if (navigator.clipboard && navigator.clipboard.writeText) {
+             await navigator.clipboard.writeText(invitationUrl);
+             messageApi.success(
+               intl.formatMessage({ id: 'tenant.invite.code.created.success' }) || 
+               '邀请链接已生成并复制到剪贴板'
+             );
+           } else {
+             // Fallback for browsers that don't support clipboard API
+             const textArea = document.createElement('textarea');
+             textArea.value = invitationUrl;
+             document.body.appendChild(textArea);
+             textArea.select();
+             document.execCommand('copy');
+             document.body.removeChild(textArea);
+             messageApi.success(
+               intl.formatMessage({ id: 'tenant.invite.code.created.success' }) || 
+               '邀请链接已生成并复制到剪贴板'
+             );
+           }
+         } catch (clipboardError) {
+           // Show the invitation URL in a message if copy fails
+           messageApi.info(
+             `邀请链接已生成：${invitationUrl}`
+           );
+         }
+       } else {
+         messageApi.error(
+           intl.formatMessage({ id: 'tenant.invite.code.created.failed' }) || 
+           ''
+         );
+       }
+    } catch (error) {
+      messageApi.error(
+        intl.formatMessage({ id: 'tenant.invite.code.created.failed' }) || 
+        '生成邀请链接失败'
+      );
+    }
   };
 
   /**
@@ -164,29 +207,17 @@ const AddMemberModal: React.FC<IAddMemberModalProps> = (props) => {
           }}
         />
         
-        {/* Create user prompt - positioned below username field */}
+        {/* Invite join button - positioned below username field */}
         <div style={{ marginLeft: intl.locale === 'en-US' ? '25%' : '16.67%', marginTop: 8, marginBottom: 16 }}>
-          <Text type="secondary">
-            暂无账号？
-            <Button 
-              type="link" 
-              size="small"
-              style={{ padding: 0, height: 'auto', fontSize: 'inherit' }}
-              onClick={handleCreateUser}
-            >
-              立即创建
-            </Button>
-          </Text>
+          <span 
+            style={{ color: '#1890ff', cursor: 'pointer' }}
+            onClick={handleInviteJoin}
+          >
+            暂时未查询到账号？立即邀请
+          </span>
         </div>
       </ModalForm>
-      
-      {/* Create User Modal */}
-      <AddUserModal
-        editFormVisible={createUserVisible}
-        setEditFormVisible={setCreateUserVisible}
-        userInfo={userInfo}
-        tableActionRef={drawerTableActionRef}
-      />
+
     </>
   );
 };

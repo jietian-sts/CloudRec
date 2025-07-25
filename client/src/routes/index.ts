@@ -206,6 +206,13 @@ const routes = [
     menuRender: false,
   },
   {
+    title: 'layout.routes.title.invitation',
+    path: '/invitation',
+    component: '@/pages/Invitation',
+    hideInMenu: true,
+    menuRender: false,
+  },
+  {
     title: 'layout.routes.title.personalCenter',
     path: '/individual',
     component: '@/pages/Allocation/Individual',

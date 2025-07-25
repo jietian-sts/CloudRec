@@ -57,7 +57,7 @@ const TenantDetailDrawer: React.FC<ITenantDetailDrawerProps> = (props) => {
   /**
    * Handle remove user from tenant
    */
-  const handleRemoveUser = async (userId: number): Promise<void> => {
+  const handleRemoveUser = async (userId: string): Promise<void> => {
     if (!tenantInfo?.id) return;
     
     const body = {
@@ -198,7 +198,7 @@ const TenantDetailDrawer: React.FC<ITenantDetailDrawerProps> = (props) => {
         <Popconfirm
           key="remove"
           title={intl.formatMessage({ id: 'common.button.text.delete.confirm' })}
-          onConfirm={() => handleRemoveUser(record.id!)}
+          onConfirm={() => handleRemoveUser(record.userId!)}
           okText={intl.formatMessage({ id: 'common.text.confirm' })}
           cancelText={intl.formatMessage({ id: 'common.text.cancel' })}
         >

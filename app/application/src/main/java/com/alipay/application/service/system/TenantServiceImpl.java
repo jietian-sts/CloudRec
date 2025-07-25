@@ -26,24 +26,25 @@ import com.alipay.application.share.vo.ApiResponse;
 import com.alipay.application.share.vo.ListVO;
 import com.alipay.application.share.vo.system.TenantVO;
 import com.alipay.application.share.vo.system.UserVO;
+import com.alipay.application.share.vo.user.InvitationCodeVO;
 import com.alipay.common.constant.TenantConstants;
 import com.alipay.common.exception.BizException;
 import com.alipay.common.exception.TenantEditException;
+import com.alipay.dao.context.UserInfoContext;
 import com.alipay.dao.dto.TenantDTO;
+import com.alipay.dao.mapper.InviteCodeMapper;
 import com.alipay.dao.mapper.TenantMapper;
-import com.alipay.dao.mapper.UserMapper;
+import com.alipay.dao.po.InviteCodePO;
 import com.alipay.dao.po.TenantPO;
 import com.alipay.dao.po.UserPO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /*
@@ -68,7 +69,7 @@ public class TenantServiceImpl implements TenantService {
     private UserRepository userRepository;
 
     @Resource
-    private UserMapper userMapper;
+    private InviteCodeMapper inviteCodeMapper;
 
     @Override
     public ListVO<TenantVO> findList(TenantDTO tenantDTO) {
@@ -177,8 +178,12 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
-    public ApiResponse<String> removeUser(Long uid, Long tenantId) {
-        tenantRepository.remove(uid, tenantId);
+    public ApiResponse<String> removeUser(String userId, Long tenantId) {
+        User user = userRepository.find(userId);
+        if (user == null) {
+            return new ApiResponse<>(ApiResponse.FAIL_CODE, "User does not exist:" + userId);
+        }
+        tenantRepository.remove(user.getId(), tenantId);
         return ApiResponse.SUCCESS;
     }
 
@@ -311,12 +316,50 @@ public class TenantServiceImpl implements TenantService {
             throw new BizException("The user has not joined the tenant:" + tenantId);
         }
 
-//        // The current user must be an administrator under the tenant to modify the tenant member role
-//        boolean isTenantAdmin = tenantRepository.isTenantAdmin(UserInfoContext.getCurrentUser().getUserId(), tenantId);
-//        if (!isTenantAdmin){
-//            throw new BizException("The user is not the tenant admin:" + tenantId);
-//        }
+        // The current user must be an administrator under the tenant to modify the tenant member role
+        boolean isTenantAdmin = tenantRepository.isTenantAdmin(UserInfoContext.getCurrentUser().getUserId(), tenantId);
+        if (!isTenantAdmin) {
+            throw new BizException("The user is not the tenant admin:" + tenantId);
+        }
 
         tenantRepository.changeUserTenantRole(roleName, tenantId, userId);
+    }
+
+    @Override
+    public String createInviteCode(Long tenantId) {
+        String code = UUID.randomUUID().toString();
+
+        InviteCodePO inviteCodePO = new InviteCodePO();
+        inviteCodePO.setCode(code);
+        inviteCodePO.setTenantId(tenantId);
+        inviteCodePO.setInviter(UserInfoContext.getCurrentUser().getUserId());
+        inviteCodeMapper.insertSelective(inviteCodePO);
+
+        return code;
+    }
+
+    @Override
+    public InvitationCodeVO checkInviteCode(String inviteCode) {
+        InviteCodePO inviteCodePO = inviteCodeMapper.findOne(inviteCode);
+        if (Objects.isNull(inviteCodePO)) {
+            throw new BizException("Invite code not found");
+        }
+
+        if (Strings.isNotBlank(inviteCodePO.getUserId())) {
+            throw new BizException("Invite code has been used");
+        }
+
+        InvitationCodeVO vo = InvitationCodeVO.toVO(inviteCodePO);
+        TenantPO tenantPO = tenantMapper.selectByPrimaryKey(inviteCodePO.getTenantId());
+        if (Objects.isNull(tenantPO)) {
+            throw new BizException("Tenant not found");
+        }
+        vo.setTenantName(tenantPO.getTenantName());
+
+        if (Strings.isNotEmpty(inviteCodePO.getInviter())) {
+            User user = userRepository.find(inviteCodePO.getInviter());
+            vo.setInviter(user != null ? user.getUsername() : "");
+        }
+        return vo;
     }
 }

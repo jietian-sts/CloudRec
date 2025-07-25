@@ -27,6 +27,7 @@ import com.alipay.application.share.vo.ApiResponse;
 import com.alipay.application.share.vo.ListVO;
 import com.alipay.application.share.vo.system.TenantVO;
 import com.alipay.application.share.vo.system.UserVO;
+import com.alipay.application.share.vo.user.InvitationCodeVO;
 import com.alipay.dao.context.UserInfoContext;
 import com.alipay.dao.context.UserInfoDTO;
 import com.alipay.dao.dto.TenantDTO;
@@ -126,7 +127,6 @@ public class TenantController {
      *
      * @param request request
      */
-    @AdminPermissionLimit
     @PostMapping("/joinUser")
     public ApiResponse<String> joinUser(@Validated @RequestBody JoinUserRequest request, BindingResult error) {
         if (error.hasErrors()) {
@@ -140,13 +140,13 @@ public class TenantController {
     /**
      * Remove members
      *
-     * @param uid      User table primary key ID
-     * @param tenantId Tenant table primary key ID
      */
-    @AdminPermissionLimit
     @DeleteMapping("/removeUser")
-    public ApiResponse<String> removeUser(@RequestParam(name = "userId") Long uid, @RequestParam Long tenantId) {
-        return tenantService.removeUser(uid, tenantId);
+    public ApiResponse<String> removeUser(@RequestBody @Validated RemoveUserRequest request, BindingResult error) {
+        if (error.hasErrors()) {
+            return new ApiResponse<>(error);
+        }
+        return tenantService.removeUser(request.getUserId(), request.getTenantId());
     }
 
     /**
@@ -185,4 +185,29 @@ public class TenantController {
         return tenantService.listAddedTenants(currentUser.getUserId());
     }
 
+    /**
+     * Create an inviteCode
+     *
+     * @return inviteCode
+     */
+    @PostMapping("/createInviteCode")
+    @AuthenticateToken
+    public ApiResponse<String> createInviteCode(@Validated @RequestBody CreateInviteCodeRequest request, BindingResult error) {
+        if (error.hasErrors()) {
+            return new ApiResponse<>(error);
+        }
+        String inviteCode = tenantService.createInviteCode(request.getCurrentTenantId());
+        return new ApiResponse<>(ApiResponse.SUCCESS_CODE, inviteCode, ApiResponse.SUCCESS.getMsg());
+    }
+
+    /**
+     * check inviteCode
+     */
+    @PostMapping("/checkInviteCode")
+    public ApiResponse<InvitationCodeVO> checkInviteCode(@Validated @RequestBody CheckInviteCodeRequest request, BindingResult error) {
+        if (error.hasErrors()) {
+            return new ApiResponse<>(error);
+        }
+        return new ApiResponse<>(tenantService.checkInviteCode(request.getInviteCode()));
+    }
 }

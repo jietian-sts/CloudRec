@@ -92,4 +92,11 @@ public class UserRepositoryImpl implements UserRepository {
         }
         return null;
     }
+
+    @Override
+    public void switchTenant(String userId, Long tenantId) {
+        UserPO userPO = userMapper.findOne(userId);
+        userPO.setTenantId(tenantId);
+        userMapper.updateByPrimaryKeySelective(userPO);
+    }
 }
