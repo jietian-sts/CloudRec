@@ -62,7 +62,7 @@ const SwitchTenant: React.FC<ISwitchTenant> = (props) => {
               </div>
               <Divider style={{ margin: '6px 0' }} />
               <List
-                style={{ maxHeight: 200, overflowY: 'scroll' }}
+                style={{ maxHeight: 400, overflowY: 'scroll' }}
                 itemLayout="horizontal"
                 dataSource={tenantListAdded}
                 renderItem={(item: API.TenantInfo) => (

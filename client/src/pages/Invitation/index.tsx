@@ -1,6 +1,7 @@
 import { DEFAULT_NAME } from '@/constants';
 import { checkInviteCode } from '@/services/tenant/TenantController';
 import { register, userLogin, joinTenant } from '@/services/user/UserController';
+import SwitchLanguage from '@/components/Layout/SwitchLanguage';
 import { LockOutlined, UserOutlined, MailOutlined } from '@ant-design/icons';
 import {
   LoginFormPage,
@@ -180,6 +181,18 @@ const InvitationPage: React.FC = () => {
         childrenContentStyle={{ padding: 0, height: '100%' }}
         className={styles['invitation']}
       >
+        {/* Language switcher positioned at top right */}
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          zIndex: 1000,
+          background: 'rgba(255, 255, 255, 0.9)',
+          borderRadius: '6px',
+          padding: '4px'
+        }}>
+          <SwitchLanguage />
+        </div>
         <div style={{ 
           display: 'flex', 
           justifyContent: 'center', 
@@ -204,6 +217,18 @@ const InvitationPage: React.FC = () => {
         childrenContentStyle={{ padding: 0, height: '100%' }}
         className={styles['invitation']}
       >
+        {/* Language switcher positioned at top right */}
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          zIndex: 1000,
+          background: 'rgba(255, 255, 255, 0.9)',
+          borderRadius: '6px',
+          padding: '4px'
+        }}>
+          <SwitchLanguage />
+        </div>
         <div style={{ 
           display: 'flex', 
           justifyContent: 'center', 
@@ -237,6 +262,18 @@ const InvitationPage: React.FC = () => {
         childrenContentStyle={{ padding: 0, height: '100%' }}
         className={styles['invitation']}
       >
+        {/* Language switcher positioned at top right */}
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          zIndex: 1000,
+          background: 'rgba(255, 255, 255, 0.9)',
+          borderRadius: '6px',
+          padding: '4px'
+        }}>
+          <SwitchLanguage />
+        </div>
         <div style={{ 
           display: 'flex', 
           justifyContent: 'center', 
@@ -270,6 +307,18 @@ const InvitationPage: React.FC = () => {
       className={styles['invitation']}
     >
       {contextHolder}
+      {/* Language switcher positioned at top right */}
+      <div style={{
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        zIndex: 1000,
+        background: 'rgba(255, 255, 255, 0.9)',
+        borderRadius: '6px',
+        padding: '4px'
+      }}>
+        <SwitchLanguage />
+      </div>
       <LoginFormPage
         backgroundImageUrl="https://gw.alipayobjects.com/zos/rmsportal/FfdJeJRQWjEeGTpqgBKj.png"
         logo="/favicon-light.ico"

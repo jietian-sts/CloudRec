@@ -45,7 +45,7 @@ const Individual: React.FC = () => {
                 alt="SMILE_ICON"
                 style={{ width: 23, marginRight: 6 }}
               />
-              {obtainTimeOfDay()}{access?.username ? `, ${access.username}` : ''}
+              {obtainTimeOfDay()}{access?.username ? `${access.username}` : ''}
             </Flex>
           }
           style={{ marginBottom: 16 }}
