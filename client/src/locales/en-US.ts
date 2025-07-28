@@ -583,8 +583,6 @@ export default {
     // Input field translations
     'input.text.username': 'Please enter username',
     'input.text.user.id': 'Please enter user ID',
-    'input.text.email': 'Please enter email address',
-    'input.text.email.invalid': 'Please enter a valid email address',
     'input.text.password': 'Please enter password',
     'input.text.password.length': 'Password must be at least 6 characters',
     'input.text.password.confirm': 'Please confirm password',

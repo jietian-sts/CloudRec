@@ -141,6 +141,7 @@ public class TenantController {
      * Remove members
      *
      */
+    @AuthenticateToken
     @DeleteMapping("/removeUser")
     public ApiResponse<String> removeUser(@RequestBody @Validated RemoveUserRequest request, BindingResult error) {
         if (error.hasErrors()) {

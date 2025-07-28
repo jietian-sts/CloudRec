@@ -454,6 +454,11 @@ public class RuleServiceImpl implements RuleService {
             return new ApiResponse<>(ApiResponse.FAIL_CODE, "The rules are not enabled");
         }
 
+        boolean isTenantAdmin = tenantRepository.isTenantAdmin(UserInfoContext.getCurrentUser().getUserId(), UserInfoContext.getCurrentUser().getUserTenantId());
+        if (!isTenantAdmin) {
+            return new ApiResponse<>(ApiResponse.FAIL_CODE, "You are not the tenant administrator");
+        }
+
         Long tenantId = UserInfoContext.getCurrentUser().getUserTenantId();
         TenantRulePO tenantRulePO = tenantRuleMapper.findOne(tenantId, ruleCode);
         if (tenantRulePO != null) {
@@ -484,6 +489,12 @@ public class RuleServiceImpl implements RuleService {
         if (!tenantId.equals(tenantRulePO.getTenantId())) {
             return new ApiResponse<>(ApiResponse.FAIL_CODE, "The rules do not belong to the current tenant");
         }
+
+        boolean isTenantAdmin = tenantRepository.isTenantAdmin(UserInfoContext.getCurrentUser().getUserId(), tenantId);
+        if (!isTenantAdmin) {
+            return new ApiResponse<>(ApiResponse.FAIL_CODE, "You are not the tenant administrator");
+        }
+
 
         tenantRepository.removeSelectedRule(tenantId, ruleCode);
         log.info("user:{}, deleteTenantSelectRule, ruleCode:{}", UserInfoContext.getCurrentUser(), ruleCode);
@@ -517,40 +528,40 @@ public class RuleServiceImpl implements RuleService {
      * This method combines tenant-specific rules and global default rules,
      * removes duplicates based on rule code, and filters only valid rules
      * Optimized to avoid duplicate queries when current tenant is global tenant
-     * 
+     *
      * @return List of RuleVO containing unique valid rules
      */
     @Override
     public List<RuleVO> queryAllTenantSelectRuleList() {
         Long currentTenantId = UserInfoContext.getCurrentUser().getUserTenantId();
         Long globalTenantId = tenantRepository.findGlobalTenant().getId();
-        
+
         // Use LinkedHashMap to maintain insertion order and deduplicate by ruleCode
         Map<String, RulePO> ruleMap = new LinkedHashMap<>();
-        
+
         // Check if current tenant is global tenant to avoid duplicate queries
         if (currentTenantId.equals(globalTenantId)) {
             // Current tenant is global tenant, only query once
             List<RulePO> globalRuleList = tenantRuleMapper.findAllList(globalTenantId);
             globalRuleList.stream()
-                .filter(rule -> Status.valid.name().equals(rule.getStatus()))
-                .forEach(rule -> ruleMap.put(rule.getRuleCode(), rule));
+                    .filter(rule -> Status.valid.name().equals(rule.getStatus()))
+                    .forEach(rule -> ruleMap.put(rule.getRuleCode(), rule));
         } else {
             // Current tenant is not global tenant, query both tenant and global rules
             List<RulePO> tenantSelectList = tenantRuleMapper.findAllList(currentTenantId);
             List<RulePO> defaultRuleList = tenantRuleMapper.findAllList(globalTenantId);
-            
+
             // Add tenant rules first (higher priority)
             tenantSelectList.stream()
-                .filter(rule -> Status.valid.name().equals(rule.getStatus()))
-                .forEach(rule -> ruleMap.put(rule.getRuleCode(), rule));
-            
+                    .filter(rule -> Status.valid.name().equals(rule.getStatus()))
+                    .forEach(rule -> ruleMap.put(rule.getRuleCode(), rule));
+
             // Add default rules only if not already present
             defaultRuleList.stream()
-                .filter(rule -> Status.valid.name().equals(rule.getStatus()))
-                .forEach(rule -> ruleMap.putIfAbsent(rule.getRuleCode(), rule));
+                    .filter(rule -> Status.valid.name().equals(rule.getStatus()))
+                    .forEach(rule -> ruleMap.putIfAbsent(rule.getRuleCode(), rule));
         }
-        
+
         // Convert to RuleVO list
         return ruleMap.values().stream().map(po -> {
             RuleVO ruleVO = new RuleVO();

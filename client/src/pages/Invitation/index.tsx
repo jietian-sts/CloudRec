@@ -397,24 +397,6 @@ const InvitationPage: React.FC = () => {
             },
           ]}
         />
-        <ProFormText
-          name="email"
-          fieldProps={{
-            size: 'large',
-            prefix: <MailOutlined className={'prefixIcon'} />,
-          }}
-          placeholder={intl.formatMessage({ id: 'invitation.input.text.email' })}
-          rules={[
-            {
-              required: true,
-              message: intl.formatMessage({ id: 'invitation.input.text.email' }),
-            },
-            {
-              type: 'email',
-              message: intl.formatMessage({ id: 'invitation.input.text.email.invalid' }),
-            },
-          ]}
-        />
         <ProFormText.Password
           name="password"
           fieldProps={{

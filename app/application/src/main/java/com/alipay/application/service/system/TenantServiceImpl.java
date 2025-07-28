@@ -183,8 +183,33 @@ public class TenantServiceImpl implements TenantService {
         if (user == null) {
             return new ApiResponse<>(ApiResponse.FAIL_CODE, "User does not exist:" + userId);
         }
+
+        if (!permissionCheck(UserInfoContext.getCurrentUser().getUserId(), tenantId)) {
+            throw new BizException("No permission");
+        }
         tenantRepository.remove(user.getId(), tenantId);
         return ApiResponse.SUCCESS;
+    }
+
+
+    /**
+     * 权限校验,租户管理员或者平台管理员可以操作
+     * @param userId 用户id
+     * @param tenantId 租户id
+     * @return true:有权限，false:无权限
+     */
+    private boolean permissionCheck(String userId, Long tenantId) {
+        boolean isTenantAdmin = tenantRepository.isTenantAdmin(UserInfoContext.getCurrentUser().getUserId(), tenantId);
+        if (isTenantAdmin) {
+            return true;
+        }
+
+        User user = userRepository.find(userId);
+        if (RoleNameType.admin.equals(user.getRoleName())) {
+            return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -316,10 +341,9 @@ public class TenantServiceImpl implements TenantService {
             throw new BizException("The user has not joined the tenant:" + tenantId);
         }
 
-        // The current user must be an administrator under the tenant to modify the tenant member role
-        boolean isTenantAdmin = tenantRepository.isTenantAdmin(UserInfoContext.getCurrentUser().getUserId(), tenantId);
-        if (!isTenantAdmin) {
-            throw new BizException("The user is not the tenant admin:" + tenantId);
+        boolean permissionCheck = permissionCheck(UserInfoContext.getCurrentUser().getUserId(), tenantId);
+        if (!permissionCheck) {
+            throw new BizException("No permission");
         }
 
         tenantRepository.changeUserTenantRole(roleName, tenantId, userId);
