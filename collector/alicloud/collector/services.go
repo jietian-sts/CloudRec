@@ -21,13 +21,7 @@ import (
 	"strings"
 	"time"
 
-	resourcecenter20221201 "github.com/alibabacloud-go/resourcecenter-20221201/client"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/ens"
-	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
-	ossCredentials "github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss/credentials"
-	"github.com/core-sdk/constant"
-	"go.uber.org/zap"
-
+	actiontrail20200706 "github.com/alibabacloud-go/actiontrail-20200706/v3/client"
 	adb20190315 "github.com/alibabacloud-go/adb-20190315/v4/client"
 	alb20200616 "github.com/alibabacloud-go/alb-20200616/v2/client"
 	alidns20150109 "github.com/alibabacloud-go/alidns-20150109/v4/client"
@@ -59,6 +53,7 @@ import (
 	privatelink20200415 "github.com/alibabacloud-go/privatelink-20200415/v5/client"
 	r_kvstore20150101 "github.com/alibabacloud-go/r-kvstore-20150101/v5/client"
 	rds20140815 "github.com/alibabacloud-go/rds-20140815/v6/client"
+	resourcecenter20221201 "github.com/alibabacloud-go/resourcecenter-20221201/client"
 	rocketmq20220801 "github.com/alibabacloud-go/rocketmq-20220801/client"
 	sas20181203 "github.com/alibabacloud-go/sas-20181203/v3/client"
 	selectdb20230522 "github.com/alibabacloud-go/selectdb-20230522/v3/client"
@@ -75,11 +70,16 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cdn"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/clickhouse"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ens"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/hbase"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ram"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
+	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
+	ossCredentials "github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss/credentials"
+	"github.com/core-sdk/constant"
 	"github.com/core-sdk/log"
 	"github.com/core-sdk/schema"
+	"go.uber.org/zap"
 )
 
 var RuntimeObject = new(util.RuntimeOptions)
@@ -172,6 +172,8 @@ type Services struct {
 func (s *Services) Clone() schema.ServiceInterface {
 	return &Services{}
 }
+
+
 
 func (s *Services) InitServices(cloudAccountParam schema.CloudAccountParam) (err error) {
 	param := cloudAccountParam.CommonCloudAccountParam
@@ -1007,5 +1009,12 @@ func createResourceClient(regionId string, config *openapi.Config) (_result *res
 	}
 	_result, _err := resourcecenter20221201.NewClient(config)
 	_result.RegionId = tea.String(regionId)
+	return _result, _err
+}
+
+func createActiontrailClient(regionId string, config *openapi.Config) (_result *actiontrail20200706.Client, _err error) {
+	config.Endpoint = tea.String("actiontrail." + regionId + ".aliyuncs.com")
+	_result = &actiontrail20200706.Client{}
+	_result, _err = actiontrail20200706.NewClient(config)
 	return _result, _err
 }

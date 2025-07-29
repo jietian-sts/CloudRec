@@ -5,6 +5,7 @@ go 1.23.0
 replace github.com/core-sdk => ../core-sdk
 
 require (
+	github.com/alibabacloud-go/actiontrail-20200706/v3 v3.2.0
 	github.com/alibabacloud-go/adb-20190315/v4 v4.1.4
 	github.com/alibabacloud-go/alb-20200616/v2 v2.2.0
 	github.com/alibabacloud-go/alidns-20150109/v4 v4.5.7

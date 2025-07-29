@@ -196,13 +196,28 @@ func (p *Platform) handleAccount(account CloudAccount, param CollectorParam, par
 		parentWg.Done()
 	}()
 
+	accountParam, err := getCloudAccountParam(account, p.DefaultRegions[0], "")
+	if err != nil {
+		log.GetWLogger().Warn(fmt.Sprintf("Failed to get cloud account param for ShouldCollect check: %v", err))
+		return
+	}
+
+	if param.registered && !p.assessCollectionChecker(accountParam) {
+		log.GetWLogger().Info(fmt.Sprintf("Skipping collection for CloudAccountId => [%s] Platform => [%s] - ShouldCollect returned false", account.CloudAccountId, p.Name))
+		e := p.client.SendRunningFinishSignal(account.CloudAccountId, account.TaskId)
+		if e != nil {
+			log.GetWLogger().Warn(fmt.Sprintf("Code:[%s] Platform => [%s] CloudAccountId => [%s] SendRunningFinishSignal err %s", CollectorError, p.Name, account.CloudAccountId, e))
+		}
+		return
+	}
+
 	// wait all resource finish
 	var pullResourceWait sync.WaitGroup
 	// wait all submit finish
 	var submitWait sync.WaitGroup
 
 	for _, resource := range p.Resources {
-		time.Sleep(3 * time.Second)
+		time.Sleep(1 * time.Second)
 		pullResourceWait.Add(1)
 		go func(resource Resource) {
 			p.handleResource(account, resource, param, &pullResourceWait, &submitWait)
@@ -220,6 +235,23 @@ func (p *Platform) handleAccount(account CloudAccount, param CollectorParam, par
 			log.GetWLogger().Warn(fmt.Sprintf("Platform => [%s] account [%s] send running finish signal err %s", p.Name, account.CloudAccountId, e))
 		}
 	}
+}
+
+func (p *Platform) assessCollectionChecker(accountParam CloudAccountParam) bool {
+	tempService := p.Service.Clone()
+	// Check if collection should be performed for this account
+	resp := tempService.AssessCollectionTrigger(accountParam)
+	if !resp.EnableCollection {
+		log.GetWLogger().Info(fmt.Sprintf("Skipping collection for CloudAccountId => [%s] Platform => [%s] - AssessCollectionTrigger returned false", accountParam.CloudAccountId, p.Name))
+	}
+
+	resp.CollectRecordId = accountParam.CollectRecordInfo.CollectRecordId
+	err := p.client.SendRunningStartSignal(resp)
+	if err != nil {
+		log.GetWLogger().Warn(fmt.Sprintf("Code:[%s] Platform => [%s] CloudAccountId => [%s] SendRunningStartSignal err %s", CollectorError, p.Name, accountParam.CloudAccountId, err))
+		return false
+	}
+	return resp.EnableCollection
 }
 
 func (p *Platform) handleResource(account CloudAccount, resource Resource, collectorParam CollectorParam, pullResourceWait *sync.WaitGroup, submitWait *sync.WaitGroup) {
@@ -295,7 +327,7 @@ func (p *Platform) handleResource(account CloudAccount, resource Resource, colle
 					close(resourceChan)
 					close(regionCh)
 					// Ensure that all resource been saved resourceChan
-					time.Sleep(5 * time.Second)
+					// time.Sleep(5 * time.Second)
 				}
 			}
 		}()
@@ -354,7 +386,7 @@ func (p *Platform) handleResource(account CloudAccount, resource Resource, colle
 			break
 		}
 
-		time.Sleep(1 * time.Second)
+		// time.Sleep(1 * time.Second)
 	}
 	loopRegionWait.Wait()
 }

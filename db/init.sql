@@ -928,3 +928,20 @@ CREATE TABLE `tenant_rule` (
 
 ALTER TABLE `tenant_user`
   ADD COLUMN `role_name` varchar(100) NOT NULL DEFAULT 'user' COMMENT '用户角色，user、admin';
+
+
+CREATE TABLE `invite_code` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `gmt_create` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `gmt_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
+  `inviter` varchar(255) NOT NULL COMMENT '邀请人ID',
+  `code` varchar(512) NOT NULL COMMENT '邀请码',
+  `user_id` varchar(255) DEFAULT NULL COMMENT '受邀人ID，若ID为null代表邀请码未使用',
+  `tenant_id` bigint(20) NOT NULL COMMENT '初始化的租户ID',
+  PRIMARY KEY(`id`),
+  UNIQUE KEY `uk_code`(`code`)
+) DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '邀请码';
+
+
+ALTER TABLE `collector_record`
+  ADD COLUMN `collect_record_info` mediumtext DEFAULT NULL COMMENT '采集记录信息 JSON';

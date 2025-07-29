@@ -17,7 +17,9 @@
 package com.alipay.application.service.collector;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alipay.application.service.collector.domain.Agent;
+import com.alipay.application.service.collector.domain.CollectRecordInfo;
 import com.alipay.application.service.collector.domain.TaskResp;
 import com.alipay.application.service.collector.domain.repo.AgentRepository;
 import com.alipay.application.service.collector.domain.repo.CollectorTaskRepository;
@@ -397,13 +399,13 @@ public class AgentServiceImpl implements AgentService {
                 }).filter(Objects::nonNull).toList();
 
         // 5. pre handler - async execution using CompletableFuture
-        final List<CloudAccountPO> accountList = list;
-        final AgentRegistryPO registry = agentRegistryPO;
-        CompletableFuture.runAsync(() -> accountStartCollectPreHandler(accountList, registry), threadPoolConfig.asyncServiceExecutor())
-                .exceptionally(e -> {
-                    log.error("Error in accountStartCollectPreHandler", e);
-                    return null;
-                });
+//        final List<CloudAccountPO> accountList = list;
+//        final AgentRegistryPO registry = agentRegistryPO;
+//        CompletableFuture.runAsync(() -> accountStartCollectPreHandler(accountList, registry), threadPoolConfig.asyncServiceExecutor())
+//                .exceptionally(e -> {
+//                    log.error("Error in accountStartCollectPreHandler", e);
+//                    return null;
+//                });
 
         return new ApiResponse<>(collect);
     }
@@ -540,6 +542,30 @@ public class AgentServiceImpl implements AgentService {
 
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
+    public void runningStartSignal(String token, String cloudAccountId, CollectRecordInfo collectRecordInfo) {
+        log.info("runningStartSignal, cloudAccountId:{}, collectRecordInfo:{}", cloudAccountId, collectRecordInfo);
+        CollectorRecordPO collectorRecordPO = collectorRecordMapper.selectByPrimaryKey(collectRecordInfo.getCollectRecordId());
+        if (collectorRecordPO != null) {
+            collectorRecordPO.setStartTime(new Date());
+            collectorRecordPO.setCollectRecordInfo(JSON.toJSONString(collectRecordInfo, SerializerFeature.WriteMapNullValue));
+            collectorRecordMapper.updateByPrimaryKeySelective(collectorRecordPO);
+
+            if (collectRecordInfo.getEnableCollection()) {
+                CloudAccountPO cloudAccountPO = cloudAccountMapper.findByCloudAccountId(cloudAccountId);
+                AgentRegistryPO agentRegistryPO = agentRegistryMapper.findOne(cloudAccountPO.getPlatform(), collectorRecordPO.getRegistryValue());
+                CompletableFuture.runAsync(() -> accountStartCollectPreHandler(Collections.singletonList(cloudAccountPO), agentRegistryPO), threadPoolConfig.asyncServiceExecutor())
+                        .exceptionally(e -> {
+                            log.error("Error in accountStartCollectPreHandler", e);
+                            return null;
+                        });
+            }
+        }
+
+
+    }
+
+    @Transactional(rollbackFor = RuntimeException.class)
+    @Override
     public void runningFinishSignal(String cloudAccountId, Long taskId) {
         CloudAccountPO cloudAccountPO = cloudAccountMapper.findByCloudAccountId(cloudAccountId);
         if (cloudAccountPO == null) {
@@ -580,22 +606,29 @@ public class AgentServiceImpl implements AgentService {
         }
 
         log.info("Cloud account collection finished, cloudAccountId:{}", cloudAccountId);
-        // Delayed tasks:Delete historical version data
-        // Delete 10s to prevent data submission from not completing
-        SchedulerManager.getScheduler().schedule(
-                () ->
-                {
-                    try {
-                        clearJob.commitDeleteResourceByCloudAccount(cloudAccountId);
-                        accountScanJob.scanByCloudAccountId(cloudAccountId);
-                    } catch (Exception e) {
-                        log.error("Delete historical version data or scan failed, cloudAccountId:{}", cloudAccountId, e);
-                    }
-                },
-                10,
-                TimeUnit.SECONDS
-        );
 
+        CollectorRecordPO lastOneCollectRecord = collectorRecordMapper.findLastOne(cloudAccountId);
+        if (lastOneCollectRecord != null) {
+            CollectRecordInfo collectRecordInfo = JSON.parseObject(lastOneCollectRecord.getCollectRecordInfo(), CollectRecordInfo.class);
+            if (collectRecordInfo.getEnableCollection()) {
+                log.info("Delete historical version data or scan, cloudAccountId:{}", cloudAccountId);
+                // Delayed tasks:Delete historical version data
+                // Delete 10s to prevent data submission from not completing
+                SchedulerManager.getScheduler().schedule(
+                        () ->
+                        {
+                            try {
+                                clearJob.commitDeleteResourceByCloudAccount(cloudAccountId);
+                                accountScanJob.scanByCloudAccountId(cloudAccountId);
+                            } catch (Exception e) {
+                                log.error("Delete historical version data or scan failed, cloudAccountId:{}", cloudAccountId, e);
+                            }
+                        },
+                        10,
+                        TimeUnit.SECONDS
+                );
+            }
+        }
     }
 
 

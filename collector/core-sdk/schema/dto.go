@@ -88,3 +88,15 @@ func ReturnGeneral() []byte {
 	str, _ := json.Marshal(data)
 	return str
 }
+
+type CollectRecordInfo struct {
+	CollectRecordId int64                     `json:"collectRecordId"`
+	EnableCollection bool                      `json:"enableCollection"`
+	CloudAccountId  string                    `json:"cloudAccountId"`
+	Platform        string                    `json:"platform"`
+	StartTime       string                    `json:"startTime"`
+	EndTime         string                    `json:"endTime"`
+	ErrorMessage    string                    `json:"errorMessage"`
+	Message         string                    `json:"message"`
+	Events          []map[string]interface{} `json:"events"`
+}
