@@ -232,7 +232,7 @@ func (s *Services) AssessCollectionTrigger(cloudAccountParam schema.CloudAccount
 			zap.String("cloudAccountId", cloudAccountId),
 			zap.String("startTime", queryStartTime),
 			zap.String("endTime", queryEndTime),
-			zap.Bool("shouldCollect", recordInfo.EnableCollection),
+			zap.Bool("enableCollection", recordInfo.EnableCollection),
 			zap.Int("totalEvents", len(recordInfo.Events)))
 		return recordInfo
 	}
@@ -249,7 +249,7 @@ func (s *Services) AssessCollectionTrigger(cloudAccountParam schema.CloudAccount
 		zap.String("cloudAccountId", cloudAccountId),
 		zap.String("startTime", queryStartTime),
 		zap.String("endTime", queryEndTime),
-		zap.Bool("shouldCollect", recordInfo.EnableCollection))
+		zap.Bool("enableCollection", recordInfo.EnableCollection))
 
 	return recordInfo
 }

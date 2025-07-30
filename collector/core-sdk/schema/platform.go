@@ -173,18 +173,40 @@ func (p *Platform) CollectorV3(param CollectorParam) (err error) {
 	for _, cloudAccount := range param.accounts {
 		accountWait.Add(1)
 		s := time.Now()
-		p.handleAccount(cloudAccount, param, &accountWait)
+		// Create context with cloud account information
+		ctx := context.Background()
+		ctx = context.WithValue(ctx, constant.StartTime, time.Now())
+		ctx = context.WithValue(ctx, constant.Platform, p.Name)
+		ctx = context.WithValue(ctx, constant.CloudAccountId, cloudAccount.CloudAccountId)
+		ctx = context.WithValue(ctx, constant.CollectRecordId, cloudAccount.CollectRecordId)
+		p.handleAccount(ctx, cloudAccount, param, &accountWait)
 		endTime := time.Now()
 		duration := endTime.Sub(s)
 
-		log.GetWLogger().Info(fmt.Sprintf("Platform => [%s] CloudAccountId => [%s] Program run time: %v\n", p.Name, cloudAccount.CloudAccountId, duration))
+		log.CtxLogger(ctx).Info(fmt.Sprintf("Program run time: %v", duration))
 	}
 	accountWait.Wait()
 	return
 }
 
-func (p *Platform) handleAccount(account CloudAccount, param CollectorParam, parentWg *sync.WaitGroup) {
+// handleAccount processes a cloud account with context containing account information
+// ctx: context containing Platform, CloudAccountId, and CollectRecordId
+// account: cloud account information to be processed
+// param: collector parameters including logger and registration status
+// parentWg: wait group for account processing operations
+func (p *Platform) handleAccount(ctx context.Context, account CloudAccount, param CollectorParam, parentWg *sync.WaitGroup) {
+	// Record start time for duration calculation
+	startTime := time.Now()
+	// Log cloud account collection start
+	log.CtxLogger(context.WithValue(ctx, constant.StartTime, startTime)).Info("Started collecting cloud account")
+
 	defer func() {
+		// Calculate duration and log cloud account collection end
+		endTime := time.Now()
+		duration := endTime.Sub(startTime)
+		logCtx := context.WithValue(ctx, constant.EndTime, endTime)
+		logCtx = context.WithValue(logCtx, constant.Duration, duration)
+		log.CtxLogger(logCtx).Info(fmt.Sprintf("Completed collecting cloud account, Duration=[%v]", duration))
 		// Clean up region services for this account
 		p.regionServices.Range(func(key, value interface{}) bool {
 			keyStr := key.(string)
@@ -198,15 +220,15 @@ func (p *Platform) handleAccount(account CloudAccount, param CollectorParam, par
 
 	accountParam, err := getCloudAccountParam(account, p.DefaultRegions[0], "")
 	if err != nil {
-		log.GetWLogger().Warn(fmt.Sprintf("Failed to get cloud account param for ShouldCollect check: %v", err))
+		log.CtxLogger(ctx).Warn(fmt.Sprintf("Failed to get cloud account param for AssessCollectionTrigger check: %v", err))
 		return
 	}
 
-	if param.registered && !p.assessCollectionChecker(accountParam) {
-		log.GetWLogger().Info(fmt.Sprintf("Skipping collection for CloudAccountId => [%s] Platform => [%s] - ShouldCollect returned false", account.CloudAccountId, p.Name))
+	if param.registered && !p.assessCollectionChecker(ctx, accountParam) {
+		log.CtxLogger(ctx).Info("Skipping collection - AssessCollectionTrigger returned false")
 		e := p.client.SendRunningFinishSignal(account.CloudAccountId, account.TaskId)
 		if e != nil {
-			log.GetWLogger().Warn(fmt.Sprintf("Code:[%s] Platform => [%s] CloudAccountId => [%s] SendRunningFinishSignal err %s", CollectorError, p.Name, account.CloudAccountId, e))
+			log.CtxLogger(ctx).Warn(fmt.Sprintf("Code:[%s] SendRunningFinishSignal error %s", CollectorError, e))
 		}
 		return
 	}
@@ -220,7 +242,9 @@ func (p *Platform) handleAccount(account CloudAccount, param CollectorParam, par
 		time.Sleep(1 * time.Second)
 		pullResourceWait.Add(1)
 		go func(resource Resource) {
-			p.handleResource(account, resource, param, &pullResourceWait, &submitWait)
+			// Add resource-specific information to the existing context
+			resourceCtx := context.WithValue(ctx, constant.ResourceType, resource.ResourceType)
+			p.handleResource(resourceCtx, account, resource, param, &pullResourceWait, &submitWait)
 		}(resource)
 	}
 	// wait all resource finish
@@ -229,47 +253,63 @@ func (p *Platform) handleAccount(account CloudAccount, param CollectorParam, par
 	submitWait.Wait()
 	// send account running finish signal
 	if param.registered {
-		log.GetWLogger().Info(fmt.Sprintf("Platform => [%s] account [%s] send running finish signal success", p.Name, account.CloudAccountId))
+		log.CtxLogger(ctx).Info("Send running finish signal success")
 		e := p.client.SendRunningFinishSignal(account.CloudAccountId, account.TaskId)
 		if e != nil {
-			log.GetWLogger().Warn(fmt.Sprintf("Platform => [%s] account [%s] send running finish signal err %s", p.Name, account.CloudAccountId, e))
+			log.CtxLogger(ctx).Warn(fmt.Sprintf("Code:[%s] SendRunningFinishSignal err %s", CollectorError, e))
 		}
 	}
 }
 
-func (p *Platform) assessCollectionChecker(accountParam CloudAccountParam) bool {
+func (p *Platform) assessCollectionChecker(ctx context.Context, accountParam CloudAccountParam) bool {
 	tempService := p.Service.Clone()
 	// Check if collection should be performed for this account
 	resp := tempService.AssessCollectionTrigger(accountParam)
 	if !resp.EnableCollection {
-		log.GetWLogger().Info(fmt.Sprintf("Skipping collection for CloudAccountId => [%s] Platform => [%s] - AssessCollectionTrigger returned false", accountParam.CloudAccountId, p.Name))
+		log.CtxLogger(ctx).Info("Skipping collection - AssessCollectionTrigger returned false")
 	}
 
 	resp.CollectRecordId = accountParam.CollectRecordInfo.CollectRecordId
 	err := p.client.SendRunningStartSignal(resp)
 	if err != nil {
-		log.GetWLogger().Warn(fmt.Sprintf("Code:[%s] Platform => [%s] CloudAccountId => [%s] SendRunningStartSignal err %s", CollectorError, p.Name, accountParam.CloudAccountId, err))
+		log.CtxLogger(ctx).Warn(fmt.Sprintf("Code:[%s] SendRunningStartSignal err %s", CollectorError, err))
 		return false
 	}
 	return resp.EnableCollection
 }
 
-func (p *Platform) handleResource(account CloudAccount, resource Resource, collectorParam CollectorParam, pullResourceWait *sync.WaitGroup, submitWait *sync.WaitGroup) {
-	defer pullResourceWait.Done()
+// handleResource processes a specific resource for a cloud account with context containing account information
+// ctx: context containing CloudAccountId, Platform, ResourceType, and CollectRecordId
+// account: cloud account information
+// resource: resource configuration to be collected
+// collectorParam: collector parameters including logger and registration status
+// pullResourceWait: wait group for resource pulling operations
+// submitWait: wait group for resource submission operations
+func (p *Platform) handleResource(ctx context.Context, account CloudAccount, resource Resource, collectorParam CollectorParam, pullResourceWait *sync.WaitGroup, submitWait *sync.WaitGroup) {
+	// Record start time for duration calculation
+	startTime := time.Now()
+	// Log resource collection start
+	log.CtxLogger(context.WithValue(ctx, constant.StartTime, startTime)).Info("Started collecting resource")
+
+	defer func() {
+		// Calculate duration and log resource collection end
+		endTime := time.Now()
+		duration := endTime.Sub(startTime)
+		logCtx := context.WithValue(ctx, constant.EndTime, endTime)
+		logCtx = context.WithValue(logCtx, constant.Duration, duration)
+		log.CtxLogger(logCtx).Info(fmt.Sprintf("Completed collecting resource, Duration=[%v]", duration))
+		pullResourceWait.Done()
+	}()
 	if collectorParam.registered && len(account.ResourceTypeList) != 0 && !utils.Contains(account.ResourceTypeList, resource.ResourceType) {
-		errorMsg := fmt.Sprintf("Code:[%s] Platform => [%s] ResourceType => [%s] will not be collected because the account [%s] is not configured", CollectorError, p.Name, resource.ResourceType, account.CloudAccountId)
-		log.GetWLogger().Warn(errorMsg)
+		errorMsg := fmt.Sprintf("Code:[%s] ResourceType will not be collected because the account is not configured", CollectorError)
+		log.CtxLogger(ctx).Warn(errorMsg)
 		collectorParam.CloudRecLogger.logAccountError(account.Platform, resource.ResourceType, account.CloudAccountId, account.CollectRecordId, errors.New(errorMsg))
 		return
 	}
 
 	loopRegions := p.getLoopRegion(account, resource)
-
-	log.GetWLogger().Info(fmt.Sprintf("Running CloudAccountId => [%s] Platform => [%s] ResourceType => [%s]  LoopRegions => [%s]", account.CloudAccountId, p.Name, resource.ResourceType, loopRegions))
-
 	resourceKey := account.Platform + resource.ResourceType + account.CloudAccountId
 	version := p.generateUUIDWithVersion(resourceKey)
-	log.GetWLogger().Info("version been created ==>", zap.String("resourceKey", resourceKey), zap.String("version", version))
 
 	// loop regions
 	loopRegionWait := &sync.WaitGroup{}
@@ -279,8 +319,8 @@ func (p *Platform) handleResource(account CloudAccount, resource Resource, colle
 		regionService := p.getRegionService(region, resource.ResourceType, account.CloudAccountId)
 		err := regionService.InitServices(param)
 		if err != nil {
-			errorMsg := fmt.Sprintf("Code:[%s] Running CloudAccountId => [%s] Region => [%s] Platform => [%s] ResourceType => [%s] Init Client error %v", CollectorError, account.CloudAccountId, region, p.Name, resource.ResourceType, err)
-			log.GetWLogger().Warn(errorMsg)
+			errorMsg := fmt.Sprintf("Code:[%s] Init Client error %v", CollectorError, err)
+			log.CtxLogger(ctx).Warn(errorMsg)
 			collectorParam.CloudRecLogger.logAccountError(account.Platform, resource.ResourceType, account.CloudAccountId, account.CollectRecordId, errors.New(errorMsg))
 			continue
 		}
@@ -305,19 +345,19 @@ func (p *Platform) handleResource(account CloudAccount, resource Resource, colle
 					var d interface{}
 					err := json.Unmarshal(marshal, &d)
 					if err != nil {
-						log.GetWLogger().Error("json Unmarshal err", zap.Error(err))
+						log.CtxLogger(ctx).Error("json Unmarshal err", zap.Error(err))
 					}
 					// If the registration is not successful, it will be printed on the console.
 					if !collectorParam.registered {
 						if err := utils.PrettyPrintJSON(string(marshal)); err != nil {
-							log.GetWLogger().Error(fmt.Sprintf("Failed to format JSON: %s", err))
+							log.CtxLogger(ctx).Error(fmt.Sprintf("Failed to format JSON: %s", err))
 						}
 					}
 
 					result, err := getJsonPathValue(d, resource.Dimension, resource.RowField, account.CloudAccountId)
 					if err != nil {
-						errorMsg := fmt.Sprintf("Code:[%s] %s  The data will not be submitted to the server CloudAccountId => [%s] Platform => [%s] ResourceType => [%s]", CollectorError, err.Error(), account.CloudAccountId, p.Name, resource.ResourceType)
-						log.GetWLogger().Warn(errorMsg)
+						errorMsg := fmt.Sprintf("Code:[%s] %s  The data will not be submitted to the server", CollectorError, err.Error())
+						log.CtxLogger(ctx).Warn(errorMsg)
 						collectorParam.CloudRecLogger.logAccountError(account.Platform, resource.ResourceType, account.CloudAccountId, account.CollectRecordId, errors.New(errorMsg))
 						continue
 					}
@@ -334,16 +374,16 @@ func (p *Platform) handleResource(account CloudAccount, resource Resource, colle
 
 		// Producer
 		loopRegionWait.Add(1)
-		ctx, cancel := context.WithTimeout(context.Background(), 240*time.Second)
+		// Create timeout context based on the input context to preserve account information
+		regionCtx, cancel := context.WithTimeout(ctx, 240*time.Second)
 		// Get rate limiter for this region
 		limiter := p.getRegionLimiter(region)
 		// Acquire semaphore
 		limiter <- struct{}{}
-		ctx = context.WithValue(ctx, constant.CloudAccountId, account.CloudAccountId)
-		ctx = context.WithValue(ctx, constant.RegionId, region)
-		ctx = context.WithValue(ctx, constant.ResourceType, resource.ResourceType)
-		ctx = context.WithValue(ctx, constant.TraceId, version)
-		go func(ctx context.Context, regionService ServiceInterface) {
+		// Add region-specific information to the context
+		regionCtx = context.WithValue(regionCtx, constant.RegionId, region)
+		regionCtx = context.WithValue(regionCtx, constant.TraceId, version)
+		go func(regionCtx context.Context, regionService ServiceInterface) {
 			defer func() {
 				cancel()
 				loopRegionWait.Done()
@@ -353,36 +393,38 @@ func (p *Platform) handleResource(account CloudAccount, resource Resource, colle
 				if r := recover(); r != nil {
 					errMsg := fmt.Sprintf("%v", r)
 					if strings.Contains(errMsg, "send on closed channel") {
-						log.GetWLogger().Warn(fmt.Sprintf("Timeout, more than %d seconds !!! CloudAccountId => [%s] Platform => [%s] Region => [%s]  ResourceType => [%s]", constant.TimeOut, account.CloudAccountId, p.Name, region, resource.ResourceType))
+						log.CtxLogger(ctx).Warn(fmt.Sprintf("Timeout, more than %d seconds !!!", constant.TimeOut))
 					} else {
-						errmsg := fmt.Sprintf("Code:[%s], CloudAccountId => [%s] Platform => [%s] Region => [%s] ResourceType => [%s] Recovered from panic of unknown type: %s", UnknownError, account.CloudAccountId, p.Name, region, resource.ResourceType, r)
-						log.GetWLogger().Error(errmsg)
+						errmsg := fmt.Sprintf("Code:[%s] Recovered from panic of unknown type: %s", UnknownError, r)
+						log.CtxLogger(ctx).Error(errmsg)
 						collectorParam.CloudRecLogger.logAccountError(account.Platform, resource.ResourceType, account.CloudAccountId, account.CollectRecordId, errors.New(errMsg))
 					}
 				}
+				log.CtxLogger(context.WithValue(regionCtx, constant.EndTime, time.Now())).Info("LoopRegionWait Done")
 			}()
 
 			if resource.ResourceDetailFunc != nil {
-				if err = resource.ResourceDetailFunc(ctx, regionService, regionCh); err != nil {
-					errmsg := fmt.Sprintf("Code:[%s], CloudAccountId => [%s] Platform => [%s] Region => [%s] ResourceType => [%s] ERROR \n %s", CollectorError, account.CloudAccountId, p.Name, region, resource.ResourceType, err.Error())
-					log.GetWLogger().Info(errmsg)
+				if err = resource.ResourceDetailFunc(regionCtx, regionService, regionCh); err != nil {
+					errmsg := fmt.Sprintf("Code:[%s] ResourceDetailFunc ERROR: %s", CollectorError, err.Error())
+					log.CtxLogger(ctx).Warn(errmsg)
 					collectorParam.CloudRecLogger.logAccountError(account.Platform, resource.ResourceType, account.CloudAccountId, account.CollectRecordId, errors.New(errmsg))
 				}
 			}
 
 			if resource.ResourceDetailFuncWithCancel != nil {
-				if err = resource.ResourceDetailFuncWithCancel(ctx, cancel, regionService, regionCh); err != nil {
-					errmsg := fmt.Sprintf("Code:[%s], CloudAccountId => [%s] Platform => [%s] Region => [%s] ResourceType => [%s] ERROR \n %s", SDKError, account.CloudAccountId, p.Name, region, resource.ResourceType, err.Error())
-					log.GetWLogger().Info(errmsg)
+				if err = resource.ResourceDetailFuncWithCancel(regionCtx, cancel, regionService, regionCh); err != nil {
+					errmsg := fmt.Sprintf("Code:[%s] ResourceDetailFuncWithCancel ERROR: %s", SDKError, err.Error())
+					log.CtxLogger(ctx).Warn(errmsg)
 					collectorParam.CloudRecLogger.logAccountError(account.Platform, resource.ResourceType, account.CloudAccountId, account.CollectRecordId, errors.New(errmsg))
 				}
 				// Waiting timeout or Cancel
-				<-ctx.Done()
+				<-regionCtx.Done()
 			}
 
-		}(ctx, regionService)
+		}(regionCtx, regionService)
 
 		if resource.Dimension == Global {
+			log.CtxLogger(ctx).Info("Global resource, no need to loop region")
 			break
 		}
 
@@ -464,16 +506,6 @@ func (p *Platform) getUUIDVersion(key string) (string, bool) {
 		return "", false
 	}
 	return value.(string), true
-}
-
-// deleteUUIDVersion deletes a UUID version from the map for a given key.
-func (p *Platform) deleteUUIDVersion(key string) {
-	version, exist := p.getUUIDVersion(key)
-	if exist {
-		log.GetWLogger().Info("version will remove ==>", zap.String("key", key), zap.String("version", version))
-		// Delete the key-value pair from the map
-		p.uuidVersionMap.Delete(key)
-	}
 }
 
 // ClearVersionMap clears all entries from the global map.

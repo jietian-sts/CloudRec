@@ -16,8 +16,8 @@
 package log
 
 import (
-	"github.com/core-sdk/constant"
 	"context"
+	"github.com/core-sdk/constant"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -88,18 +88,30 @@ func fieldsFromContext(ctx context.Context) []zap.Field {
 	var fields []zap.Field
 
 	if resourceType, ok := ctx.Value(constant.TraceId).(string); ok {
-		fields = append(fields, zap.String("traceId", resourceType))
+		fields = append(fields, zap.String(string(constant.TraceId), resourceType))
 	}
 	if regionId, ok := ctx.Value(constant.RegionId).(string); ok {
-		fields = append(fields, zap.String("regionId", regionId))
+		fields = append(fields, zap.String(string(constant.RegionId), regionId))
 	}
 
 	if cloudAccountId, ok := ctx.Value(constant.CloudAccountId).(string); ok {
-		fields = append(fields, zap.String("cloudAccountId", cloudAccountId))
+		fields = append(fields, zap.String(string(constant.CloudAccountId), cloudAccountId))
 	}
 
 	if resourceType, ok := ctx.Value(constant.ResourceType).(string); ok {
-		fields = append(fields, zap.String("resourceType", resourceType))
+		fields = append(fields, zap.String(string(constant.ResourceType), resourceType))
+	}
+
+	if startTime, ok := ctx.Value(constant.StartTime).(string); ok {
+		fields = append(fields, zap.String(string(constant.StartTime), startTime))
+	}
+
+	if endTime, ok := ctx.Value(constant.EndTime).(string); ok {
+		fields = append(fields, zap.String(string(constant.EndTime), endTime))
+	}
+
+	if duration, ok := ctx.Value(constant.Duration).(string); ok {
+		fields = append(fields, zap.String(string(constant.Duration), duration))
 	}
 
 	return fields

@@ -16,14 +16,13 @@
 package collector
 
 import (
-	"github.com/core-sdk/log"
-	"github.com/core-sdk/schema"
 	"cloud.google.com/go/accesscontextmanager/apiv1"
 	"cloud.google.com/go/resourcemanager/apiv3"
 	"cloud.google.com/go/resourcemanager/apiv3/resourcemanagerpb"
 	"context"
 	"fmt"
-	"time"
+	"github.com/core-sdk/log"
+	"github.com/core-sdk/schema"
 	"go.uber.org/zap"
 	admin "google.golang.org/api/admin/directory/v1"
 	"google.golang.org/api/cloudidentity/v1"
@@ -35,6 +34,7 @@ import (
 	"google.golang.org/api/sqladmin/v1"
 	"google.golang.org/api/storage/v1"
 	"google.golang.org/api/vpcaccess/v1"
+	"time"
 )
 
 type Services struct {
@@ -58,10 +58,10 @@ func (s *Services) Clone() schema.ServiceInterface {
 	return &Services{}
 }
 
-// ShouldCollect determines whether asset collection should be performed for the cloud account
+// AssessCollectionTrigger determines whether asset collection should be performed for the cloud account
 // Returns true if collection should proceed, false if it should be skipped
 // This can be used to skip collection when credentials are invalid or no changes occurred
-// ShouldCollect determines whether collection should be performed for the given cloud account
+// AssessCollectionTrigger determines whether collection should be performed for the given cloud account
 // Returns CollectRecordInfo containing collection decision and metadata
 func (s *Services) AssessCollectionTrigger(param schema.CloudAccountParam) schema.CollectRecordInfo {
 	// TODO: Implement logic to check if collection should be performed
@@ -70,16 +70,16 @@ func (s *Services) AssessCollectionTrigger(param schema.CloudAccountParam) schem
 	// - Check if there were recent changes in the account
 	// - Check if the last collection was recent enough
 	// - Check if the account is in maintenance mode
-	
+
 	startTime := time.Now().Format("2006-01-02T15:04:05Z")
 	recordInfo := schema.CollectRecordInfo{
-		CloudAccountId: param.CloudAccountId,
-		Platform:       param.Platform,
-		StartTime:      startTime,
-		EndTime:        "", // Will be set when collection completes
-		EnableCollection:  true, // Default implementation: always collect
+		CloudAccountId:   param.CloudAccountId,
+		Platform:         param.Platform,
+		StartTime:        startTime,
+		EndTime:          "",   // Will be set when collection completes
+		EnableCollection: true, // Default implementation: always collect
 	}
-	
+
 	return recordInfo
 }
 
