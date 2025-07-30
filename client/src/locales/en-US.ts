@@ -1,5 +1,7 @@
 export default {
   common: {
+    'text.create.time': 'Create Time',
+    'text.update.time': 'Update Time',
     'title.operation': 'Operation',
     'button.text.reset': 'Reset',
     'button.text.query': 'Query',
@@ -268,7 +270,7 @@ export default {
     'module.text.running.results': 'Running results',
     'module.text.repair.suggestions': 'Repair suggestions',
     'module.text.reference.link': 'Reference Links',
-    'module.text.risk.context.template': 'Risk Context Template',
+    'module.text.risk.context.template': 'Context Template',
     'module.text.related.assets': 'Related Resources',
     'module.text.example.data': 'Example.Data',
     'module.text.appoint.tenant': 'Appoint Tenant',

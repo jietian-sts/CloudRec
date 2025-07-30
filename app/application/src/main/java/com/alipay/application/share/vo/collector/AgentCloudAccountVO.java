@@ -129,7 +129,10 @@ public class AgentCloudAccountVO {
 
         // set last collect record info
         CollectorRecordPO lastOneRecord = collectorRecordMapper.findLastOne(cloudAccountPO.getCloudAccountId());
+        // Do not modify the location of the record initialization code
         CollectRecordInfo currentRecord = initCollectRecordInfo(cloudAccountPO, agentRegistryPO);
+        agentCloudAccountVO.setCollectRecordId(currentRecord.getCollectRecordId());
+
         if (lastOneRecord != null && StringUtils.isNoneEmpty(lastOneRecord.getCollectRecordInfo())) {
             // use last one collect record info
             CollectRecordInfo info = JSON.parseObject(lastOneRecord.getCollectRecordInfo(), CollectRecordInfo.class);

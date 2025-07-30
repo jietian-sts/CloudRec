@@ -1,5 +1,7 @@
 export default {
   common: {
+    'text.create.time': '创建时间',
+    'text.update.time': '更新时间',
     'title.operation': '操作',
     'button.text.reset': '重置',
     'button.text.query': '查询',
@@ -267,7 +269,7 @@ export default {
     'module.text.running.results': '运行结果',
     'module.text.repair.suggestions': '修复建议',
     'module.text.reference.link': '参考链接',
-    'module.text.risk.context.template': '风险上下文模板',
+    'module.text.risk.context.template': '上下文模板',
     'module.text.related.assets': '关联资产',
     'module.text.example.data': '示例数据',
     'module.text.appoint.tenant': '指定租户',

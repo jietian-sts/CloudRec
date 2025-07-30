@@ -88,7 +88,6 @@ const RuleDetailDrawer: React.FC<RuleDetailDrawerProps> = ({
     <>
       {contextHolder}
       <Drawer
-        title="规则详情"
         placement="right"
         onClose={handleClose}
         open={visible}
@@ -98,45 +97,41 @@ const RuleDetailDrawer: React.FC<RuleDetailDrawerProps> = ({
         <Spin spinning={loading}>
           {ruleDetail && (
             <Descriptions column={1} bordered>
-              <Descriptions.Item label="规则名称">
+              <Descriptions.Item label={intl.formatMessage({ id: 'home.module.inform.columns.ruleName' }, {})}>
                 <Typography.Text copyable>{ruleDetail.ruleName}</Typography.Text>
               </Descriptions.Item>
-              <Descriptions.Item label="规则code">
+              <Descriptions.Item label="Code">
                 <Typography.Text copyable>{ruleDetail.ruleCode}</Typography.Text>
               </Descriptions.Item>
-              <Descriptions.Item label="修复建议">
+              <Descriptions.Item label={intl.formatMessage({ id: 'rule.module.text.repair.suggestions' }, {})}>
                 <Typography.Text copyable>{ruleDetail.advice}</Typography.Text>
               </Descriptions.Item>
-              <Descriptions.Item label="修复文档">
+              <Descriptions.Item label={intl.formatMessage({ id: 'rule.module.text.reference.link' }, {})}>
                 <Typography.Text copyable>{ruleDetail.link}</Typography.Text>
               </Descriptions.Item>
-              <Descriptions.Item label="上下文模板">
+              <Descriptions.Item label={intl.formatMessage({ id: 'rule.module.text.risk.context.template' }, {})}>
                 <Typography.Text copyable>{ruleDetail.context}</Typography.Text>
               </Descriptions.Item>
               {ruleDetail.ruleRego && (
-                <Descriptions.Item label="策略">
-                  <Typography.Paragraph copyable>
+                <Descriptions.Item label="Rego Policy">
+                  <Typography.Text copyable={{ text: ruleDetail.ruleRego }}>
                     <pre style={{ 
                       background: '#f5f5f5', 
                       padding: '12px', 
                       borderRadius: '4px',
                       fontSize: '12px',
-                      maxHeight: '1000px',
+                      maxHeight: '2048px',
                       overflow: 'auto'
                     }}>
                       {ruleDetail.ruleRego}
                     </pre>
-                  </Typography.Paragraph>
+                  </Typography.Text>
                 </Descriptions.Item>
               )}
-              {ruleDetail.createTime && (
-                <Descriptions.Item label="创建时间">
-                  <Typography.Text copyable>{ruleDetail.createTime}</Typography.Text>
-                </Descriptions.Item>
-              )}
-              {ruleDetail.updateTime && (
-                <Descriptions.Item label="更新时间">
-                  <Typography.Text copyable>{ruleDetail.updateTime}</Typography.Text>
+              
+              {ruleDetail.gmtModified && (
+                <Descriptions.Item label={intl.formatMessage({ id: 'common.text.update.time' }, {})}>
+                  <Typography.Text copyable>{ruleDetail.gmtModified}</Typography.Text>
                 </Descriptions.Item>
               )}
             </Descriptions>

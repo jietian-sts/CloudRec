@@ -1,7 +1,8 @@
 import { useIntl, useSearchParams, useModel, history } from '@umijs/max';
 import { PageContainer } from '@ant-design/pro-components';
 import { Table, DatePicker, Space, Select, Form, Tag, Progress, Tooltip, Button, Modal, Typography, message } from 'antd';
-import { CheckCircleOutlined, SyncOutlined, CloseCircleFilled, InfoCircleOutlined, CopyOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined, SyncOutlined, CloseCircleFilled, InfoCircleOutlined, CopyOutlined, FullscreenOutlined, FullscreenExitOutlined } from '@ant-design/icons';
+import JSONEditor from '@/components/Editor/JSONEditor';
 import { cloudAccountBaseInfoListV2 } from '@/services/account/AccountController';
 import { obtainPlatformEasyIcon } from '@/utils/shared';
 import { useEffect, useState } from 'react';
@@ -28,6 +29,22 @@ const CollectionRecord = () => {
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const [metadataModalVisible, setMetadataModalVisible] = useState(false);
   const [selectedMetadata, setSelectedMetadata] = useState<any>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  /**
+   * Toggle fullscreen mode for metadata modal
+   */
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
+
+  /**
+   * Handle modal close - reset fullscreen state
+   */
+  const handleModalClose = () => {
+    setMetadataModalVisible(false);
+    setIsFullscreen(false);
+  };
 
   // query cloud account list
   const fetchAccountList = async (platform?: string, searchValue?: string) => {
@@ -382,64 +399,40 @@ const CollectionRecord = () => {
            </Space>
          }
          open={metadataModalVisible}
-         onCancel={() => setMetadataModalVisible(false)}
+         onCancel={handleModalClose}
          footer={[
            <Button 
-             key="copy" 
-             icon={<CopyOutlined />}
-             onClick={() => {
-               if (selectedMetadata) {
-                 const textToCopy = typeof selectedMetadata === 'object' 
-                   ? JSON.stringify(selectedMetadata, null, 2)
-                   : selectedMetadata;
-                 navigator.clipboard.writeText(textToCopy);
-                 message.success('Metadata copied to clipboard!');
-               }
-             }}
+             key="fullscreen" 
+             icon={isFullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
+             onClick={toggleFullscreen}
            >
-             Copy
-           </Button>,
-           <Button key="close" onClick={() => setMetadataModalVisible(false)}>
-             Close
+             {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
            </Button>,
          ]}
-         width={800}
-       >
-         <div 
-           style={{ 
-             maxHeight: '60vh', 
-             overflow: 'auto',
-             backgroundColor: '#f6f8fa',
+         width={isFullscreen ? '100vw' : 800}
+         style={isFullscreen ? {
+           top: 0,
+           paddingBottom: 0,
+           maxWidth: '100vw'
+         } : {}}
+         bodyStyle={isFullscreen ? {
+           height: 'calc(100vh - 110px)',
+           padding: '24px'
+         } : {}}
+       >         <JSONEditor
+           value={selectedMetadata ? 
+             (typeof selectedMetadata === 'object' 
+               ? JSON.stringify(selectedMetadata, null, 2)
+               : selectedMetadata
+             ) : '{}'
+           }
+           readOnly={true}
+           editorStyle={{
+             height: isFullscreen ? 'calc(100vh - 200px)' : '60vh',
              border: '1px solid #e1e4e8',
-             borderRadius: '6px',
-             padding: '16px'
+             borderRadius: '6px'
            }}
-         >
-           <Typography.Text 
-             code 
-             style={{ 
-               fontSize: '13px',
-               fontFamily: 'SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace'
-             }}
-           >
-             <pre 
-               style={{ 
-                 whiteSpace: 'pre-wrap', 
-                 wordBreak: 'break-word',
-                 margin: 0,
-                 lineHeight: '1.45',
-                 color: '#24292e'
-               }}
-             >
-               {selectedMetadata ? 
-                 (typeof selectedMetadata === 'object' 
-                   ? JSON.stringify(selectedMetadata, null, 2)
-                   : selectedMetadata
-                 ) : ''
-               }
-             </pre>
-           </Typography.Text>
-         </div>
+         />
        </Modal>
     </PageContainer>
   );
