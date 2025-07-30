@@ -22,7 +22,6 @@ import (
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 	"os"
-	"path"
 )
 
 // NewLogger
@@ -78,10 +77,8 @@ func GetWLogger() *zap.Logger {
 	return logger
 }
 
-var logDir string
-
 func init() {
-	logger = NewLogger(path.Join(logDir, "/tmp/task.log"), zapcore.InfoLevel, 128, 30, 7, true)
+	logger = NewLogger("./logs/task.log", zapcore.InfoLevel, 256, 30, 7, true)
 }
 
 func fieldsFromContext(ctx context.Context) []zap.Field {
