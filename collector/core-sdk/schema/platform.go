@@ -169,6 +169,9 @@ func (p *Platform) clearRegionServices() {
 	})
 }
 
+// CollectorV3 collect resource v3
+// Simplified version for queue-based processing - accounts are processed sequentially
+// since AccountQueue already handles concurrency control at the system level
 func (p *Platform) CollectorV3(param CollectorParam) (err error) {
 	startTime := time.Now()
 	defer func() {
@@ -179,40 +182,22 @@ func (p *Platform) CollectorV3(param CollectorParam) (err error) {
 		log.GetWLogger().Info(fmt.Sprintf("Platform => [%s] Program run time: %v\n", p.Name, duration))
 	}()
 
-	// wait all account finish
-	var accountWait sync.WaitGroup
-	cloudAccountMaxConcurrent := p.CloudAccountMaxConcurrent
-	if len(param.accounts) < cloudAccountMaxConcurrent {
-		cloudAccountMaxConcurrent = len(param.accounts)
-	}
-	semaphore := make(chan struct{}, cloudAccountMaxConcurrent)
-
+	// Process accounts sequentially since queue mechanism handles concurrency
 	for _, cloudAccount := range param.accounts {
-		accountWait.Add(1)
-		semaphore <- struct{}{}
-		time.Sleep(1 * time.Second)
-		go func(account CloudAccount) {
-			defer func() {
-				<-semaphore
-				accountWait.Done()
-			}()
+		s := time.Now()
+		// Create context with cloud account information
+		ctx := context.Background()
+		ctx = context.WithValue(ctx, constant.StartTime, time.Now())
+		ctx = context.WithValue(ctx, constant.Platform, p.Name)
+		ctx = context.WithValue(ctx, constant.CloudAccountId, cloudAccount.CloudAccountId)
+		ctx = context.WithValue(ctx, constant.CollectRecordId, cloudAccount.CollectRecordId)
 
-			s := time.Now()
-			// Create context with cloud account information
-			ctx := context.Background()
-			ctx = context.WithValue(ctx, constant.StartTime, time.Now())
-			ctx = context.WithValue(ctx, constant.Platform, p.Name)
-			ctx = context.WithValue(ctx, constant.CloudAccountId, account.CloudAccountId)
-			ctx = context.WithValue(ctx, constant.CollectRecordId, account.CollectRecordId)
+		p.handleAccount(ctx, cloudAccount, param)
 
-			p.handleAccount(ctx, account, param)
-
-			endTime := time.Now()
-			duration := endTime.Sub(s)
-			log.CtxLogger(ctx).Info(fmt.Sprintf("Program run time: %v", duration))
-		}(cloudAccount)
+		endTime := time.Now()
+		duration := endTime.Sub(s)
+		log.CtxLogger(ctx).Info(fmt.Sprintf("Program run time: %v", duration))
 	}
-	accountWait.Wait()
 	return
 }
 

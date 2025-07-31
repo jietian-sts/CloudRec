@@ -60,7 +60,7 @@ public interface AgentService {
 
 
     ApiResponse<List<AgentCloudAccountVO>> queryCloudAccountList(String persistentToken, String registryValue,
-                                                                 String platform, List<String> sites, List<Long> taskIds);
+                                                                 String platform, List<String> sites, List<Long> taskIds, Integer freeCloudAccountCount);
 
     void exitAgent(String onceToken);
 

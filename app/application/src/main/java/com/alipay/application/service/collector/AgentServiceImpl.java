@@ -332,7 +332,7 @@ public class AgentServiceImpl implements AgentService {
     @Transactional(rollbackFor = RuntimeException.class)
     @Override
     public ApiResponse<List<AgentCloudAccountVO>> queryCloudAccountList(String persistentToken, String registryValue,
-                                                                        String platform, List<String> sites, List<Long> taskIds) {
+                                                                        String platform, List<String> sites, List<Long> taskIds, Integer freeCloudAccountCount) {
 
         String lockKey = "query::cloud::account:list";
         if (!dbDistributedLockUtil.tryLock(lockKey, 5 * 60)) {
@@ -388,10 +388,16 @@ public class AgentServiceImpl implements AgentService {
                     throw new RuntimeException(platform + ":" + registryValue + "There is currently no collector running");
                 }
 
+                // Apply freeCloudAccountCount limit if specified
+                int accountLimit = MAX_ACCOUNT_COUNT;
+                if (freeCloudAccountCount != null && freeCloudAccountCount > 0) {
+                    accountLimit = Math.min(freeCloudAccountCount, MAX_ACCOUNT_COUNT);
+                }
+                
                 if (collectorList.size() != 1 && list.size() > collectorList.size()) {
-                    list = list.stream().limit(Math.min(list.size() / collectorList.size(), MAX_ACCOUNT_COUNT)).toList();
+                    list = list.stream().limit(Math.min(list.size() / collectorList.size(), accountLimit)).toList();
                 } else {
-                    list = list.stream().limit(MAX_ACCOUNT_COUNT).toList();
+                    list = list.stream().limit(accountLimit).toList();
                 }
             }
 

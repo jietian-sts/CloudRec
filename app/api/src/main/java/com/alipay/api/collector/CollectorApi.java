@@ -103,7 +103,7 @@ public class CollectorApi {
     public ApiResponse<List<AgentCloudAccountVO>> listCloudAccount(HttpServletRequest request,
                                                                    @RequestBody QueryCloudAccountRequest req) {
         return agentService.queryCloudAccountList(request.getHeader(PERSISTENT_TOKEN),
-                req.getRegistryValue(), req.getPlatform(), req.getSites(), req.getTaskIds());
+                req.getRegistryValue(), req.getPlatform(), req.getSites(), req.getTaskIds(), req.getFreeCloudAccountCount());
     }
 
     /**

@@ -61,6 +61,7 @@ import (
 	"github.com/cloudrec/alicloud/collector/resourcecenter"
 	"github.com/cloudrec/alicloud/collector/rocketmq"
 	"github.com/cloudrec/alicloud/collector/tablestore"
+	"github.com/cloudrec/alicloud/collector/test"
 	"github.com/cloudrec/alicloud/collector/vpc"
 	"github.com/cloudrec/alicloud/collector/vpc/eip"
 	"github.com/cloudrec/alicloud/collector/vpc/nat"
@@ -209,10 +210,10 @@ func GetPlatformConfigTest() *schema.Platform {
 	return schema.GetInstance(schema.PlatformConfig{
 		Name: string(constant.AlibabaCloud),
 		Resources: []schema.Resource{
-			//test.TestBlockResource(),
-			//test.TestAutoExitResource(),
-			//test.TestTimeOutResource(),
-			//test.TestBlockResource2(),
+			test.TestBlockResource(),
+			test.TestAutoExitResource(),
+			test.TestTimeOutResource(),
+			test.TestBlockResource2(),
 		},
 
 		Service:              &collector.Services{},

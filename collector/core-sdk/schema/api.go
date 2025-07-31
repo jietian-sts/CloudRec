@@ -95,12 +95,21 @@ func (c *Client) SendSupportResourceType(registryValue, platform string, resourc
 
 // LoadAccountFromServer Get cloud account information from the server
 func (c *Client) LoadAccountFromServer(registryValue string, taskIds []int64) (cloudAccountList []CloudAccount, err error) {
+	return c.LoadAccountFromServerWithCount(registryValue, taskIds, 0)
+}
+
+// LoadAccountFromServerWithCount Get cloud account information from the server with specified count
+func (c *Client) LoadAccountFromServerWithCount(registryValue string, taskIds []int64, freeCount int) (cloudAccountList []CloudAccount, err error) {
 	t := time.NewTimer(time.Second * 60)
 	defer t.Stop()
 	req := &AccountParam{
 		Platform:      c.Platform,
 		RegistryValue: registryValue,
 		TaskIds:       taskIds,
+	}
+
+	if freeCount > 0 {
+		req.FreeCloudAccountCount = freeCount
 	}
 
 	if len(c.Sites) != 0 {
