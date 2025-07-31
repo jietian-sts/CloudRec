@@ -271,7 +271,7 @@ public class AgentServiceImpl implements AgentService {
         List<OnceTokenVO> result = new ArrayList<>();
 
         // alibaba account
-        String scriptTemplate = "curl -L -o %s.tar.gz %s/%s.tar.gz && tar -xzf %s.tar.gz && cd %s && nohup ./%s --serverUrl \"%s\" --accessToken \"%s\" &";
+        String scriptTemplate = "curl -L -o %s.tar.gz %s/%s.tar.gz && tar -xzf %s.tar.gz && cd %s && nohup ./%s --serverUrl \"%s\" --accessToken \"%s\" > /dev/null 2>&1 &";
         String alicloudScript = parseScript(scriptTemplate, "deploy_alicloud", "cloudrec_collector_alicloud", bucketUrl, serverUrl, existPO.getOnceToken());
         result.add(createOnceToken(Platform.getPlatformName(PlatformType.ALI_CLOUD.getPlatform()), alicloudScript, userPO, existPO));
 
