@@ -16,7 +16,6 @@
  */
 package com.alipay.api.web.rule;
 
-import com.alipay.api.config.filter.annotation.aop.AdminPermissionLimit;
 import com.alipay.api.config.filter.annotation.aop.AuthenticateToken;
 import com.alipay.application.service.rule.WhitedRuleService;
 import com.alipay.application.share.request.rule.*;
@@ -117,7 +116,6 @@ public class WhitedRuleController {
      */
     @AuthenticateToken
     @PostMapping("/delete/{id}")
-    @AdminPermissionLimit
     public ApiResponse<String> delete(@PathVariable Long id) {
         whitedRuleService.deleteById(id);
         return ApiResponse.SUCCESS;
@@ -132,7 +130,6 @@ public class WhitedRuleController {
      */
     @AuthenticateToken
     @PostMapping("/changeStatus")
-    @AdminPermissionLimit
     public ApiResponse<String> changeStatus(@RequestBody SaveWhitedRuleRequestDTO requestDTO) {
         whitedRuleService.changeStatus(requestDTO.getId(), requestDTO.getEnable());
         return ApiResponse.SUCCESS;
@@ -146,7 +143,6 @@ public class WhitedRuleController {
      */
     @AuthenticateToken
     @PostMapping("/grabLock/{id}")
-    @AdminPermissionLimit
     public ApiResponse<String> grabLock(@PathVariable Long id) {
         whitedRuleService.grabLock(id);
         return ApiResponse.SUCCESS;
@@ -175,7 +171,6 @@ public class WhitedRuleController {
 
     @AuthenticateToken
     @PostMapping("/testRun")
-    @AdminPermissionLimit
     public ApiResponse<TestRunWhitedRuleResultDTO> testRun(@RequestBody TestRunWhitedRuleRequestDTO dto) {
         TestRunWhitedRuleResultDTO resultDTO = whitedRuleService.testRun(dto);
         return new ApiResponse<>(resultDTO);
@@ -190,7 +185,6 @@ public class WhitedRuleController {
      */
     @AuthenticateToken
     @PostMapping("/queryWhitedContentByRisk/{riskId}")
-    @AdminPermissionLimit
     public ApiResponse<SaveWhitedRuleRequestDTO> queryWhitedContentByRisk(@PathVariable Long riskId) throws IOException {
         SaveWhitedRuleRequestDTO saveWhitedRuleRequestDTO = whitedRuleService.queryWhitedContentByRisk(riskId);
         return new ApiResponse<>(saveWhitedRuleRequestDTO);
