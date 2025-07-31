@@ -32,7 +32,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// PlatformConfig
+// PlatformConfig platform config param
 type PlatformConfig struct {
 	// (required == true) platform name
 	Name string
@@ -48,6 +48,9 @@ type PlatformConfig struct {
 
 	// (required == true) Supported cloud services
 	Service ServiceInterface
+
+	// Maximum number of accounts running simultaneously,default is 3,can be configured,The maximum cannot exceed 8
+	CloudAccountMaxConcurrent int
 }
 
 type Platform struct {
@@ -84,6 +87,7 @@ func GetInstance(config PlatformConfig) *Platform {
 		servicesMap:           make(map[string]ServiceInterface, 2*len(config.DefaultCloudAccounts)),
 		maxConcurrentRequests: 10, // 默认每个区域最多10个并发请求
 	}
+
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	return instance
 }
@@ -130,6 +134,10 @@ func verifyPlatformConfig(config PlatformConfig) {
 	if len(config.DefaultRegions) == 0 {
 		panic(errors.New("platform default regions is empty"))
 	}
+	if config.CloudAccountMaxConcurrent > 8 || config.CloudAccountMaxConcurrent < 1 {
+		log.GetWLogger().Warn(fmt.Sprintf("platform cloud account max concurrent is %d,default is 3", config.CloudAccountMaxConcurrent))
+		config.CloudAccountMaxConcurrent = constant.DefaultCloudAccountMaxConcurrent
+	}
 }
 
 type CollectorParam struct {
@@ -170,20 +178,36 @@ func (p *Platform) CollectorV3(param CollectorParam) (err error) {
 
 	// wait all account finish
 	var accountWait sync.WaitGroup
+	cloudAccountMaxConcurrent := p.CloudAccountMaxConcurrent
+	if len(param.accounts) < cloudAccountMaxConcurrent {
+		cloudAccountMaxConcurrent = len(param.accounts)
+	}
+	semaphore := make(chan struct{}, cloudAccountMaxConcurrent)
+
 	for _, cloudAccount := range param.accounts {
 		accountWait.Add(1)
-		s := time.Now()
-		// Create context with cloud account information
-		ctx := context.Background()
-		ctx = context.WithValue(ctx, constant.StartTime, time.Now())
-		ctx = context.WithValue(ctx, constant.Platform, p.Name)
-		ctx = context.WithValue(ctx, constant.CloudAccountId, cloudAccount.CloudAccountId)
-		ctx = context.WithValue(ctx, constant.CollectRecordId, cloudAccount.CollectRecordId)
-		p.handleAccount(ctx, cloudAccount, param, &accountWait)
-		endTime := time.Now()
-		duration := endTime.Sub(s)
+		semaphore <- struct{}{}
 
-		log.CtxLogger(ctx).Info(fmt.Sprintf("Program run time: %v", duration))
+		go func(account CloudAccount) {
+			defer func() {
+				<-semaphore
+				accountWait.Done()
+			}()
+
+			s := time.Now()
+			// Create context with cloud account information
+			ctx := context.Background()
+			ctx = context.WithValue(ctx, constant.StartTime, time.Now())
+			ctx = context.WithValue(ctx, constant.Platform, p.Name)
+			ctx = context.WithValue(ctx, constant.CloudAccountId, account.CloudAccountId)
+			ctx = context.WithValue(ctx, constant.CollectRecordId, account.CollectRecordId)
+
+			p.handleAccount(ctx, account, param)
+
+			endTime := time.Now()
+			duration := endTime.Sub(s)
+			log.CtxLogger(ctx).Info(fmt.Sprintf("Program run time: %v", duration))
+		}(cloudAccount)
 	}
 	accountWait.Wait()
 	return
@@ -193,8 +217,7 @@ func (p *Platform) CollectorV3(param CollectorParam) (err error) {
 // ctx: context containing Platform, CloudAccountId, and CollectRecordId
 // account: cloud account information to be processed
 // param: collector parameters including logger and registration status
-// parentWg: wait group for account processing operations
-func (p *Platform) handleAccount(ctx context.Context, account CloudAccount, param CollectorParam, parentWg *sync.WaitGroup) {
+func (p *Platform) handleAccount(ctx context.Context, account CloudAccount, param CollectorParam) {
 	// Record start time for duration calculation
 	startTime := time.Now()
 	// Log cloud account collection start
@@ -215,7 +238,6 @@ func (p *Platform) handleAccount(ctx context.Context, account CloudAccount, para
 			}
 			return true
 		})
-		parentWg.Done()
 	}()
 
 	accountParam, err := getCloudAccountParam(account, p.DefaultRegions[0], "")
