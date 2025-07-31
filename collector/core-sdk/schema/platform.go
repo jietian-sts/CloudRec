@@ -49,7 +49,7 @@ type PlatformConfig struct {
 	// (required == true) Supported cloud services
 	Service ServiceInterface
 
-	// Maximum number of accounts running simultaneously,default is 3,can be configured,The maximum cannot exceed 8
+	// Maximum number of accounts running simultaneously,default is DefaultCloudAccountMaxConcurrent,can be configured,The maximum cannot exceed 8
 	CloudAccountMaxConcurrent int
 }
 
@@ -80,7 +80,7 @@ var instance *Platform
 
 // GetInstance Created instance in singleton mode
 func GetInstance(config PlatformConfig) *Platform {
-	verifyPlatformConfig(config)
+	verifyPlatformConfig(&config)
 	config.DefaultRegions = utils.UniqueList(config.DefaultRegions)
 	instance = &Platform{
 		PlatformConfig:        config,
@@ -121,7 +121,7 @@ func RunExecutors(params ...*Platform) {
 	}
 }
 
-func verifyPlatformConfig(config PlatformConfig) {
+func verifyPlatformConfig(config *PlatformConfig) {
 	if config.Name == "" {
 		panic(errors.New("platform name is empty"))
 	}
@@ -134,8 +134,11 @@ func verifyPlatformConfig(config PlatformConfig) {
 	if len(config.DefaultRegions) == 0 {
 		panic(errors.New("platform default regions is empty"))
 	}
+	if config.CloudAccountMaxConcurrent == 0 {
+		config.CloudAccountMaxConcurrent = constant.DefaultCloudAccountMaxConcurrent
+	}
 	if config.CloudAccountMaxConcurrent > 8 || config.CloudAccountMaxConcurrent < 1 {
-		log.GetWLogger().Warn(fmt.Sprintf("platform cloud account max concurrent is %d,default is 3", config.CloudAccountMaxConcurrent))
+		log.GetWLogger().Info("The configured CloudAccountMaxConcurrent exceeds 8 or less than 1, and the default value will be used.", zap.Int("CloudAccountMaxConcurrent", config.CloudAccountMaxConcurrent))
 		config.CloudAccountMaxConcurrent = constant.DefaultCloudAccountMaxConcurrent
 	}
 }
@@ -187,7 +190,7 @@ func (p *Platform) CollectorV3(param CollectorParam) (err error) {
 	for _, cloudAccount := range param.accounts {
 		accountWait.Add(1)
 		semaphore <- struct{}{}
-
+		time.Sleep(1 * time.Second)
 		go func(account CloudAccount) {
 			defer func() {
 				<-semaphore

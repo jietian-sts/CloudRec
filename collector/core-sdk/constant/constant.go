@@ -32,7 +32,7 @@ const TimeOut = 30
 type contextKey string
 
 // DefaultCloudAccountMaxConcurrent Default number of concurrent collection tasks
-const DefaultCloudAccountMaxConcurrent = 3
+const DefaultCloudAccountMaxConcurrent = 4
 
 const (
 	StartTime       contextKey = "StartTime"
