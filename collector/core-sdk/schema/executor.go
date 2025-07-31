@@ -71,7 +71,7 @@ func RunExecutor(platform *Platform) (err error) {
 	}
 
 	// Initialize account queue with max size of 50
-	e.accountQueue = NewAccountQueue(5, &e)
+	e.accountQueue = NewAccountQueue(50, &e)
 
 	err = e.Register()
 	if err != nil && len(platform.DefaultCloudAccounts) == 0 {
