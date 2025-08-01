@@ -18,7 +18,6 @@ package com.alipay.api.web.account;
 
 import com.alibaba.fastjson.JSON;
 import com.alipay.api.config.filter.annotation.aop.AuthenticateToken;
-import com.alipay.api.config.filter.annotation.aop.OpenApi;
 import com.alipay.application.service.account.CloudAccountService;
 import com.alipay.application.service.account.utils.PlatformUtils;
 import com.alipay.application.share.request.account.*;
@@ -142,7 +141,6 @@ public class CloudAccountApi {
     }
 
     @AuthenticateToken
-    @OpenApi
     @PostMapping("/createCollectTask")
     public ApiResponse<String> createCollectTask(@RequestBody CreateCollectTaskRequest request) {
         cloudAccountService.createCollectTask(request);

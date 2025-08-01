@@ -50,11 +50,11 @@ public class PermissionInterceptor implements AsyncHandlerInterceptor {
         if (HttpMethod.OPTIONS.toString().equals(request.getMethod())) {
             return true;
         }
-        
+
         // 检查请求是否已被标记为OpenApi请求
         Boolean isOpenApiRequest = (Boolean) request.getAttribute(OpenApiInterceptor.OPEN_API_REQUEST_ATTRIBUTE);
         if (Boolean.TRUE.equals(isOpenApiRequest)) {
-            logger.debug("Skipping permission check for OpenApi request");
+            logger.info("Skipping permission check for OpenApi request");
             return true;
         }
 
