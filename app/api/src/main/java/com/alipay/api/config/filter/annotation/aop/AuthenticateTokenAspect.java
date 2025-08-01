@@ -53,7 +53,7 @@ public class AuthenticateTokenAspect {
     private TenantRepository tenantRepository;
 
 
-    @Before("@annotation(authenticateToken)")
+    @Before("@annotation(authenticateToken) && !@annotation(com.alipay.api.config.filter.annotation.aop.OpenApi)")
     public void authenticate(AuthenticateToken authenticateToken) {
         try {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
@@ -89,7 +89,7 @@ public class AuthenticateTokenAspect {
         }
     }
 
-    @After("@annotation(com.alipay.api.config.filter.annotation.aop.AuthenticateToken)")
+    @After("@annotation(com.alipay.api.config.filter.annotation.aop.AuthenticateToken) || @annotation(com.alipay.api.config.filter.annotation.aop.OpenApi)")
     public void clearUserInfo() {
         UserInfoContext.clear();
     }
