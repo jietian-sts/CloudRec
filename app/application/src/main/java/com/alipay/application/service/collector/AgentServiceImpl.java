@@ -643,7 +643,7 @@ public class AgentServiceImpl implements AgentService {
         CollectorRecordPO lastOneCollectRecord = collectorRecordMapper.findLastOne(cloudAccountId);
         if (lastOneCollectRecord != null) {
             CollectRecordInfo collectRecordInfo = JSON.parseObject(lastOneCollectRecord.getCollectRecordInfo(), CollectRecordInfo.class);
-            if (collectRecordInfo.getEnableCollection()) {
+            if (collectRecordInfo != null && collectRecordInfo.getEnableCollection()) {
                 log.info("Delete historical version data or scan, cloudAccountId:{}", cloudAccountId);
                 // Delayed tasks:Delete historical version data
                 // Delete 10s to prevent data submission from not completing
