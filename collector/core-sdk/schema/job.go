@@ -55,6 +55,51 @@ func (e *Executor) listCollectorTask() (tasks []TaskResp, err error) {
 	return
 }
 
+// processCollectorTasks processes collector tasks and adds matched accounts to the priority queue
+// Returns the number of accounts added to the queue
+func (e *Executor) processCollectorTasks(available int, logPrefix string) int {
+	if available <= 0 {
+		return 0
+	}
+
+	totalAdded := 0
+	tasks, taskErr := e.listCollectorTask()
+	if taskErr != nil {
+		log.GetWLogger().Warn(fmt.Sprintf("%sFailed to get task from server: %v", logPrefix, taskErr))
+		return 0
+	}
+
+	if len(tasks) > 0 {
+		if logPrefix != "" {
+			log.GetWLogger().Info(fmt.Sprintf("%sFound %d tasks to process", logPrefix, len(tasks)))
+		}
+
+		// find task and match task type
+		for _, task := range tasks {
+			currentTask := task
+			switch currentTask.TaskType {
+			case collect:
+				// Add task accounts to queue
+				taskAccounts := matchTaskId(e.loadCloudAccounts(queryTaskIds(currentTask.TaskParams)), currentTask)
+				if len(taskAccounts) > 0 {
+					// Use priority queue for task accounts to process them first
+					added := e.accountQueue.AddPriorityAccounts(taskAccounts)
+					log.GetWLogger().Info(fmt.Sprintf("%sAdded %d priority task accounts to front of queue", logPrefix, added))
+					totalAdded += added
+
+					// Start processing task accounts
+					for i := 0; i < added; i++ {
+						e.accountQueue.ProcessNext()
+					}
+				}
+				// TODO other task type
+			}
+		}
+	}
+
+	return totalAdded
+}
+
 func (e *Executor) Start() (err error) {
 	if e.registered {
 		time.Sleep(2 * time.Second)
@@ -79,33 +124,9 @@ func (e *Executor) Start() (err error) {
 					// Handle specific tasks
 					queued, processing, available := e.accountQueue.GetQueueStatus()
 					log.GetWLogger().Info(fmt.Sprintf("Queue Status - Queued: %d, Processing: %d, Available: %d", queued, processing, available))
-					if available > 0 {
-						tasks, taskErr := e.listCollectorTask()
-						if taskErr != nil {
-							log.GetWLogger().Warn(fmt.Sprintf("Failed to get task from server: %v", taskErr))
-						} else if len(tasks) > 0 {
-							// find task and match task type
-							for _, task := range tasks {
-								currentTask := task
-								switch currentTask.TaskType {
-								case collect:
-									// Add task accounts to queue
-									taskAccounts := matchTaskId(e.loadCloudAccounts(queryTaskIds(currentTask.TaskParams)), currentTask)
-									if len(taskAccounts) > 0 {
-										// Use priority queue for task accounts to process them first
-										added := e.accountQueue.AddPriorityAccounts(taskAccounts)
-										log.GetWLogger().Info(fmt.Sprintf("Added %d priority task accounts to front of queue", added))
 
-										// Start processing task accounts
-										for i := 0; i < added; i++ {
-											e.accountQueue.ProcessNext()
-										}
-									}
-									// TODO other task type
-								}
-							}
-						}
-					}
+					// Process collector tasks if slots are available
+					e.processCollectorTasks(available, "")
 				}
 			}()
 		}
@@ -116,9 +137,12 @@ func (e *Executor) Start() (err error) {
 				queued, processing, available := e.accountQueue.GetQueueStatus()
 				log.GetWLogger().Info(fmt.Sprintf("Queue Status - Queued: %d, Processing: %d, Available: %d", queued, processing, available))
 
-				// Load more accounts if queue has space
-				if available > 0 {
-					newAccounts := e.loadCloudAccountsWithCount(nil, available)
+				// First try to process collector tasks
+				tasksAdded := e.processCollectorTasks(available, "Cron job: ")
+
+				// Then load more regular accounts if queue still has space
+				if available > tasksAdded {
+					newAccounts := e.loadCloudAccountsWithCount(nil, available-tasksAdded)
 					if len(newAccounts) > 0 {
 						added := e.accountQueue.AddAccounts(newAccounts)
 						log.GetWLogger().Info(fmt.Sprintf("Cron job added %d accounts to queue", added))
@@ -139,14 +163,31 @@ func (e *Executor) Start() (err error) {
 
 		// Initial load of accounts to queue
 		go func() {
-			initialAccounts := e.loadCloudAccounts(nil)
-			if len(initialAccounts) > 0 {
-				added := e.accountQueue.AddAccounts(initialAccounts)
-				log.GetWLogger().Info(fmt.Sprintf("Initial load: added %d accounts to queue", added))
+			// First check for collector tasks and process them
+			if e.registered {
+				queued, processing, available := e.accountQueue.GetQueueStatus()
+				log.GetWLogger().Info(fmt.Sprintf("Initial Queue Status - Queued: %d, Processing: %d, Available: %d", queued, processing, available))
 
-				// Start processing initial accounts
-				for i := 0; i < added; i++ {
-					e.accountQueue.ProcessNext()
+				// Process collector tasks first
+				if e.processCollectorTasks(available, "Initial check: ") > 0 {
+					// Wait for task processing to start,Modify the cloud account status to scanning
+					time.Sleep(5 * time.Second)
+				}
+			}
+
+			// Then load regular accounts if needed
+			_, _, available := e.accountQueue.GetQueueStatus()
+			if available > 0 {
+				// Load accounts based on available slots
+				initialAccounts := e.loadCloudAccountsWithCount(nil, available)
+				if len(initialAccounts) > 0 {
+					added := e.accountQueue.AddAccounts(initialAccounts)
+					log.GetWLogger().Info(fmt.Sprintf("Initial load: added %d accounts to queue", added))
+
+					// Start processing initial accounts
+					for i := 0; i < added; i++ {
+						e.accountQueue.ProcessNext()
+					}
 				}
 			}
 		}()
