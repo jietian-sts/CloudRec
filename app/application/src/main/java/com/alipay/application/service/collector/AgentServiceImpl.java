@@ -132,7 +132,6 @@ public class AgentServiceImpl implements AgentService {
 
         if (agent != null && Status.exit.name().equals(agent.getStatus())) {
             registryResponse.setStatus(agent.getStatus());
-            agentRepository.del(agent.getId());
             return new ApiResponse<>(registryResponse);
         }
 
@@ -393,7 +392,7 @@ public class AgentServiceImpl implements AgentService {
                 if (freeCloudAccountCount != null && freeCloudAccountCount > 0) {
                     accountLimit = Math.min(freeCloudAccountCount, MAX_ACCOUNT_COUNT);
                 }
-                
+
                 if (collectorList.size() != 1 && list.size() > collectorList.size()) {
                     list = list.stream().limit(Math.min(list.size() / collectorList.size(), accountLimit)).toList();
                 } else {
@@ -678,6 +677,7 @@ public class AgentServiceImpl implements AgentService {
 
             if (agentRegistryPO.getStatus().equals(Status.exit.name())) {
                 clear(agentRegistryPO.getId());
+                return;
             }
 
             // If the patient is in a healthy state, a heartbeat of 1 minute will be changed to unhealthy.
@@ -686,6 +686,7 @@ public class AgentServiceImpl implements AgentService {
                     agentRegistryPO.setStatus(Status.unusual.name());
                     agentRegistryMapper.updateByPrimaryKeySelective(agentRegistryPO);
                 }
+                return;
             }
 
             // Unhealthy, no heartbeat within 5 minutes will be changed to offline
@@ -719,8 +720,9 @@ public class AgentServiceImpl implements AgentService {
         CloudAccountDTO cloudAccountDTO = CloudAccountDTO.builder().collectorStatus(Status.running.name()).build();
         List<CloudAccountPO> cloudAccountPOS = cloudAccountMapper.findList(cloudAccountDTO);
         for (CloudAccountPO cloudAccountPO : cloudAccountPOS) {
+            // 8h has not been scanned, the status is waiting
             if (cloudAccountPO.getLastScanTime() == null
-                    || System.currentTimeMillis() - cloudAccountPO.getLastScanTime().getTime() > 60 * 1000) {
+                    || System.currentTimeMillis() - cloudAccountPO.getLastScanTime().getTime() > 8 * 60 * 60 * 1000) {
                 cloudAccountPO.setCollectorStatus(Status.waiting.name());
                 cloudAccountMapper.updateByPrimaryKeySelective(cloudAccountPO);
             }
