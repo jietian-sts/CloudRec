@@ -40,6 +40,8 @@ import (
 	"github.com/cloudrec/alicloud/collector/ddos"
 	"github.com/cloudrec/alicloud/collector/dms"
 	"github.com/cloudrec/alicloud/collector/dns"
+	"github.com/cloudrec/alicloud/collector/dts"
+	"github.com/cloudrec/alicloud/collector/eci"
 	"github.com/cloudrec/alicloud/collector/ecs"
 	"github.com/cloudrec/alicloud/collector/elasticsearch"
 	"github.com/cloudrec/alicloud/collector/ens"
@@ -178,6 +180,9 @@ func GetPlatformConfig() *schema.Platform {
 			tablestore.GetTablestoreResource(),
 			yundun.GetResource(),
 			apig.GetDomainData(),
+			dts.GetDTSInstanceResource(),
+			eci.GetECIContainerGroupResource(),
+			eci.GetECIImageCacheResource(),
 		},
 
 		Service:        &collector.Services{},
