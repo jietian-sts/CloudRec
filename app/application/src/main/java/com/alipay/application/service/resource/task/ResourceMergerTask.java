@@ -126,106 +126,110 @@ public class ResourceMergerTask implements Callable<List<CloudResourceInstancePO
             return orgInstanceData;
         }
 
-        Configuration config = Configuration.defaultConfiguration();
-        for (LinkDataParam linkedData : linkedDataList) {
-            IQueryResource iQueryResource = SpringUtils.getApplicationContext().getBean(IQueryResource.class);
-            List<CloudResourceInstancePO> cloudResourceInstancePOS = iQueryResource.queryByCond(orgInstanceData.get(0).getPlatform(), linkedData.getResourceType().get(1), cloudAccountId);
-            linkedData.setDataList(cloudResourceInstancePOS);
-        }
-
-        // Turn on concurrent task
-        orgInstanceData.parallelStream().forEach(instance -> {
-            log.info("resourceId {} start query...", instance.getResourceId());
-            DocumentContext context = JsonPath.using(config).parse(instance.getInstance());
+        try {
+            Configuration config = Configuration.defaultConfiguration();
             for (LinkDataParam linkedData : linkedDataList) {
-                // 读取出的值与另一个资产读取的值对比
-                List<Object> newArrayData = new ArrayList<>();
-                Object newObjData = null;
+                IQueryResource iQueryResource = SpringUtils.getApplicationContext().getBean(IQueryResource.class);
+                List<CloudResourceInstancePO> cloudResourceInstancePOS = iQueryResource.queryByCond(orgInstanceData.get(0).getPlatform(), linkedData.getResourceType().get(1), cloudAccountId);
+                linkedData.setDataList(cloudResourceInstancePOS);
+            }
 
-                if (linkedData.getAssociativeMode().equals(AssociativeMode.MANY_TO_ONE.getName())) {
-                    // 无关联字段，直接将关联资产挂载到主资产上
-                    if (CollectionUtils.isNotEmpty(linkedData.getDataList())) {
-                        newObjData = JSON.parseObject(linkedData.getDataList().get(0).getInstance());
-                    }
-                } else {
-                    Object primaryDataValue;
-                    try {
-                        primaryDataValue = context.read(linkedData.getLinkedKey1());
-                    } catch (Exception e) {
-                        log.warn("primaryDataValue is null, linkedKey:{}", linkedData.getLinkedKey1(), e);
-                        continue;
-                    }
+            // Turn on concurrent task
+            orgInstanceData.parallelStream().forEach(instance -> {
+                log.info("resourceId {} start query...", instance.getResourceId());
+                DocumentContext context = JsonPath.using(config).parse(instance.getInstance());
+                for (LinkDataParam linkedData : linkedDataList) {
+                    // 读取出的值与另一个资产读取的值对比
+                    List<Object> newArrayData = new ArrayList<>();
+                    Object newObjData = null;
 
-                    for (CloudResourceInstancePO linkedInstance : linkedData.getDataList()) {
-                        Object linkedDocument = Configuration.defaultConfiguration().jsonProvider()
-                                .parse(linkedInstance.getInstance());
-
-                        Object linkedDataValue;
+                    if (linkedData.getAssociativeMode().equals(AssociativeMode.MANY_TO_ONE.getName())) {
+                        // 无关联字段，直接将关联资产挂载到主资产上
+                        if (CollectionUtils.isNotEmpty(linkedData.getDataList())) {
+                            newObjData = JSON.parseObject(linkedData.getDataList().get(0).getInstance());
+                        }
+                    } else {
+                        Object primaryDataValue;
                         try {
-                            linkedDataValue = JsonPath.read(linkedDocument, linkedData.getLinkedKey2());
+                            primaryDataValue = context.read(linkedData.getLinkedKey1());
                         } catch (Exception e) {
-                            log.warn("linkedDataValue is null, linkedKey:{}", linkedData.getLinkedKey2(), e);
+                            log.warn("primaryDataValue is null, linkedKey:{}", linkedData.getLinkedKey1(), e);
                             continue;
                         }
 
-                        if (primaryDataValue instanceof List) {
-                            // 将 primaryDataValue 转化为数组 并比较 linkedDataValue 的值是否包含在数组中
-                            List<String> primaryDataValueList = (List<String>) primaryDataValue;
-                            if (primaryDataValueList.isEmpty()) {
-                                break;
+                        for (CloudResourceInstancePO linkedInstance : linkedData.getDataList()) {
+                            Object linkedDocument = Configuration.defaultConfiguration().jsonProvider()
+                                    .parse(linkedInstance.getInstance());
+
+                            Object linkedDataValue;
+                            try {
+                                linkedDataValue = JsonPath.read(linkedDocument, linkedData.getLinkedKey2());
+                            } catch (Exception e) {
+                                log.warn("linkedDataValue is null, linkedKey:{}", linkedData.getLinkedKey2(), e);
+                                continue;
                             }
-                            if (primaryDataValueList.contains(linkedDataValue.toString())) {
-                                // 如果包含在数组中则创建一个新的数组，并将 linkedInstance.getInstance() 的json放到新数组后，拼接到
-                                // instance.getInstance() 中
-                                newArrayData.add(JSON.parseObject(linkedInstance.getInstance()));
-                                // 全部数据都关联完成则跳出循环
-                                if (newArrayData.size() == primaryDataValueList.size()) {
+
+                            if (primaryDataValue instanceof List) {
+                                // 将 primaryDataValue 转化为数组 并比较 linkedDataValue 的值是否包含在数组中
+                                List<String> primaryDataValueList = (List<String>) primaryDataValue;
+                                if (primaryDataValueList.isEmpty()) {
                                     break;
                                 }
-                            }
-                        } else {
-                            // 直接比较 primaryDataValue 是否与 linkedDataValue 相等
-                            // 如果相等则将 linkedInstance.getInstance() 做为一个对象拼接到 instance.getInstance() 中
-                            boolean equals = primaryDataValue.toString().equals(linkedDataValue.toString());
-                            if (Objects.equals(linkedData.getAssociativeMode(), AssociativeMode.ONE_TO_ONE.getName())) {
-                                if (equals) {
-                                    newObjData = JSON.parseObject(linkedInstance.getInstance());
-                                    break;
+                                if (primaryDataValueList.contains(linkedDataValue.toString())) {
+                                    // 如果包含在数组中则创建一个新的数组，并将 linkedInstance.getInstance() 的json放到新数组后，拼接到
+                                    // instance.getInstance() 中
+                                    newArrayData.add(JSON.parseObject(linkedInstance.getInstance()));
+                                    // 全部数据都关联完成则跳出循环
+                                    if (newArrayData.size() == primaryDataValueList.size()) {
+                                        break;
+                                    }
                                 }
                             } else {
-                                if (equals) {
-                                    newArrayData.add(JSON.parseObject(linkedInstance.getInstance()));
-                                    break;
+                                // 直接比较 primaryDataValue 是否与 linkedDataValue 相等
+                                // 如果相等则将 linkedInstance.getInstance() 做为一个对象拼接到 instance.getInstance() 中
+                                boolean equals = primaryDataValue.toString().equals(linkedDataValue.toString());
+                                if (Objects.equals(linkedData.getAssociativeMode(), AssociativeMode.ONE_TO_ONE.getName())) {
+                                    if (equals) {
+                                        newObjData = JSON.parseObject(linkedInstance.getInstance());
+                                        break;
+                                    }
+                                } else {
+                                    if (equals) {
+                                        newArrayData.add(JSON.parseObject(linkedInstance.getInstance()));
+                                        break;
+                                    }
                                 }
                             }
                         }
                     }
+
+                    boolean filled = false;
+                    // array
+                    Map<String, Object> map = context.json();
+                    if (!newArrayData.isEmpty()) {
+                        map.put(linkedData.getNewKeyName(), newArrayData);
+                        filled = true;
+                    }
+
+                    // obj
+                    if (newObjData != null) {
+                        map.put(linkedData.getNewKeyName(), newObjData);
+                        filled = true;
+                    }
+
+                    if (!filled) {
+                        map.put(linkedData.getNewKeyName(), null);
+                    }
+
+                    instance.setInstance(JSON.toJSONString(map, SerializerFeature.WriteMapNullValue));
+
                 }
 
-                boolean filled = false;
-                // array
-                Map<String, Object> map = context.json();
-                if (!newArrayData.isEmpty()) {
-                    map.put(linkedData.getNewKeyName(), newArrayData);
-                    filled = true;
-                }
-
-                // obj
-                if (newObjData != null) {
-                    map.put(linkedData.getNewKeyName(), newObjData);
-                    filled = true;
-                }
-
-                if (!filled) {
-                    map.put(linkedData.getNewKeyName(), null);
-                }
-
-                instance.setInstance(JSON.toJSONString(map, SerializerFeature.WriteMapNullValue));
-
-            }
-
-            log.info("resourceId {} end query !!!", instance.getResourceId());
-        });
+                log.info("resourceId {} end query !!!", instance.getResourceId());
+            });
+        } catch (Exception e) {
+            log.error("resource mergeJson error", e);
+        }
 
         return orgInstanceData;
     }
