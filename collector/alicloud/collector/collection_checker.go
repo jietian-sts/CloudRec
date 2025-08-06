@@ -29,6 +29,8 @@ import (
 )
 
 const (
+	// Max number of events size
+	maxEventSize = 20
 	// Time format used for ActionTrail queries
 	actionTrailTimeFormat = "2006-01-02T15:04:05Z"
 	// Default query window for ActionTrail (7 days)
@@ -251,5 +253,8 @@ func (s *Services) AssessCollectionTrigger(cloudAccountParam schema.CloudAccount
 		zap.String("endTime", queryEndTime),
 		zap.Bool("enableCollection", recordInfo.EnableCollection))
 
+	if len(recordInfo.Events) > maxEventSize {
+		recordInfo.Events = recordInfo.Events[:maxEventSize]
+	}
 	return recordInfo
 }
