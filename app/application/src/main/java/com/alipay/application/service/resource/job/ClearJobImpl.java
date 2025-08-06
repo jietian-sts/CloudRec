@@ -68,10 +68,6 @@ public class ClearJobImpl implements ClearJob {
 
     @Resource
     private RiskRepository riskRepository;
-    /**
-     * The asset is deleted if it has not been updated for more than 7 days
-     */
-    private static final int MAX_STORE_DAY = 7;
 
     /**
      * The number of assets deleted at a time
@@ -123,14 +119,6 @@ public class ClearJobImpl implements ClearJob {
                     cloudResourceInstanceMapper.deletedByIdList(idListSub);
                 }
             }
-
-            while (true) {
-                int effectCount = cloudResourceInstanceMapper.deleteByModified(cloudAccountId, MAX_STORE_DAY);
-                if (effectCount == 0) {
-                    break;
-                }
-            }
-
         } catch (Exception e) {
             log.error("clear obsolete data error", e);
         }

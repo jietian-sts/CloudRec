@@ -707,7 +707,7 @@ public class AgentServiceImpl implements AgentService {
             for (AgentRegistryCloudAccountPO po : agentRegistryCloudAccountPOList) {
                 agentRegistryCloudAccountMapper.deleteByPrimaryKey(po.getId());
                 CloudAccountPO cloudAccountPO = cloudAccountMapper.findByCloudAccountId(po.getCloudAccountId());
-                if (cloudAccountPO != null) {
+                if (cloudAccountPO != null && Status.running.name().equals(cloudAccountPO.getCollectorStatus())) {
                     cloudAccountPO.setCollectorStatus(Status.waiting.name());
                     cloudAccountMapper.updateByPrimaryKeySelective(cloudAccountPO);
                 }
