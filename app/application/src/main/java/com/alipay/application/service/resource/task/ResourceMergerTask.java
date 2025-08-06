@@ -46,9 +46,9 @@ import java.util.concurrent.TimeoutException;
 public class ResourceMergerTask implements Callable<List<CloudResourceInstancePO>> {
 
     /**
-     * Maximum waiting time for task execution 30s
+     * Maximum waiting time for task execution 5 min
      */
-    public static int MAX_TIME_OUT_MILLISECONDS = 1000 * 30;
+    public static int MAX_TIME_OUT_MILLISECONDS = 1000 * 60 * 5;
 
     /**
      * Associated data str
