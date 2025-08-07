@@ -208,6 +208,9 @@ public class RuleRepositoryImpl implements RuleRepository {
                 rulePO.setId(existRule.getId());
                 rulePO.setGmtModified(new Date());
                 ruleMapper.updateByPrimaryKeySelective(rulePO);
+            } else {
+                // When RuleCode is not empty,But not exist in database, still should insert
+                ruleMapper.insertSelective(rulePO);
             }
         }
 
