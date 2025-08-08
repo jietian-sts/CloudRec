@@ -43,6 +43,7 @@ import com.alipay.common.enums.PlatformType;
 import com.alipay.common.enums.Status;
 import com.alipay.common.exception.BizException;
 import com.alipay.common.utils.DateUtil;
+import com.alipay.common.utils.ListUtils;
 import com.alipay.dao.dto.AgentRegistryDTO;
 import com.alipay.dao.dto.CloudAccountDTO;
 import com.alipay.dao.dto.CollectorRecordDTO;
@@ -155,21 +156,38 @@ public class AgentServiceImpl implements AgentService {
         return new ApiResponse<>(registryResponse);
     }
 
+    /**
+     * Query agent list with memory-based pagination
+     * This method retrieves all matching agents and performs pagination in memory
+     * 
+     * @param dto the agent registry query parameters
+     * @return ApiResponse containing paginated agent list
+     */
     @Override
     public ApiResponse<ListVO<AgentRegistryVO>> queryAgentList(AgentRegistryDTO dto) {
         ListVO<AgentRegistryVO> listVO = new ListVO<>();
-        int count = agentRegistryMapper.findCount(dto);
-        if (count == 0) {
+        
+        // Get all matching agents without database pagination
+        AgentRegistryDTO queryDto = new AgentRegistryDTO();
+        queryDto.setPlatform(dto.getPlatform());
+        queryDto.setAgentName(dto.getAgentName());
+        queryDto.setRegistryValue(dto.getRegistryValue());
+        queryDto.setStatus(dto.getStatus());
+        
+        List<AgentRegistryPO> allAgents = agentRegistryMapper.findAggList(queryDto);
+        
+        if (allAgents.isEmpty()) {
             return new ApiResponse<>(listVO);
         }
-
-        dto.setOffset();
-        List<AgentRegistryPO> list = agentRegistryMapper.findAggList(dto);
-        List<AgentRegistryVO> collect = list.stream().map(AgentRegistryVO::build).toList();
-
+        
+        // Memory-based pagination using utility method
+        ListUtils.PaginationResult<AgentRegistryPO> paginationResult = ListUtils.paginate(allAgents, dto.getPage(), dto.getSize());
+        List<AgentRegistryPO> pagedAgents = paginationResult.getData();
+        List<AgentRegistryVO> collect = pagedAgents.stream().map(AgentRegistryVO::build).toList();
+        
         listVO.setData(collect);
-        listVO.setTotal(count);
-
+        listVO.setTotal(paginationResult.getTotal());
+        
         return new ApiResponse<>(listVO);
     }
 

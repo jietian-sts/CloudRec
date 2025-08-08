@@ -120,7 +120,7 @@
       IFNULL(rsrcs.count, 0) AS risk_statistics_count
       from rule r INNER JOIN rule_group_rel rgr ON r.id = rgr.rule_id INNER JOIN rule_group rg ON rgr.rule_group_id =
       rg.id INNER JOIN tenant_rule tr ON r.rule_code = tr.rule_code
-      LEFT JOIN rule_scan_risk_count_statistics rsrcs ON r.id = rsrcs.rule_id
+      LEFT JOIN rule_scan_risk_count_statistics rsrcs ON r.id = rsrcs.rule_id AND rsrcs.tenant_id = tr.tenant_id
       <include refid="getLitWhere"></include>
       GROUP BY r.id
       <choose>
@@ -135,6 +135,21 @@
           </otherwise>
       </choose>
       <include refid="getListLimit"></include>
+  </select>
+  <select id="findAllSortList" resultMap="RuleResultMap">
+      SELECT
+      r.*,
+      0 AS risk_statistics_count
+      from rule r INNER JOIN rule_group_rel rgr ON r.id = rgr.rule_id INNER JOIN rule_group rg ON rgr.rule_group_id =
+      rg.id INNER JOIN tenant_rule tr ON r.rule_code = tr.rule_code
+      <include refid="getLitWhere"></include>
+      GROUP BY r.id
+      ORDER BY r.id
+  </select>
+  <select id="findRiskCountByRuleAndTenant" resultType="java.lang.Integer">
+      SELECT IFNULL(rsrcs.count, 0)
+      FROM rule_scan_risk_count_statistics rsrcs
+      WHERE rsrcs.rule_id = #{ruleId} AND rsrcs.tenant_id = #{tenantId}
   </select>
   <select id="findOne" resultMap="BaseResultMap">
       select

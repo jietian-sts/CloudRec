@@ -58,6 +58,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -213,6 +214,13 @@ public class RuleServiceImpl implements RuleService {
         return new ApiResponse<>(listVO);
     }
 
+    /**
+     * Query effective rule list for tenant with memory-based pagination
+     * This method uses memory pagination to ensure accurate tenant-specific risk statistics
+     * 
+     * @param request the list rule request containing filter parameters
+     * @return ListVO containing rule data with proper tenant-specific caching
+     */
     @Override
     public ListVO<RuleVO> queryEffectRuleList(ListRuleRequest request) {
         boolean needCache = false;
@@ -248,16 +256,53 @@ public class RuleServiceImpl implements RuleService {
         }
 
         ListVO<RuleVO> listVO = new ListVO<>();
-        int count = tenantRuleMapper.findCount(ruleDTO);
-        if (count == 0) {
+        
+        // Query all data without pagination for memory-based pagination
+        List<RulePO> allRules = tenantRuleMapper.findAllSortList(ruleDTO);
+        
+        if (allRules.isEmpty()) {
             return listVO;
         }
 
-        ruleDTO.setOffset();
-        List<RulePO> list = tenantRuleMapper.findSortList(ruleDTO);
+        // Application layer processing: add risk statistics for current tenant
+        Long currentTenantId = UserInfoContext.getCurrentUser().getUserTenantId();
+        List<RulePO> processedRules = allRules.stream()
+                .peek(rule -> {
+                    // Set risk statistics count for current tenant
+                    Integer riskCount = tenantRuleMapper.findRiskCountByRuleAndTenant(rule.getId(), currentTenantId);
+                    rule.setRiskCount(riskCount != null ? riskCount : 0);
+                })
+                .collect(Collectors.toList());
 
-        List<RuleVO> collect = list.stream().map(RuleVO::buildEasy).toList();
-        listVO.setTotal(count);
+        // Application layer sorting
+        if ("lastScanTime".equals(request.getSortParam())) {
+            processedRules.sort((r1, r2) -> {
+                Date date1 = r1.getLastScanTime();
+                Date date2 = r2.getLastScanTime();
+                if (date1 == null && date2 == null) return 0;
+                if (date1 == null) return "ASC".equalsIgnoreCase(request.getSortType()) ? -1 : 1;
+                if (date2 == null) return "ASC".equalsIgnoreCase(request.getSortType()) ? 1 : -1;
+                return "ASC".equalsIgnoreCase(request.getSortType()) ? date1.compareTo(date2) : date2.compareTo(date1);
+            });
+        } else if ("riskCount".equals(request.getSortParam())) {
+            processedRules.sort((r1, r2) -> {
+                if ("ASC".equalsIgnoreCase(request.getSortType())) {
+                    return Integer.compare(r1.getRiskCount() != null ? r1.getRiskCount() : 0, r2.getRiskCount() != null ? r2.getRiskCount() : 0);
+                } else {
+                    return Integer.compare(r2.getRiskCount() != null ? r2.getRiskCount() : 0, r1.getRiskCount() != null ? r1.getRiskCount() : 0);
+                }
+            });
+        } else {
+            // Default sort by risk count DESC
+            processedRules.sort((r1, r2) -> Integer.compare(r2.getRiskCount() != null ? r2.getRiskCount() : 0, r1.getRiskCount() != null ? r1.getRiskCount() : 0));
+        }
+
+        // Memory-based pagination using utility method
+        ListUtils.PaginationResult<RulePO> paginationResult = ListUtils.paginate(processedRules, request.getPage(), request.getSize());
+        List<RulePO> pagedRules = paginationResult.getData();
+        List<RuleVO> collect = pagedRules.stream().map(RuleVO::buildEasy).toList();
+        
+        listVO.setTotal(paginationResult.getTotal());
         listVO.setData(collect);
 
         if (needCache) {

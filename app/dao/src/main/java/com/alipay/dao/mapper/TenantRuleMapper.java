@@ -24,6 +24,23 @@ public interface TenantRuleMapper {
 
     List<RulePO> findSortList(RuleDTO ruleDTO);
 
+    /**
+     * Find all rules without pagination for memory-based pagination
+     * 
+     * @param ruleDTO the rule query criteria
+     * @return List of RulePO with risk statistics
+     */
+    List<RulePO> findAllSortList(RuleDTO ruleDTO);
+
+    /**
+     * Find risk count for specific rule and tenant
+     * 
+     * @param ruleId the rule ID
+     * @param tenantId the tenant ID
+     * @return risk count for the rule and tenant
+     */
+    Integer findRiskCountByRuleAndTenant(@Param("ruleId") Long ruleId, @Param("tenantId") Long tenantId);
+
     TenantRulePO findOne(@Param("tenantId") Long tenantId, @Param("ruleCode") String ruleCode);
 
     List<RulePO> findAllList(@Param("tenantId") Long tenantId);
