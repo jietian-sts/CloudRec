@@ -17,14 +17,17 @@
 package com.alipay.api.web.openapi;
 
 
+import com.alibaba.fastjson.JSON;
 import com.alipay.api.config.filter.annotation.aop.OpenApi;
 import com.alipay.application.service.account.CloudAccountService;
+import com.alipay.application.service.account.utils.PlatformUtils;
 import com.alipay.application.service.common.Platform;
 import com.alipay.application.service.resource.IQueryResource;
 import com.alipay.application.service.system.OpenApiService;
 import com.alipay.application.service.system.TenantService;
 import com.alipay.application.service.system.utils.DigestSignUtils;
 import com.alipay.application.share.request.account.CreateCollectTaskRequest;
+import com.alipay.application.share.request.account.SaveCloudAccountRequest;
 import com.alipay.application.share.request.openapi.QueryResourceRequest;
 import com.alipay.application.share.vo.ApiResponse;
 import com.alipay.application.share.vo.ListScrollPageVO;
@@ -34,6 +37,8 @@ import com.alipay.application.share.vo.resource.ResourceInstanceVO;
 import com.alipay.application.share.vo.rule.RuleScanResultVO;
 import com.alipay.application.share.vo.rule.RuleVO;
 import com.alipay.application.share.vo.system.TenantVO;
+import com.alipay.common.utils.ListUtils;
+import com.alipay.dao.dto.CloudAccountDTO;
 import com.alipay.dao.dto.QueryScanResultDTO;
 import com.alipay.dao.dto.TenantDTO;
 import com.alipay.dao.po.PlatformPO;
@@ -41,6 +46,8 @@ import com.alipay.dao.po.ResourcePO;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -151,5 +158,40 @@ public class OpenApiController {
     public ApiResponse<String> createCollectTask(@RequestBody CreateCollectTaskRequest request) {
         cloudAccountService.createCollectTask(request);
         return ApiResponse.SUCCESS;
+    }
+
+    @OpenApi
+    @PostMapping("/saveCloudAccount")
+    public ApiResponse<String> saveCloudAccount(HttpServletRequest httpServletRequest,
+                                                @Validated @RequestBody SaveCloudAccountRequest request, BindingResult result) {
+        if (result.hasErrors()) {
+            return new ApiResponse<>(result);
+        }
+        CloudAccountDTO cloudAccountDTO = CloudAccountDTO.builder()
+                .id(request.getId())
+                .cloudAccountId(request.getCloudAccountId())
+                .email(request.getEmail())
+                .alias(request.getAlias())
+                .platform(request.getPlatform())
+                .tenantId(request.getTenantId())
+                .site(request.getSite())
+                .owner(request.getOwner())
+                .proxyConfig(request.getProxyConfig())
+                .build();
+        cloudAccountDTO.setResourceTypeList(ListUtils.setList(request.getResourceTypeList()));
+
+        if (request.getCredentialsObj() != null) {
+            cloudAccountDTO.setCredentialsJson(JSON.toJSONString(request.getCredentialsObj()));
+            PlatformUtils.checkCredentialsJson(cloudAccountDTO.getCredentialsJson());
+        }
+
+        return cloudAccountService.saveCloudAccount(cloudAccountDTO);
+    }
+
+    @OpenApi
+    @GetMapping("/queryAllTenantList")
+    public ApiResponse<ListVO<TenantVO>> queryAllTenantList() {
+        ListVO<TenantVO> listVO = tenantService.findAll();
+        return new ApiResponse<>(listVO);
     }
 }
