@@ -25,9 +25,12 @@ import com.alipay.application.service.common.Platform;
 import com.alipay.application.service.resource.IQueryResource;
 import com.alipay.application.service.system.OpenApiService;
 import com.alipay.application.service.system.TenantService;
+import com.alipay.application.service.system.domain.Tenant;
+import com.alipay.application.service.system.domain.enums.Status;
 import com.alipay.application.service.system.utils.DigestSignUtils;
 import com.alipay.application.share.request.account.CreateCollectTaskRequest;
 import com.alipay.application.share.request.account.SaveCloudAccountRequest;
+import com.alipay.application.share.request.admin.SaveTenantRequest;
 import com.alipay.application.share.request.openapi.QueryResourceRequest;
 import com.alipay.application.share.vo.ApiResponse;
 import com.alipay.application.share.vo.ListScrollPageVO;
@@ -41,6 +44,8 @@ import com.alipay.common.utils.ListUtils;
 import com.alipay.dao.dto.CloudAccountDTO;
 import com.alipay.dao.dto.QueryScanResultDTO;
 import com.alipay.dao.dto.TenantDTO;
+import com.alipay.dao.mapper.CloudAccountMapper;
+import com.alipay.dao.po.CloudAccountPO;
 import com.alipay.dao.po.PlatformPO;
 import com.alipay.dao.po.ResourcePO;
 import jakarta.annotation.Resource;
@@ -51,6 +56,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 /*
  *@title OpenApiController
@@ -72,6 +78,8 @@ public class OpenApiController {
     private TenantService tenantService;
     @Resource
     private CloudAccountService cloudAccountService;
+    @Resource
+    private CloudAccountMapper cloudAccountMapper;
 
     /**
      * 查询扫描结果
@@ -185,6 +193,10 @@ public class OpenApiController {
             PlatformUtils.checkCredentialsJson(cloudAccountDTO.getCredentialsJson());
         }
 
+        CloudAccountPO cloudAccountPO = cloudAccountMapper.findByCloudAccountId(request.getCloudAccountId());
+        if (Objects.nonNull(cloudAccountPO)) {
+            cloudAccountDTO.setId(cloudAccountPO.getId());
+        }
         return cloudAccountService.saveCloudAccount(cloudAccountDTO);
     }
 
@@ -193,5 +205,23 @@ public class OpenApiController {
     public ApiResponse<ListVO<TenantVO>> queryAllTenantList() {
         ListVO<TenantVO> listVO = tenantService.findAll();
         return new ApiResponse<>(listVO);
+    }
+
+    /**
+     * Save tenant information
+     */
+    @OpenApi
+    @PostMapping("/saveTenant")
+    public ApiResponse<String> saveTenant(@Validated @RequestBody SaveTenantRequest req,
+                                          BindingResult error) {
+        if (error.hasErrors()) {
+            return new ApiResponse<>(error);
+        }
+
+        Tenant tenant = new Tenant(req.getId(), req.getTenantName(), Status.getStatus(req.getStatus()), req.getTenantDesc());
+
+        tenantService.saveTenant(tenant);
+
+        return ApiResponse.SUCCESS;
     }
 }

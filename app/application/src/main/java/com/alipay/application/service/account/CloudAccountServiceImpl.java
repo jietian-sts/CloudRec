@@ -26,14 +26,12 @@ import com.alipay.application.service.common.utils.CacheUtil;
 import com.alipay.application.service.common.utils.DbCacheUtil;
 import com.alipay.application.service.resource.DelResourceService;
 import com.alipay.application.service.risk.domain.repo.RiskRepository;
-import com.alipay.application.share.request.account.AcceptAccountRequest;
 import com.alipay.application.share.request.account.CreateCollectTaskRequest;
 import com.alipay.application.share.request.account.QueryCloudAccountListRequest;
 import com.alipay.application.share.vo.ApiResponse;
 import com.alipay.application.share.vo.ListVO;
 import com.alipay.application.share.vo.account.CloudAccountVO;
 import com.alipay.common.constant.MarkConstants;
-import com.alipay.common.enums.PlatformType;
 import com.alipay.common.enums.Status;
 import com.alipay.common.exception.BizException;
 import com.alipay.common.utils.ListUtils;
@@ -44,7 +42,6 @@ import com.alipay.dao.mapper.CloudAccountMapper;
 import com.alipay.dao.mapper.TenantMapper;
 import com.alipay.dao.po.CloudAccountPO;
 import com.alipay.dao.po.DbCachePO;
-import com.alipay.dao.po.TenantPO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -224,46 +221,6 @@ public class CloudAccountServiceImpl implements CloudAccountService {
         cloudAccountMapper.updateByPrimaryKeySelective(cloudAccountPO);
 
         dbCacheUtil.clear(cacheKey);
-    }
-
-    @Override
-    public void acceptCloudAccount(AcceptAccountRequest request) {
-        log.info("accept account: {}", request.getAccount());
-        // check whether the tenant exists
-        TenantPO tenantPO = tenantMapper.findByTenantName(request.getCiso());
-        if (Objects.isNull(tenantPO)) {
-            tenantPO = new TenantPO();
-            tenantPO.setStatus(Status.valid.name());
-            tenantPO.setTenantName(request.getCiso());
-            tenantPO.setTenantDesc(request.getCiso());
-
-            log.info("create ciso tenant: {}", request.getCiso());
-            tenantMapper.insertSelective(tenantPO);
-        }
-
-        Map<String, String> credentialMap = new HashMap<>();
-        credentialMap.put("ak", request.getAk());
-        credentialMap.put("sk", request.getSk());
-
-        // save account account
-        CloudAccountDTO cloudAccountDTO = CloudAccountDTO.builder().cloudAccountId(request.getYunid())
-                .platform(PlatformType.ALI_CLOUD.getPlatform())
-                .email(request.getEmail())
-                .userId(request.getOwner())
-                .credentialsJson(JSON.toJSONString(credentialMap))
-                .alias(request.getAccount())
-                .build();
-        cloudAccountDTO.setTenantId(tenantPO.getId());
-        cloudAccountDTO.setOwner(request.getOwner());
-
-        CloudAccountPO cloudAccountPO = cloudAccountMapper.findOne(request.getYunid(), PlatformType.ALI_CLOUD.getPlatform());
-        if (Objects.nonNull(cloudAccountPO)) {
-            cloudAccountDTO.setId(cloudAccountPO.getId());
-        }
-
-        UserInfoDTO userInfoDTO = new UserInfoDTO();
-        userInfoDTO.setUserId(request.getOwner());
-        this.saveCloudAccount(cloudAccountDTO);
     }
 
     @Override

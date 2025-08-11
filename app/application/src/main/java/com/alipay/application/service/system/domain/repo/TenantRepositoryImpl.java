@@ -88,7 +88,7 @@ public class TenantRepositoryImpl implements TenantRepository {
 
     @Override
     public void save(Tenant tenant) {
-        TenantPO tenantPO = tenantMapper.selectByPrimaryKey(tenant.getId());
+        TenantPO tenantPO = tenantMapper.findByTenantName(tenant.getTenantName());
         if (tenantPO == null) {
             tenantMapper.insertSelective(tenantConverter.toPo(tenant));
         } else {
