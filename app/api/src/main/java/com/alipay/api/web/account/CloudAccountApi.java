@@ -131,15 +131,6 @@ public class CloudAccountApi {
         return ApiResponse.SUCCESS;
     }
 
-    @PostMapping("/acceptCloudAccount")
-    public ApiResponse<String> acceptCloudAccount(@RequestBody @Validated AcceptAccountRequest request, BindingResult result) {
-        if (result.hasErrors()) {
-            return new ApiResponse<>(result);
-        }
-        cloudAccountService.acceptCloudAccount(request);
-        return ApiResponse.SUCCESS;
-    }
-
     @AuthenticateToken
     @PostMapping("/createCollectTask")
     public ApiResponse<String> createCollectTask(@RequestBody CreateCollectTaskRequest request) {
