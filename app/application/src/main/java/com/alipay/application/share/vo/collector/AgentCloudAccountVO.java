@@ -124,13 +124,13 @@ public class AgentCloudAccountVO {
         Map<String, String> accountCredentialsInfo = PlatformUtils.getAccountCredentialsInfo(cloudAccountPO.getPlatform(), PlatformUtils.decryptCredentialsJson(cloudAccountPO.getCredentialsJson()));
         agentCloudAccountVO.setCredentialJson(AESEncryptionUtils.encrypt(JSON.toJSONString(accountCredentialsInfo), agentRegistryPO.getSecretKey()));
 
+        if (StringUtils.isNoneEmpty(cloudAccountPO.getResourceTypeList())) {
+            agentCloudAccountVO.setResourceTypeList(Arrays.asList(cloudAccountPO.getResourceTypeList().split(",")));
+        }
 
-        List<String> resourceTypeList = Arrays.asList(cloudAccountPO.getResourceTypeList().split(","));
-        if (cloudAccountPO.getEnableInverseSelection() == 0) {
-            agentCloudAccountVO.setResourceTypeList(resourceTypeList);
-        } else {
+        if (cloudAccountPO.getEnableInverseSelection() == 1) {
             List<String> allResourceType = new ArrayList<>(PlatformUtils.getResourceType(cloudAccountPO.getPlatform()));
-            allResourceType.removeAll(resourceTypeList);
+            allResourceType.removeAll(agentCloudAccountVO.getResourceTypeList());
             agentCloudAccountVO.setResourceTypeList(allResourceType);
         }
 
