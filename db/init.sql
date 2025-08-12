@@ -945,3 +945,5 @@ CREATE TABLE `invite_code` (
 
 ALTER TABLE `collector_record`
   ADD COLUMN `collect_record_info` mediumtext DEFAULT NULL COMMENT '采集记录信息 JSON';
+
+ALTER TABLE `cloud_account` ADD COLUMN `enable_inverse_selection` tinyint(4) DEFAULT '0' COMMENT '资产类型是否反选0,1';
