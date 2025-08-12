@@ -118,6 +118,12 @@ public class CloudAccountServiceImpl implements CloudAccountService {
 
     @Override
     public ApiResponse<String> saveCloudAccount(CloudAccountDTO cloudAccountDTO) {
+        if (cloudAccountDTO.getEnableInverseSelection() != null
+                && cloudAccountDTO.getEnableInverseSelection() == 1
+                && ListUtils.isEmpty(cloudAccountDTO.getResourceTypeList())) {
+            throw new BizException("The unselected resource type cannot be null");
+        }
+
         // check cloud account id
         if (cloudAccountDTO.getId() == null) {
             CloudAccountPO existPO = cloudAccountMapper.findByCloudAccountId(cloudAccountDTO.getCloudAccountId());
@@ -137,6 +143,7 @@ public class CloudAccountServiceImpl implements CloudAccountService {
         cloudAccountPO.setSite(cloudAccountDTO.getSite());
         cloudAccountPO.setOwner(cloudAccountDTO.getOwner());
         cloudAccountPO.setProxyConfig(cloudAccountDTO.getProxyConfig());
+        cloudAccountPO.setEnableInverseSelection(cloudAccountDTO.getEnableInverseSelection());
         cloudAccountPO.setResourceTypeList(!ListUtils.isEmpty(cloudAccountDTO.getResourceTypeList()) ? String.join(",", cloudAccountDTO.getResourceTypeList()) : "");
 
         // check credential

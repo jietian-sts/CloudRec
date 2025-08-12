@@ -31,6 +31,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -123,8 +124,14 @@ public class AgentCloudAccountVO {
         Map<String, String> accountCredentialsInfo = PlatformUtils.getAccountCredentialsInfo(cloudAccountPO.getPlatform(), PlatformUtils.decryptCredentialsJson(cloudAccountPO.getCredentialsJson()));
         agentCloudAccountVO.setCredentialJson(AESEncryptionUtils.encrypt(JSON.toJSONString(accountCredentialsInfo), agentRegistryPO.getSecretKey()));
 
-        if (StringUtils.isNoneEmpty(cloudAccountPO.getResourceTypeList())) {
-            agentCloudAccountVO.setResourceTypeList(Arrays.asList(cloudAccountPO.getResourceTypeList().split(",")));
+
+        List<String> resourceTypeList = Arrays.asList(cloudAccountPO.getResourceTypeList().split(","));
+        if (cloudAccountPO.getEnableInverseSelection() == 0) {
+            agentCloudAccountVO.setResourceTypeList(resourceTypeList);
+        } else {
+            List<String> allResourceType = new ArrayList<>(PlatformUtils.getResourceType(cloudAccountPO.getPlatform()));
+            allResourceType.removeAll(resourceTypeList);
+            agentCloudAccountVO.setResourceTypeList(allResourceType);
         }
 
         // set last collect record info

@@ -63,4 +63,5 @@ public class CloudAccountPO {
 
     private String email;
 
+    private Integer enableInverseSelection;
 }

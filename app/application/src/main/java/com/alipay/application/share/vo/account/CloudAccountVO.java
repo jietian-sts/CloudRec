@@ -142,6 +142,8 @@ public class CloudAccountVO {
 
     private String email;
 
+    private Boolean enableInverseSelection;
+
 
     public static CloudAccountVO buildEasy(CloudAccountPO cloudAccountPO) {
         if (cloudAccountPO == null) {
@@ -149,6 +151,8 @@ public class CloudAccountVO {
         }
         CloudAccountVO cloudAccountVO = new CloudAccountVO();
         BeanUtils.copyProperties(cloudAccountPO, cloudAccountVO, "credentialMap");
+        cloudAccountVO.setEnableInverseSelection(cloudAccountPO.getEnableInverseSelection() == 1);
+
 
         if (cloudAccountPO.getTenantId() != null) {
             TenantMapper tenantMapper = SpringUtils.getBean(TenantMapper.class);
@@ -190,12 +194,14 @@ public class CloudAccountVO {
         }
 
         // Asset types supported for scanning
+        cloudAccountVO.setEnableInverseSelection(cloudAccountPO.getEnableInverseSelection() == 1);
         if (cloudAccountPO.getResourceTypeList() != null) {
             String[] split = cloudAccountPO.getResourceTypeList().split(",");
             List<List<String>> list = Arrays.stream(split).parallel()
                     .map(e -> queryResource(cloudAccountPO.getPlatform(), e)).toList();
             cloudAccountVO.setResourceTypeListForWeb(list);
         }
+
 
         cloudAccountVO.setCollectorStatus(Status.running.name().equals(cloudAccountPO.getCollectorStatus()) ? CollectorStatusConstants.running : CollectorStatusConstants.waiting);
 

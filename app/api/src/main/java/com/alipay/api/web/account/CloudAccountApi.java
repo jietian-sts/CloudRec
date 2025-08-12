@@ -20,7 +20,10 @@ import com.alibaba.fastjson.JSON;
 import com.alipay.api.config.filter.annotation.aop.AuthenticateToken;
 import com.alipay.application.service.account.CloudAccountService;
 import com.alipay.application.service.account.utils.PlatformUtils;
-import com.alipay.application.share.request.account.*;
+import com.alipay.application.share.request.account.CreateCollectTaskRequest;
+import com.alipay.application.share.request.account.QueryCloudAccountListRequest;
+import com.alipay.application.share.request.account.SaveCloudAccountRequest;
+import com.alipay.application.share.request.account.UpdateCloudAccountStatusRequest;
 import com.alipay.application.share.vo.ApiResponse;
 import com.alipay.application.share.vo.ListVO;
 import com.alipay.application.share.vo.account.CloudAccountVO;
@@ -106,6 +109,7 @@ public class CloudAccountApi {
                 .site(request.getSite())
                 .owner(request.getOwner())
                 .proxyConfig(request.getProxyConfig())
+                .enableInverseSelection(request.getEnableInverseSelection() ? 1 : 0)
                 .build();
         cloudAccountDTO.setResourceTypeList(ListUtils.setList(request.getResourceTypeList()));
 

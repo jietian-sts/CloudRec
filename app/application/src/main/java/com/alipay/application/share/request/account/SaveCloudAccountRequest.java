@@ -90,4 +90,9 @@ public class SaveCloudAccountRequest {
      * 代理配置JSON
      */
     private String proxyConfig;
+
+    /**
+     * 是否启用反选模式
+     */
+    private Boolean enableInverseSelection;
 }

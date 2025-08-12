@@ -113,4 +113,9 @@ public class CloudAccountDTO extends PageDTO {
      * 代理配置JSON
      */
     private String proxyConfig;
+
+    /**
+     * 云产品类型是否启用反选模式
+     */
+    private Integer enableInverseSelection;
 }

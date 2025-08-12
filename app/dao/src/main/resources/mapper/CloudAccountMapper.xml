@@ -20,11 +20,12 @@
         <result column="owner" jdbcType="VARCHAR" property="owner"/>
         <result column="proxy_config" jdbcType="VARCHAR" property="proxyConfig"/>
         <result column="email" jdbcType="VARCHAR" property="email"/>
+        <result column="enable_inverse_selection" jdbcType="VARCHAR" property="enableInverseSelection"/>
     </resultMap>
     <sql id="Base_Column_List">
         id
         , gmt_create, gmt_modified, cloud_account_id,alias, platform, status,
-    user_id, tenant_id, last_scan_time, resource_type_list,collector_status,account_status,credentials_json,site,owner,proxy_config,email
+    user_id, tenant_id, last_scan_time, resource_type_list,collector_status,account_status,credentials_json,site,owner,proxy_config,email,enable_inverse_selection
     </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select
@@ -95,6 +96,9 @@
             <if test="email != null">
                 email,
             </if>
+            <if test="enableInverseSelection != null">
+                enable_inverse_selection,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -150,6 +154,9 @@
             </if>
             <if test="email != null">
                 #{email,jdbcType=VARCHAR},
+            </if>
+            <if test="enableInverseSelection != null">
+                #{enableInverseSelection,jdbcType=VARCHAR},
             </if>
         </trim>
     </insert>
@@ -207,6 +214,9 @@
             <if test="email != null">
                 email = #{email,jdbcType=VARCHAR},
             </if>
+            <if test="enableInverseSelection != null">
+                enable_inverse_selection = #{enableInverseSelection,jdbcType=VARCHAR},
+            </if>
         </set>
         where id = #{id,jdbcType=BIGINT}
     </update>
@@ -248,7 +258,8 @@
         credentials_json AS credentialsJson,
         site AS site,
         proxy_config AS proxyConfig,
-        email AS email
+        email AS email,
+        enable_inverse_selection AS enableInverseSelection
         FROM cloud_account
         WHERE platform = #{platform}
         <if test="sites != null and sites.size > 0">
