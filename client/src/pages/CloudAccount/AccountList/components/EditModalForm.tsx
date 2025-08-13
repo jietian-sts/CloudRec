@@ -153,7 +153,7 @@ const EditDrawerForm: React.FC<IEditFormProps> = (props) => {
         resourceTypeList: resourceTypeListForWeb || [],
         proxyConfig: proxyConfig || undefined,
         platform: platform || '',
-        enableInverseSelection: rest.enableInverseSelection || 0
+        enableInverseSelection: rest.enableInverseSelection || false
       };
 
       if (platform && PLATFORM_CONFIGS[platform]?.type === 'json' && credentialMap?.credentialsJson) {
@@ -321,6 +321,7 @@ const EditDrawerForm: React.FC<IEditFormProps> = (props) => {
                       name="enableInverseSelection"
                       tooltip={intl.formatMessage({ id: 'cloudAccount.extend.tooltip.selection.mode' })}
                       style={{ marginTop: '8px', marginBottom: 0 }}
+                      initialValue={false}
                     >
                       {intl.formatMessage({ id: 'cloudAccount.extend.title.cloud.services.inverse.selection' })}
                       <Tooltip title={intl.formatMessage({ id: 'cloudAccount.extend.tooltip.selection.mode' })}>
