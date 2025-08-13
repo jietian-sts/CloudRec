@@ -79,4 +79,14 @@ public class User {
         return user;
     }
 
+    public static User initDefaultUser(User user) {
+        user.setUserId(DEFAULT_USER_ID);
+        user.setUsername(DEFAULT_USER_ID);
+        user.setRoleName(RoleNameType.admin);
+        user.setStatus(Status.valid);
+        return user;
+    }
+
+
+
 }
