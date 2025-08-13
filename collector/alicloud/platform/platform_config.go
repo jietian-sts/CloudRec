@@ -25,6 +25,7 @@ import (
 	"github.com/cloudrec/alicloud/collector/cas"
 	"github.com/cloudrec/alicloud/collector/cdn"
 	"github.com/cloudrec/alicloud/collector/cen"
+	"github.com/cloudrec/alicloud/collector/cloudapi"
 	"github.com/cloudrec/alicloud/collector/cloudcenter"
 	"github.com/cloudrec/alicloud/collector/cloudfw"
 	"github.com/cloudrec/alicloud/collector/db/AnalyticDB/adbmysql"
