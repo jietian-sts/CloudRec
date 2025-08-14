@@ -12,6 +12,7 @@ import {
   queryResourceRiskQuantity,
 } from '@/services/asset/AssetController';
 import { queryGroupTypeList } from '@/services/resource/ResourceController';
+import { usePlatformDefaultSelection } from '@/hooks/usePlatformDefaultSelection';
 import { RiskLevelList } from '@/utils/const';
 import {
   obtainFirstProperty,
@@ -453,6 +454,19 @@ const AssetManagement: React.FC = () => {
     },
   );
 
+  // Use custom hook for default platform selection
+  usePlatformDefaultSelection({
+    platformList,
+    form,
+    requestResourceTypeList: (platformList) => {
+      setResourceTypeList([]);
+      requestResourceTypeList(platformList);
+    },
+    requestCloudAccountBaseInfoList,
+    platformFieldName: 'platformList',
+    resourceTypeFieldName: 'resourceTypeList'
+  });
+
   // Cloud account list filtering
   const debounceFetcher = useMemo(() => {
     const loadOptions = (fuzzy: string): void => {
@@ -520,12 +534,18 @@ const AssetManagement: React.FC = () => {
                 <Checkbox.Group
                   options={valueListAddIcon(platformList)}
                   onChange={(checkedValue): void => {
+                    const selectedPlatforms = (checkedValue as string[]) || [];
+                    // Reset resource type list
                     form.setFieldValue('resourceTypeList', null);
                     setResourceTypeList([]);
-                    requestResourceTypeList(checkedValue as any);
+                    // Update resource type list for the selected platforms
+                    requestResourceTypeList(selectedPlatforms);
+                    // Update cloud account list for the selected platforms
                     requestCloudAccountBaseInfoList({
-                      platformList: (checkedValue as string[]) || [],
+                      platformList: selectedPlatforms,
                     });
+                    // Immediately trigger table reload with new platform filter
+                    tableActionRef.current?.reload();
                   }}
                 />
               </Form.Item>

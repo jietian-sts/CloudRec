@@ -3,6 +3,7 @@ import PolymerizeCard from '@/pages/AssetManagement/components/PolymerizeCard';
 import { cloudAccountBaseInfoList } from '@/services/account/AccountController';
 import { queryAggregateAssets } from '@/services/asset/AssetController';
 import { queryGroupTypeList } from '@/services/resource/ResourceController';
+import { usePlatformDefaultSelection } from '@/hooks/usePlatformDefaultSelection';
 import { showTotalIntlFunc, valueListAddIcon } from '@/utils/shared';
 import { useMediaQuerySize } from '@/utils/useMediaQuery';
 import { PageContainer, ProCard } from '@ant-design/pro-components';
@@ -121,6 +122,19 @@ const AssetPolymerize: React.FC = () => {
     },
   );
 
+  // Use custom hook for default platform selection
+  usePlatformDefaultSelection({
+    platformList,
+    form,
+    requestResourceTypeList: (platformList) => {
+      setResourceTypeList([]);
+      requestResourceTypeList(platformList);
+    },
+    requestCloudAccountBaseInfoList,
+    platformFieldName: 'platformList',
+    resourceTypeFieldName: 'resourceTypeList'
+  });
+
   // Cloud account list filtering
   const debounceFetcher = useMemo(() => {
     const loadOptions = (fuzzy: string): void => {
@@ -154,12 +168,18 @@ const AssetPolymerize: React.FC = () => {
                 <Checkbox.Group
                   options={valueListAddIcon(platformList)}
                   onChange={(checkedValue): void => {
+                    const selectedPlatforms = (checkedValue as string[]) || [];
+                    // Reset resource type list and cloud account list
                     form.setFieldValue('resourceTypeList', null);
                     setResourceTypeList([]);
-                    requestResourceTypeList(checkedValue as any);
+                    // Update resource type list for the selected platforms
+                    requestResourceTypeList(selectedPlatforms);
+                    // Update cloud account base info list for dropdown
                     requestCloudAccountBaseInfoList({
-                      platformList: (checkedValue as string[]) || [],
+                      platformList: selectedPlatforms,
                     });
+                    // Immediately trigger search with new platform filter
+                     onClickToFinish(form.getFieldsValue());
                   }}
                 />
               </Form.Item>
