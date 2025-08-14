@@ -28,6 +28,7 @@ import (
 	"github.com/cloudrec/alicloud/collector/cloudapi"
 	"github.com/cloudrec/alicloud/collector/cloudcenter"
 	"github.com/cloudrec/alicloud/collector/cloudfw"
+	"github.com/cloudrec/alicloud/collector/cloudstoragegateway"
 	"github.com/cloudrec/alicloud/collector/db/AnalyticDB/adbmysql"
 	"github.com/cloudrec/alicloud/collector/db/AnalyticDB/adbpostgresql"
 	"github.com/cloudrec/alicloud/collector/db/clickhouse"
@@ -37,35 +38,43 @@ import (
 	"github.com/cloudrec/alicloud/collector/db/polardb"
 	"github.com/cloudrec/alicloud/collector/db/rds"
 	"github.com/cloudrec/alicloud/collector/db/selectdb"
+	"github.com/cloudrec/alicloud/collector/dcdn"
 	"github.com/cloudrec/alicloud/collector/ddos"
 	"github.com/cloudrec/alicloud/collector/dms"
 	"github.com/cloudrec/alicloud/collector/dns"
 	"github.com/cloudrec/alicloud/collector/dts"
 	"github.com/cloudrec/alicloud/collector/eci"
+	"github.com/cloudrec/alicloud/collector/ecp"
 	"github.com/cloudrec/alicloud/collector/ecs"
+	"github.com/cloudrec/alicloud/collector/eflo"
 	"github.com/cloudrec/alicloud/collector/elasticsearch"
 	"github.com/cloudrec/alicloud/collector/ens"
 	"github.com/cloudrec/alicloud/collector/ess"
 	"github.com/cloudrec/alicloud/collector/fc"
+	"github.com/cloudrec/alicloud/collector/ga"
 	"github.com/cloudrec/alicloud/collector/hitsdb"
 	"github.com/cloudrec/alicloud/collector/ims"
 	"github.com/cloudrec/alicloud/collector/kafka"
 	"github.com/cloudrec/alicloud/collector/kms"
+	"github.com/cloudrec/alicloud/collector/live"
 	"github.com/cloudrec/alicloud/collector/loadbalance/alb"
 	"github.com/cloudrec/alicloud/collector/loadbalance/nlb"
 	"github.com/cloudrec/alicloud/collector/loadbalance/slb"
 	"github.com/cloudrec/alicloud/collector/maxcompute"
 	"github.com/cloudrec/alicloud/collector/mse"
 	"github.com/cloudrec/alicloud/collector/nas"
+	"github.com/cloudrec/alicloud/collector/ons"
 	"github.com/cloudrec/alicloud/collector/oss"
 	"github.com/cloudrec/alicloud/collector/pl"
 	"github.com/cloudrec/alicloud/collector/ram"
 	"github.com/cloudrec/alicloud/collector/redis"
 	"github.com/cloudrec/alicloud/collector/resourcecenter"
 	"github.com/cloudrec/alicloud/collector/rocketmq"
+	"github.com/cloudrec/alicloud/collector/sms"
 	"github.com/cloudrec/alicloud/collector/swas"
 	"github.com/cloudrec/alicloud/collector/tablestore"
 	"github.com/cloudrec/alicloud/collector/test"
+	"github.com/cloudrec/alicloud/collector/vod"
 	"github.com/cloudrec/alicloud/collector/vpc"
 	"github.com/cloudrec/alicloud/collector/vpc/eip"
 	"github.com/cloudrec/alicloud/collector/vpc/nat"
@@ -124,9 +133,13 @@ func GetPlatformConfig() *schema.Platform {
 			cloudfw.GetCloudFWConfigResource(),
 			cloudcenter.GetSasConfigResource(),
 			cloudcenter.GetCloudCenterResource(),
+			cloudstoragegateway.GetCloudStorageGatewayResource(),
+			cloudstoragegateway.GetCloudStorageGatewayStorageBundleResource(),
 			elasticsearch.GetResource(),
+			elasticsearch.GetLogstashResource(),
 			arms.GetTraceAppResource(),
 			arms.GetGrafanaWorkspaceResource(),
+			arms.GetARMSPrometheusResource(),
 			ecs.GetInstanceResource(),
 			ecs.GetSecurityGroupData(),
 			ecs.GetImagesResource(),
@@ -177,8 +190,9 @@ func GetPlatformConfig() *schema.Platform {
 			ens.GetLoadBalancerResource(),
 			ens.GetNetworkResource(),
 			ens.GetNatGatewayResource(),
-			// cloudapi.GetCloudAPIResource(),
+			//cloudapi.GetCloudAPIResource(),
 			cloudapi.GetAPIGatewayResource(),
+			cloudapi.GetAPIGatewayAppResource(),
 			kms.GetKMSResource(),
 			ack.GetClusterResource(),
 			mse.GetMSEResource(),
@@ -189,9 +203,17 @@ func GetPlatformConfig() *schema.Platform {
 			dts.GetDTSInstanceResource(),
 			eci.GetECIContainerGroupResource(),
 			eci.GetECIImageCacheResource(),
+			ecp.GetInstanceResource(),
 			swas.GetInstanceResource(),
 			vpc.GetVPNConnectionResource(),
-
+			ga.GetAcceleratorResource(),
+			eflo.GetNodeResource(),
+			ons.GetInstanceResource(),
+			dcdn.GetDCDNDomainResource(),
+			dcdn.GetDCDNIpaDomainResource(),
+			vod.GetVODDomainResource(),
+			sms.GetSMSTemplateResource(),
+			live.GetLiveDomainResource(),
 		},
 
 		Service:        &collector.Services{},
