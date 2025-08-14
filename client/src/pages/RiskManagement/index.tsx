@@ -554,6 +554,35 @@ const RiskManagement: React.FC = () => {
       colSize: 2, // Rule name takes half width (12/24)
       fieldProps: {
         mode: 'multiple',
+        showSearch: true,
+        filterOption: (input: string, option: any) => {
+          // Filter by ruleName and ruleCode for better search experience
+          
+          const searchText = input.toLowerCase();
+          const value = option?.value?.toString().toLowerCase() || '';
+          
+          // Find the original data item to get ruleName and ruleCode
+          const originalItem = tenantRuleList?.find(
+            (item: any) => item.ruleCode === option?.value
+          );
+          
+          if (originalItem) {
+            // Search in both ruleName and ruleCode from the original data
+            const ruleName = originalItem.ruleName?.toLowerCase() || '';
+            const ruleCode = originalItem.ruleCode?.toLowerCase() || '';
+            
+            // Simple case-insensitive search
+            const result = ruleName.includes(searchText) || 
+                          ruleCode.includes(searchText) || 
+                          value.includes(searchText);
+            
+            return result;
+          }
+          
+          // Fallback to value search if original item not found
+          const fallbackResult = value.includes(searchText);
+          return fallbackResult;
+        },
       },
     },
     {
