@@ -195,6 +195,9 @@ export default {
     'module.text.identity': 'identities',
     'input.text.placeholder.access.key':
     'Please enter Access Key, supports multiple inputs',
+    'polymerize.aggregationType.tooltip':'Aggregation method',
+    'polymerize.aggregationType.resourceType': 'Resource Type',
+    'polymerize.aggregationType.cloudAccount': 'Cloud Account',
   },
   cloudAccount: {
     'form.credential': 'credential',

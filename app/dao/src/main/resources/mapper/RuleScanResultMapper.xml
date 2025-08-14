@@ -403,6 +403,12 @@
         <if test="resourceType != null and resourceType != ''">
             AND rsr.resource_type = #{resourceType}
         </if>
+        <if test="resourceTypeList != null and resourceTypeList.size() > 0">
+            AND rsr.resource_type IN
+            <foreach collection="resourceTypeList" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
         <if test="platform != null and platform != ''">
             AND rsr.platform = #{platform}
         </if>

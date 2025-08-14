@@ -423,6 +423,10 @@ declare namespace API {
     resourceType: any[] | string;
     // Resource name, use carefully resourceTypeName
     resourceTypeName: string;
+    // Cloud account ID
+    cloudAccountId: string;
+    // Cloud account alias
+    alias: string;
     // High risk numbers
     highLevelRiskCount: number;
     // Medium risk numbers

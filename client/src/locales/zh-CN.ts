@@ -194,6 +194,9 @@ export default {
     'module.text.risk.information': '风险信息',
     'module.text.identity': '身份',
     'input.text.placeholder.access.key': '请输入Access Key，支持输入多个',
+    'polymerize.aggregationType.tooltip':'聚合方式',
+    'polymerize.aggregationType.resourceType': '资产类型',
+    'polymerize.aggregationType.cloudAccount': '云账号',
   },
   cloudAccount: {
     'form.credential': '凭证',
