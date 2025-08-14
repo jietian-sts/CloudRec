@@ -336,22 +336,7 @@ public class QueryResourceImpl implements IQueryResource {
 
     @Override
     public ApiResponse<ListVO<ResourceAggByInstanceTypeDTO>> queryAggregateAssets(ResourceDTO resourceDTO) {
-        UserInfoDTO currentUser = UserInfoContext.getCurrentUser();
-        Long userTenantId = currentUser.getUserTenantId();
-        boolean needCache = false;
-        String key = CacheUtil.buildKey("queryAggregateAssets", userTenantId, resourceDTO.getPage(), resourceDTO.getSize());
-        if (StringUtils.isEmpty(resourceDTO.getCloudAccountId()) && CollectionUtils.isEmpty(resourceDTO.getPlatformList())
-                && CollectionUtils.isEmpty(resourceDTO.getResourceTypeList()) && StringUtils.isEmpty(resourceDTO.getSearchParam())
-                && StringUtils.isEmpty(resourceDTO.getAddress())) {
-            needCache = true;
-            DbCachePO dbCachePO = dbCacheUtil.get(key);
-            if (dbCachePO != null) {
-                ListVO<ResourceAggByInstanceTypeDTO> listVO = JSON.parseObject(dbCachePO.getValue(), new TypeReference<>() {
-                });
-                return new ApiResponse<>(listVO);
-            }
-        }
-        resourceDTO.setTenantId(currentUser.getTenantId());
+        resourceDTO.setTenantId(UserInfoContext.getCurrentUser().getTenantId());
         resourceDTO.setCloudAccountIdList(cloudAccount.queryCloudAccountIdList(resourceDTO.getCloudAccountId()));
 
         ListVO<ResourceAggByInstanceTypeDTO> listVO = new ListVO<>();
@@ -418,7 +403,7 @@ public class QueryResourceImpl implements IQueryResource {
                 dto.setTypeFullNameList(List.of(typeFullNameList));
 
                 // query risk by resource type
-                CloudResourceRiskCountStatisticsPO cloudResourceRiskCountStatisticsPO = cloudResourceRiskCountStatisticsMapper.findOne(resourcePO.getPlatform(), resourcePO.getResourceType(), userTenantId);
+                CloudResourceRiskCountStatisticsPO cloudResourceRiskCountStatisticsPO = cloudResourceRiskCountStatisticsMapper.findOne(resourcePO.getPlatform(), resourcePO.getResourceType(), UserInfoContext.getCurrentUser().getTenantId());
                 if (cloudResourceRiskCountStatisticsPO != null) {
                     dto.setHighLevelRiskCount(cloudResourceRiskCountStatisticsPO.getHighLevelRiskCount());
                     dto.setMediumLevelRiskCount(cloudResourceRiskCountStatisticsPO.getMediumLevelRiskCount());
@@ -448,10 +433,6 @@ public class QueryResourceImpl implements IQueryResource {
 
         listVO.setData(list);
         listVO.setTotal(count);
-
-        if (needCache) {
-            dbCacheUtil.put(key, listVO);
-        }
 
         return new ApiResponse<>(listVO);
     }

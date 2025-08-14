@@ -505,15 +505,10 @@
         SELECT /*+ query_timeout(20000000)*/
         COUNT(*) AS count,
         cloud_account_id AS cloudAccountId,
-        platform AS platform,
-        MAX(resource_name) AS resourceTypeName,
-        MAX(gmt_modified) AS latestGmtModified,
-        MAX(resource_id) AS latestResourceId,
-        MAX(resource_name) AS latestResourceName,
-        MAX(address) AS latestAddress
+        platform AS platform
         FROM cloud_resource_instance_v1
         <include refid="findAggregateAssetsListWhere"/>
-        GROUP BY cloud_account_id, platform
+        GROUP BY cloud_account_id
         ORDER BY count DESC
         <include refid="getListLimit"></include>
     </select>
