@@ -17,6 +17,7 @@
 package com.alipay.api.web.risk;
 
 import com.alipay.api.config.filter.annotation.aop.AuthenticateToken;
+import com.alipay.api.config.filter.annotation.aop.RateLimit;
 import com.alipay.application.service.risk.RiskService;
 import com.alipay.application.service.system.OperationLogService;
 import com.alipay.application.share.request.risk.*;
@@ -63,6 +64,8 @@ public class RiskController {
     private OperationLogService operationLogService;
 
 
+    @RateLimit(maxRequests = 10, timeWindowSeconds = 60, keyStrategy = RateLimit.KeyStrategy.IP,
+            message = "Too many requests for risks query. Please try again later.")
     @AuthenticateToken
     @PostMapping("/queryRiskList")
     public ApiResponse<ListVO<RuleScanResultVO>> queryRiskList(@RequestBody QueryRiskRequest queryRiskRequest) {

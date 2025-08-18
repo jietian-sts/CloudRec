@@ -18,6 +18,7 @@ package com.alipay.api.web.account;
 
 import com.alibaba.fastjson.JSON;
 import com.alipay.api.config.filter.annotation.aop.AuthenticateToken;
+import com.alipay.api.config.filter.annotation.aop.RateLimit;
 import com.alipay.application.service.account.CloudAccountService;
 import com.alipay.application.service.account.utils.PlatformUtils;
 import com.alipay.application.share.request.account.CreateCollectTaskRequest;
@@ -57,6 +58,8 @@ public class CloudAccountApi {
     @Resource
     private CloudAccountService cloudAccountService;
 
+    @RateLimit(maxRequests = 10, timeWindowSeconds = 60, keyStrategy = RateLimit.KeyStrategy.IP,
+            message = "Too many requests for accounts assets query. Please try again later.")
     @AuthenticateToken
     @PostMapping("/cloudAccountList")
     public ApiResponse<ListVO<CloudAccountVO>> queryCloudAccountList(HttpServletRequest httpServletRequest,
