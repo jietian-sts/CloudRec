@@ -387,7 +387,7 @@ public class QueryResourceImpl implements IQueryResource {
                 dto.setLowLevelRiskCount(riskCountDTO.getLowLevelRiskCount());
 
                 // query new resource
-                queryDTO.setCloudAccountId(dto.getCloudAccountId());
+                queryDTO.setCloudAccountIdList(Collections.singletonList(dto.getCloudAccountId()));
             } else {
                 // For resource type aggregation, query resource type name
                 ResourcePO resourcePO = resourceMapper.findOne(dto.getPlatform(), dto.getResourceType());
