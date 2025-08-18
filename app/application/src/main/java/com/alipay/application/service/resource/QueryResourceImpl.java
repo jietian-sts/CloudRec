@@ -21,6 +21,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.alipay.application.service.common.CloudAccount;
 import com.alipay.application.service.common.utils.CacheUtil;
 import com.alipay.application.service.common.utils.DbCacheUtil;
+import com.alipay.application.service.resource.enums.AggregationType;
 import com.alipay.application.service.resource.task.ResourceMergerTask;
 import com.alipay.application.service.risk.RiskStatusManager;
 import com.alipay.application.share.request.base.IdListRequest;
@@ -33,23 +34,14 @@ import com.alipay.application.share.vo.resource.ResourceGroupTypeVO;
 import com.alipay.application.share.vo.resource.ResourceInstanceVO;
 import com.alipay.application.share.vo.resource.ResourceRiskCountVO;
 import com.alipay.common.constant.TenantConstants;
-import com.alipay.application.service.resource.enums.AggregationType;
 import com.alipay.common.enums.ResourceGroupType;
 import com.alipay.common.exception.BizException;
 import com.alipay.common.utils.ListUtils;
 import com.alipay.dao.context.UserInfoContext;
 import com.alipay.dao.context.UserInfoDTO;
 import com.alipay.dao.dto.*;
-import com.alipay.dao.mapper.CloudAccountMapper;
-import com.alipay.dao.mapper.CloudResourceInstanceMapper;
-import com.alipay.dao.mapper.CloudResourceRiskCountStatisticsMapper;
-import com.alipay.dao.mapper.ResourceMapper;
-import com.alipay.dao.mapper.RuleScanResultMapper;
-import com.alipay.dao.po.CloudAccountPO;
-import com.alipay.dao.po.CloudResourceInstancePO;
-import com.alipay.dao.po.CloudResourceRiskCountStatisticsPO;
-import com.alipay.dao.po.DbCachePO;
-import com.alipay.dao.po.ResourcePO;
+import com.alipay.dao.mapper.*;
+import com.alipay.dao.po.*;
 import jakarta.annotation.Resource;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
@@ -192,10 +184,13 @@ public class QueryResourceImpl implements IQueryResource {
     @Override
     public ApiResponse<ListVO<ResourceInstanceVO>> queryResourceList(QueryResourceListRequest request) {
         boolean needCache = false;
-        String key = CacheUtil.buildKey(cacheKey, UserInfoContext.getCurrentUser().getUserTenantId(), request.getPage(), request.getSize());
+        String key = CacheUtil.buildKey(cacheKey, request.getPlatformList(),
+                request.getResourceTypeList(),
+                UserInfoContext.getCurrentUser().getUserTenantId(),
+                request.getPage(),
+                request.getSize());
+
         if (StringUtils.isEmpty(request.getCloudAccountId())
-                && CollectionUtils.isEmpty(request.getPlatformList())
-                && CollectionUtils.isEmpty(request.getResourceTypeList())
                 && StringUtils.isEmpty(request.getSearchParam())
                 && StringUtils.isEmpty(request.getAddress())
                 && StringUtils.isEmpty(request.getCustomFieldValue())) {
@@ -336,6 +331,26 @@ public class QueryResourceImpl implements IQueryResource {
 
     @Override
     public ApiResponse<ListVO<ResourceAggByInstanceTypeDTO>> queryAggregateAssets(ResourceDTO resourceDTO) {
+        boolean needCache = false;
+        String key = CacheUtil.buildKey("queryAggregateAssets", resourceDTO.getAggregationType(),
+                resourceDTO.getPlatformList(),
+                resourceDTO.getResourceTypeList(),
+                UserInfoContext.getCurrentUser().getTenantId(),
+                resourceDTO.getPage(),
+                resourceDTO.getSize());
+
+        if (StringUtils.isEmpty(resourceDTO.getCloudAccountId())
+                && StringUtils.isEmpty(resourceDTO.getSearchParam())
+                && StringUtils.isEmpty(resourceDTO.getAddress())) {
+            needCache = true;
+            DbCachePO dbCachePO = dbCacheUtil.get(key);
+            if (dbCachePO != null) {
+                ListVO<ResourceAggByInstanceTypeDTO> listVO = JSON.parseObject(dbCachePO.getValue(), new TypeReference<>() {
+                });
+                return new ApiResponse<>(listVO);
+            }
+        }
+
         resourceDTO.setTenantId(UserInfoContext.getCurrentUser().getTenantId());
         resourceDTO.setCloudAccountIdList(cloudAccount.queryCloudAccountIdList(resourceDTO.getCloudAccountId()));
 
@@ -433,6 +448,10 @@ public class QueryResourceImpl implements IQueryResource {
 
         listVO.setData(list);
         listVO.setTotal(count);
+
+        if (needCache) {
+            dbCacheUtil.put(key, listVO);
+        }
 
         return new ApiResponse<>(listVO);
     }
