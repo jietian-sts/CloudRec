@@ -36,12 +36,14 @@ import com.alipay.application.share.vo.ApiResponse;
 import com.alipay.application.share.vo.ListVO;
 import com.alipay.application.share.vo.rule.RuleScanResultVO;
 import com.alipay.application.share.vo.rule.RuleVO;
+import com.alipay.application.share.vo.whited.GroupByRuleCodeVO;
 import com.alipay.application.share.vo.whited.WhitedConfigVO;
 import com.alipay.application.share.vo.whited.WhitedRuleConfigVO;
 import com.alipay.common.enums.WhitedRuleOperatorEnum;
 import com.alipay.common.enums.WhitedRuleTypeEnum;
 import com.alipay.dao.context.UserInfoContext;
 import com.alipay.dao.context.UserInfoDTO;
+import com.alipay.dao.dto.GroupByRuleCodeDTO;
 import com.alipay.dao.dto.QueryScanResultDTO;
 import com.alipay.dao.dto.QueryWhitedRuleDTO;
 import com.alipay.dao.dto.RuleScanResultDTO;
@@ -169,6 +171,7 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
         }
 
         dto.setTenantId(UserInfoContext.getCurrentUser().getTenantId());
+
         List<WhitedRuleConfigPO> list = whitedRuleConfigMapper.list(dto);
         if (StringUtils.isNoneEmpty(dto.getSearch())) {
             list = list.stream()
@@ -364,6 +367,33 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
             return null;
         }
         return buildContentByRiskInfo(ruleScanResultVOApiResponse.getContent());
+    }
+
+    @Override
+    public ListVO<GroupByRuleCodeVO> getListGroupByRuleCode(QueryWhitedRuleDTO dto) {
+        ListVO<GroupByRuleCodeVO> listVO = new ListVO<>();
+
+        // Tenant isolation
+        dto.setTenantId(UserInfoContext.getCurrentUser().getTenantId());
+        List<GroupByRuleCodeDTO> list = whitedRuleConfigMapper.findListGroupByRuleCode(dto);
+
+        if (CollectionUtils.isEmpty(dto.getRuleCodeList())) {
+            GroupByRuleCodeDTO groupByRuleCodeDTO = whitedRuleConfigMapper.findNullRuleCode(dto);
+            if (Objects.nonNull(groupByRuleCodeDTO)) {
+                list.add(0, groupByRuleCodeDTO);
+            }
+        }
+
+        List<GroupByRuleCodeVO> result = list.stream()
+                .skip((long) (dto.getPage() - 1) * dto.getSize())
+                .limit(dto.getSize())
+                .map(GroupByRuleCodeVO::build)
+                .toList();
+
+        listVO.setTotal(list.size());
+        listVO.setData(result);
+
+        return listVO;
     }
 
     private SaveWhitedRuleRequestDTO buildContentByRiskInfo(RuleScanResultVO ruleScanResultVO) {

@@ -104,7 +104,8 @@ export default {
     'message.text.no.permission.title':'No permission',
     'message.text.no.permission.subtitle':'No permission',
     'message.text.delete.failed': 'Delete failed',
-    'message.text.edit.failed': 'Edit failed'
+    'message.text.edit.failed': 'Edit failed',
+    'text.count':'count'
   },
   layout: {
     'routes.title.home': 'Dashboard',
@@ -343,6 +344,7 @@ export default {
     'module.text.batch.remove':'Batch remove',
     'module.text.batch.add.to.favorites':'Batch Add to Favorites',
     'extend.placeholder.input': 'Input Asset ID',
+    'text.global.config.whitelist':"Global Config Whitelist"
   },
   risk: {
     'module.text.not.fixed': 'Not fixed',

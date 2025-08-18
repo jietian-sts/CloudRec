@@ -16,7 +16,11 @@
  */
 package com.alipay.dao.dto;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.List;
 
 /**
  * Date: 2025/3/17
@@ -61,5 +65,8 @@ public class QueryWhitedRuleDTO extends PageDTO  {
      */
     private String search;
 
+    private String ruleCode;
+
+    private List<String> ruleCodeList;
 
 }

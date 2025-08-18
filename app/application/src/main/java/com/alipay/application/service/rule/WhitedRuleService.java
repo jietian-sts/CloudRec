@@ -21,6 +21,7 @@ import com.alipay.application.share.request.rule.TestRunWhitedRuleRequestDTO;
 import com.alipay.application.share.request.rule.TestRunWhitedRuleResultDTO;
 import com.alipay.application.share.request.rule.WhitedScanInputDataDTO;
 import com.alipay.application.share.vo.ListVO;
+import com.alipay.application.share.vo.whited.GroupByRuleCodeVO;
 import com.alipay.application.share.vo.whited.WhitedConfigVO;
 import com.alipay.application.share.vo.whited.WhitedRuleConfigVO;
 import com.alipay.dao.dto.QueryWhitedRuleDTO;
@@ -53,4 +54,6 @@ public interface WhitedRuleService {
     TestRunWhitedRuleResultDTO testRun(TestRunWhitedRuleRequestDTO dto);
 
     SaveWhitedRuleRequestDTO queryWhitedContentByRisk(Long riskId);
+
+    ListVO<GroupByRuleCodeVO> getListGroupByRuleCode(QueryWhitedRuleDTO dto);
 }

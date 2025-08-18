@@ -21,6 +21,7 @@ import com.alipay.application.service.rule.WhitedRuleService;
 import com.alipay.application.share.request.rule.*;
 import com.alipay.application.share.vo.ApiResponse;
 import com.alipay.application.share.vo.ListVO;
+import com.alipay.application.share.vo.whited.GroupByRuleCodeVO;
 import com.alipay.application.share.vo.whited.WhitedConfigVO;
 import com.alipay.application.share.vo.whited.WhitedRuleConfigVO;
 import com.alipay.common.enums.WhitedRuleOperatorEnum;
@@ -91,6 +92,16 @@ public class WhitedRuleController {
         QueryWhitedRuleDTO dto = QueryWhitedRuleDTO.builder().build();
         BeanUtils.copyProperties(request, dto);
         ListVO<WhitedRuleConfigVO> listVO = whitedRuleService.getList(dto);
+        return new ApiResponse<>(listVO);
+    }
+
+
+    @AuthenticateToken
+    @PostMapping("/listGroupByRuleCode")
+    public ApiResponse<ListVO<GroupByRuleCodeVO>> listGroupByRuleCode(@RequestBody QueryWhitedRuleRequest request) {
+        QueryWhitedRuleDTO dto = QueryWhitedRuleDTO.builder().build();
+        BeanUtils.copyProperties(request, dto);
+        ListVO<GroupByRuleCodeVO> listVO = whitedRuleService.getListGroupByRuleCode(dto);
         return new ApiResponse<>(listVO);
     }
 

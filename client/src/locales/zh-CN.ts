@@ -104,7 +104,9 @@ export default {
     'message.text.no.permission.title':'无权限',
     'message.text.no.permission.subtitle':'您无权限访问此页面',
     'message.text.delete.failed': '删除失败',
-    'message.text.edit.failed': '编辑失败'
+    'message.text.edit.failed': '编辑失败',
+    'text.count':'数量',
+    'button.text.back':'返回'
   },
   layout: {
     'routes.title.home': '指标大盘',
@@ -340,6 +342,7 @@ export default {
     'module.text.batch.remove':'批量移出自选',
     'module.text.batch.add.to.favorites':'批量自选',
     'extend.placeholder.input': '请输入资产ID',
+    'text.global.config.whitelist':"全局加白"
   },
   risk: {
     'module.text.not.fixed': '未修复',
