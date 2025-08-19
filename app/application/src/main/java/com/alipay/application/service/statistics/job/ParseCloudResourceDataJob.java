@@ -80,7 +80,7 @@ public class ParseCloudResourceDataJob {
     @Resource
     private TenantRepository tenantRepository;
 
-    public void parseData() {
+    public void refreshIAMData() {
         //清理历史数据
         identitySecurityMapper.deleteAll();
         //获取指定资产数据

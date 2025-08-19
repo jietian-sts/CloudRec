@@ -234,25 +234,25 @@ public class LocalRunTask {
     }
 
     /**
-     * 定时扫描规则
+     * 定时刷新ram风险数据
      */
     @Synchronized
     @Scheduled(cron = "0 0 0/12 * * ?")
-    public void parseData_local() {
+    public void refreshIAMData_local() {
         boolean runStatus = Boolean.TRUE;
         String msg = null;
         try {
-            log.info("parseData_local start");
-            localTaskLocksService.lockTask("parseDataHandler");
-            parseCloudResourceDataJob.parseData();
+            log.info("refreshIAMData_local start");
+            localTaskLocksService.lockTask("refreshIAMDataHandler");
+            parseCloudResourceDataJob.refreshIAMData();
         } catch (Exception e) {
-            log.error("parseData_local error", e);
+            log.error("refreshIAMData_local error", e);
             runStatus = Boolean.FALSE;
             msg = e.getMessage();
             throw new RuntimeException(e);
         } finally {
             //释放锁
-            localTaskLocksService.releaseLockTask("parseDataHandler", runStatus, msg);
+            localTaskLocksService.releaseLockTask("refreshIAMDataHandler", runStatus, msg);
         }
     }
 
