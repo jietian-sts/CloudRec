@@ -26,9 +26,11 @@ import com.alipay.application.service.resource.enums.IdentityTagConfig;
 import com.alipay.application.service.resource.identitySecurity.model.ResourceAccessInfoDTO;
 import com.alipay.application.service.resource.identitySecurity.model.ResourcePolicyInfoDTO;
 import com.alipay.application.service.resource.identitySecurity.model.ResourceUserInfoDTO;
+import com.alipay.application.service.rule.domain.repo.RuleRepository;
 import com.alipay.application.service.rule.enums.RuleType;
-import com.alipay.application.share.request.resource.QueryIdentityRuleRequest;
+import com.alipay.application.service.system.domain.repo.TenantRepository;
 import com.alipay.application.share.request.resource.QueryIdentityCardRequest;
+import com.alipay.application.share.request.resource.QueryIdentityRuleRequest;
 import com.alipay.application.share.vo.ListVO;
 import com.alipay.application.share.vo.resource.IdentityCardVO;
 import com.alipay.application.share.vo.resource.IdentitySecurityRiskInfoVO;
@@ -65,6 +67,10 @@ public class IdentitySecurityServiceImpl implements IdentitySecurityService {
     private CloudResourceInstanceMapper cloudResourceInstanceMapper;
     @Resource
     private RuleTypeMapper ruleTypeMapper;
+    @Resource
+    private RuleRepository ruleRepository;
+    @Resource
+    private TenantRepository tenantRepository;
 
     @Resource
     private DbCacheUtil dbCacheUtil;
@@ -135,8 +141,8 @@ public class IdentitySecurityServiceImpl implements IdentitySecurityService {
         identitySecurityVO.setUserInfo(JSON.parseObject(identitySecurityPO.getUserInfo(), ResourceUserInfoDTO.class));
         identitySecurityVO.setAccessInfos(JSON.parseArray(identitySecurityPO.getAccessInfos(), ResourceAccessInfoDTO.class));
         identitySecurityVO.setPolicies(JSON.parseArray(identitySecurityPO.getPolicies(), ResourcePolicyInfoDTO.class));
-        if(StringUtils.isNotBlank(identitySecurityPO.getTags())){
-            identitySecurityVO.setTags(JSON.parseObject(identitySecurityPO.getTags(),List.class));
+        if (StringUtils.isNotBlank(identitySecurityPO.getTags())) {
+            identitySecurityVO.setTags(JSON.parseObject(identitySecurityPO.getTags(), List.class));
         }
         return identitySecurityVO;
     }
@@ -188,16 +194,22 @@ public class IdentitySecurityServiceImpl implements IdentitySecurityService {
 
     @Override
     public List<IdentityCardVO> queryIdentityCardListWithRulds(QueryIdentityCardRequest request) {
-        //默认需要缓存
-        String key = CacheUtil.buildKey(dbCacheKey, UserInfoContext.getCurrentUser().getUserTenantId(), String.join(",", request.getPlatformList()), request.getPage(), request.getSize());
+        String key = CacheUtil.buildKey(dbCacheKey,
+                UserInfoContext.getCurrentUser().getUserTenantId(),
+                request.getPlatformList(),
+                request.getPage(),
+                request.getSize());
+
         DbCachePO dbCachePO = dbCacheUtil.get(key);
         if (dbCachePO != null) {
             return JSON.parseObject(dbCachePO.getValue(), new TypeReference<>() {
             });
         }
-        RuleTypePO ruleTypePO = ruleTypeMapper.findByTypeName(RuleType.identity_security.getRuleType());
+
         RuleDTO ruleDTO = RuleDTO.builder().build();
         BeanUtils.copyProperties(request, ruleDTO);
+
+        RuleTypePO ruleTypePO = ruleTypeMapper.findByTypeName(RuleType.identity_security.getRuleType());
         ruleDTO.setRuleTypeIdList(Collections.singletonList(ruleTypePO.getId()));
         ruleDTO.setStatus(Status.valid.name());
         ruleDTO.setResourceTypeList(IdentitySecurityConfig.getResourceTypeByPlatformList(request.getPlatformList()));
@@ -206,48 +218,29 @@ public class IdentitySecurityServiceImpl implements IdentitySecurityService {
 
 
         List<IdentityCardVO> identityCardVOList = new ArrayList<>();
-        for (RulePO rulePO : list){
+        for (RulePO rulePO : list) {
+            boolean defaultRule = tenantRepository.isDefaultRule(rulePO.getRuleCode());
+            if (!defaultRule) {
+                continue;
+            }
+
             IdentitySecurityDTO identitySecurityDTO = new IdentitySecurityDTO();
             identitySecurityDTO.setRuleId(String.valueOf(rulePO.getId()));
-            if(request.getPlatformList().size() == 1){
-                identitySecurityDTO.setPlatform(request.getPlatformList().get(0));
-            }else {
-                identitySecurityDTO.setPlatformList(request.getPlatformList());
-            }
+            identitySecurityDTO.setPlatformList(request.getPlatformList());
+            int count = identitySecurityMapper.countRuId(identitySecurityDTO);
+
             IdentityCardVO identityCardVO = new IdentityCardVO();
             identityCardVO.setRuleId(rulePO.getId());
             identityCardVO.setRuleCode(rulePO.getRuleCode());
             identityCardVO.setRuleName(rulePO.getRuleName());
             identityCardVO.setPlatform(rulePO.getPlatform());
             identityCardVO.setRiskLevel(rulePO.getRiskLevel());
-            identityCardVO.setUserCount(identitySecurityMapper.countRuId(identitySecurityDTO));
+            identityCardVO.setUserCount(count);
             identityCardVOList.add(identityCardVO);
         }
 
         dbCacheUtil.put(key, identityCardVOList);
+
         return identityCardVOList;
     }
-
-    private int getCloudUserCount(RulePO rulePO, Map<String, List<IdentitySecurityPO>> ruleIdToCloudUserMap){
-        List<IdentitySecurityPO> identitySecurityPOS = ruleIdToCloudUserMap.entrySet().stream()
-                .filter(entry -> Arrays.asList(entry.getKey().split(",")).contains(rulePO.getId().toString()))
-                .flatMap(entry -> entry.getValue().stream())
-                .collect(Collectors.toList());
-
-        if(!CollectionUtils.isEmpty(identitySecurityPOS)){
-            Set<String> cloudUserIds = identitySecurityPOS.stream()
-                    .map(IdentitySecurityPO::getUserInfo)
-                    .map(t -> {
-                        if(StringUtils.isNotBlank(t)){
-                           return JSON.parseObject(t, ResourceUserInfoDTO.class).getUserId();
-                        }else{
-                            return null;
-                        }
-                    })
-                    .collect(Collectors.toSet());
-            return cloudUserIds.size();
-        }
-        return 0;
-    }
-
 }
