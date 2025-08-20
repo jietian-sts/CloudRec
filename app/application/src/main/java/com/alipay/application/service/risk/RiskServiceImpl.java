@@ -109,13 +109,13 @@ public class RiskServiceImpl implements RiskService {
         ruleScanResultDTO.setTenantId(UserInfoContext.getCurrentUser().getTenantId());
 
         ListVO<RuleScanResultVO> listVO = new ListVO<>();
-        int count = ruleScanResultMapper.findCount(ruleScanResultDTO);
+        int count = ruleScanResultMapper.findCountV2(ruleScanResultDTO);
         if (count == 0) {
             return new ApiResponse<>(listVO);
         }
 
         ruleScanResultDTO.setOffset();
-        List<RuleScanResultPO> list = ruleScanResultMapper.findList(ruleScanResultDTO);
+        List<RuleScanResultPO> list = ruleScanResultMapper.findListV2(ruleScanResultDTO);
         List<RuleScanResultVO> collect = list.stream().parallel().map(RuleScanResultVO::buildList).toList();
 
         listVO.setTotal(count);
