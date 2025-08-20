@@ -41,6 +41,32 @@ func GetBastionhostResource() schema.Resource {
 			ResourceId:   "$.Instance.InstanceId",
 			ResourceName: "$.Instance.Description",
 		},
+		Regions: []string{
+			// China Regions
+			"cn-qingdao",
+			"cn-zhangjiakou",
+			"cn-huhehaote",
+			"cn-hongkong",
+
+			// Asia Pacific
+			"ap-southeast-3",
+			"ap-northeast-1",
+			"ap-southeast-1",
+			"ap-southeast-5",
+
+			// Europe & Americas
+			"eu-central-1",
+			"us-east-1",
+			"us-west-1",
+			"eu-west-1",
+
+			// Middle East
+			"me-east-1",
+
+			// Financial Cloud
+			"cn-shanghai-finance-1",
+			"cn-shenzhen-finance-1",
+		},
 		Dimension: schema.Regional,
 	}
 }

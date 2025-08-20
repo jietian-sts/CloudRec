@@ -38,6 +38,9 @@ export default {
     'button.text.last7.days': 'Last 7 days',
     'button.text.within.a.month': 'Within a month',
     'button.text.Within.three.months': 'Within three months',
+    'text.detailed.view': 'Detailed View',
+    'text.simple.view': 'Simple View',
+    'text.current':'Current',
     'button.text.Within.six.months': 'Within six months',
     'button.text.delete.confirm': 'Are you sure to Delete?',
     'text.add': 'Add',
@@ -105,7 +108,8 @@ export default {
     'message.text.no.permission.subtitle':'No permission',
     'message.text.delete.failed': 'Delete failed',
     'message.text.edit.failed': 'Edit failed',
-    'text.count':'count'
+    'text.count':'Count',
+    'button.text.back':'Back'
   },
   layout: {
     'routes.title.home': 'Dashboard',
@@ -412,7 +416,7 @@ export default {
     'module.title.user.inquiry': 'User Search',
     'module.title.user.name': 'Username',
     'module.title.user.id': 'User ID',
-    'module.title.user.role': 'User Role',
+    'module.title.user.role': 'Platform Role',
     'module.title.user.status': 'User Status',
     'module.title.user.password': 'Password',
     'title.user.status': 'User Status',
@@ -428,6 +432,7 @@ export default {
     'extend.text.tenant': 'Tenant',
   },
   tenant: {
+    'module.title.user.role':'Tenant Role',
     'module.text.tenant.inquiry': 'Tenant Inquiry',
     'module.text.tenant.name': 'Tenant Name',
     'module.text.tenant.description': 'Tenant Description',

@@ -42,14 +42,8 @@ func GetResource() schema.Resource {
 		Regions: []string{
 			// China Regions
 			"cn-qingdao",
-			"cn-beijing",
 			"cn-zhangjiakou",
 			"cn-huhehaote",
-			"cn-hangzhou",
-			"cn-shanghai",
-			"cn-shenzhen",
-			"cn-heyuan",
-			"cn-chengdu",
 			"cn-hongkong",
 
 			// Asia Pacific

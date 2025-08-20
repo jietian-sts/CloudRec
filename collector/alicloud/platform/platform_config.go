@@ -40,8 +40,6 @@ import (
 	"github.com/cloudrec/alicloud/collector/ddos"
 	"github.com/cloudrec/alicloud/collector/dms"
 	"github.com/cloudrec/alicloud/collector/dns"
-	"github.com/cloudrec/alicloud/collector/dts"
-	"github.com/cloudrec/alicloud/collector/eci"
 	"github.com/cloudrec/alicloud/collector/ecs"
 	"github.com/cloudrec/alicloud/collector/elasticsearch"
 	"github.com/cloudrec/alicloud/collector/ens"
@@ -63,7 +61,6 @@ import (
 	"github.com/cloudrec/alicloud/collector/redis"
 	"github.com/cloudrec/alicloud/collector/resourcecenter"
 	"github.com/cloudrec/alicloud/collector/rocketmq"
-	"github.com/cloudrec/alicloud/collector/swas"
 	"github.com/cloudrec/alicloud/collector/tablestore"
 	"github.com/cloudrec/alicloud/collector/test"
 	"github.com/cloudrec/alicloud/collector/vpc"
@@ -186,12 +183,11 @@ func GetPlatformConfig() *schema.Platform {
 			yundun.GetResource(),
 			yundun.GetBastionhostResource(),
 			apig.GetDomainData(),
-			dts.GetDTSInstanceResource(),
-			eci.GetECIContainerGroupResource(),
-			eci.GetECIImageCacheResource(),
-			swas.GetInstanceResource(),
+			//dts.GetDTSInstanceResource(),
+			//eci.GetECIContainerGroupResource(),
+			//eci.GetECIImageCacheResource(),
+			//swas.GetInstanceResource(),
 			vpc.GetVPNConnectionResource(),
-
 		},
 
 		Service:        &collector.Services{},
