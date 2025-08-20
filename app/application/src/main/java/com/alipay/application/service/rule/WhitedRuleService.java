@@ -16,7 +16,7 @@
  */
 package com.alipay.application.service.rule;
 
-import com.alipay.application.share.request.rule.SaveWhitedRuleRequestDTO;
+import com.alipay.application.share.request.rule.SaveWhitedRuleRequest;
 import com.alipay.application.share.request.rule.TestRunWhitedRuleRequestDTO;
 import com.alipay.application.share.request.rule.TestRunWhitedRuleResultDTO;
 import com.alipay.application.share.request.rule.WhitedScanInputDataDTO;
@@ -35,7 +35,7 @@ import java.util.List;
  */
 public interface WhitedRuleService {
 
-    int save(SaveWhitedRuleRequestDTO dto) throws IOException;
+    Long save(SaveWhitedRuleRequest dto) throws IOException;
 
     ListVO<WhitedRuleConfigVO> getList(QueryWhitedRuleDTO dto);
 
@@ -53,7 +53,7 @@ public interface WhitedRuleService {
 
     TestRunWhitedRuleResultDTO testRun(TestRunWhitedRuleRequestDTO dto);
 
-    SaveWhitedRuleRequestDTO queryWhitedContentByRisk(Long riskId);
+    SaveWhitedRuleRequest queryWhitedContentByRisk(Long riskId);
 
     ListVO<GroupByRuleCodeVO> getListGroupByRuleCode(QueryWhitedRuleDTO dto);
 }

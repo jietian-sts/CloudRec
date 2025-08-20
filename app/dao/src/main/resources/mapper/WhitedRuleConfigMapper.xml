@@ -84,7 +84,8 @@
                 #{regoContent,jdbcType=VARCHAR}, #{tenantId,jdbcType=BIGINT}, #{creator,jdbcType=VARCHAR},
                 #{lockHolder,jdbcType=VARCHAR}, #{enable,jdbcType=TINYINT}, #{riskRuleCode,jdbcType=VARCHAR})
     </insert>
-    <insert id="insertSelective" parameterType="com.alipay.dao.po.WhitedRuleConfigPO">
+    <insert id="insertSelective" parameterType="com.alipay.dao.po.WhitedRuleConfigPO" keyProperty="id"
+            useGeneratedKeys="true">
         insert into whited_rule_config
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -266,9 +267,9 @@
         SELECT COUNT(*) AS count
         FROM whited_rule_config
         WHERE risk_rule_code IS NULL
-<!--        <if test="tenantId != null">-->
-<!--            AND tenant_id = #{tenantId}-->
-<!--        </if>-->
+        <!--        <if test="tenantId != null">-->
+        <!--            AND tenant_id = #{tenantId}-->
+        <!--        </if>-->
         GROUP BY risk_rule_code
     </select>
     <select id="findListGroupByRuleCode" resultType="com.alipay.dao.dto.GroupByRuleCodeDTO">
@@ -281,9 +282,9 @@
                 #{item}
             </foreach>
         </if>
-<!--        <if test="tenantId != null">-->
-<!--            AND t1.tenant_id = #{tenantId}-->
-<!--        </if>-->
+        <!--        <if test="tenantId != null">-->
+        <!--            AND t1.tenant_id = #{tenantId}-->
+        <!--        </if>-->
         GROUP BY t1.risk_rule_code
         ORDER BY count DESC
     </select>

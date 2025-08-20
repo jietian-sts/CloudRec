@@ -108,7 +108,7 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
 
 
     @Override
-    public int save(SaveWhitedRuleRequestDTO dto) throws RuntimeException {
+    public Long save(SaveWhitedRuleRequest dto) throws RuntimeException {
         UserInfoDTO currentUser = UserInfoContext.getCurrentUser();
         paramCheck(dto, currentUser);
         WhitedRuleConfigPO whitedRuleConfigPO = new WhitedRuleConfigPO();
@@ -139,11 +139,13 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
                 //更新数据
                 buildWhitedRuleConfigPO(whitedRuleConfigPO, dto, currentUser, ruleConfigJson);
                 whitedRuleConfigPO.setGmtModified(new Date());
-                return whitedRuleConfigMapper.updateByPrimaryKeySelective(whitedRuleConfigPO);
+                whitedRuleConfigMapper.updateByPrimaryKeySelective(whitedRuleConfigPO);
+                return whitedRuleConfigPO.getId();
             } else {
                 throw new RuntimeException("whitedRuleConfigPO id: " + dto.getId() + "不存在,请检查!");
             }
         }
+
         buildWhitedRuleConfigPO(whitedRuleConfigPO, dto, currentUser, ruleConfigJson);
         whitedRuleConfigPO.setEnable(dto.getEnable());
         int insertResult = whitedRuleConfigMapper.insertSelective(whitedRuleConfigPO);
@@ -154,7 +156,7 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
                 scanService.scanByRule(rulePO.getId());
             });
         }
-        return insertResult;
+        return whitedRuleConfigPO.getId();
     }
 
     @Override
@@ -360,7 +362,7 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
     }
 
     @Override
-    public SaveWhitedRuleRequestDTO queryWhitedContentByRisk(Long riskId) {
+    public SaveWhitedRuleRequest queryWhitedContentByRisk(Long riskId) {
         ApiResponse<RuleScanResultVO> ruleScanResultVOApiResponse = riskService.queryRiskDetail(riskId);
         if (!StringUtils.isEmpty(ruleScanResultVOApiResponse.getErrorCode()) || Objects.isNull(ruleScanResultVOApiResponse.getContent())) {
             log.error("query RuleScanResultVO not exist,riskId:{} ", riskId);
@@ -396,13 +398,13 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
         return listVO;
     }
 
-    private SaveWhitedRuleRequestDTO buildContentByRiskInfo(RuleScanResultVO ruleScanResultVO) {
+    private SaveWhitedRuleRequest buildContentByRiskInfo(RuleScanResultVO ruleScanResultVO) {
         RuleVO ruleVO = ruleScanResultVO.getRuleVO();
-        SaveWhitedRuleRequestDTO saveWhitedRuleRequestDTO = new SaveWhitedRuleRequestDTO();
-        saveWhitedRuleRequestDTO.setRuleName(ruleVO.getRuleName() + "_手动加白");
-        saveWhitedRuleRequestDTO.setRuleDesc(ruleVO.getRuleName() + "_手动加白");
-        saveWhitedRuleRequestDTO.setRuleType(WhitedRuleTypeEnum.RULE_ENGINE.name());
-        saveWhitedRuleRequestDTO.setRiskRuleCode(ruleScanResultVO.getRuleCode());
+        SaveWhitedRuleRequest saveWhitedRuleRequest = new SaveWhitedRuleRequest();
+        saveWhitedRuleRequest.setRuleName(ruleVO.getRuleName() + "_手动加白");
+        saveWhitedRuleRequest.setRuleDesc(ruleVO.getRuleName() + "_手动加白");
+        saveWhitedRuleRequest.setRuleType(WhitedRuleTypeEnum.RULE_ENGINE.name());
+        saveWhitedRuleRequest.setRiskRuleCode(ruleScanResultVO.getRuleCode());
 
         List<WhitedRuleConfigDTO> ruleConfigList = new ArrayList<>();
         int index = 1;
@@ -442,9 +444,9 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
                 condition.append("&&");
             }
         }
-        saveWhitedRuleRequestDTO.setCondition(condition.toString());
-        saveWhitedRuleRequestDTO.setRuleConfigList(ruleConfigList);
-        return saveWhitedRuleRequestDTO;
+        saveWhitedRuleRequest.setCondition(condition.toString());
+        saveWhitedRuleRequest.setRuleConfigList(ruleConfigList);
+        return saveWhitedRuleRequest;
     }
 
 //    private TestRunWhitedRuleResultDTO runRegoWithInput(TestRunWhitedRuleRequestDTO dto) {
@@ -496,7 +498,7 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
         }
     }
 
-    private void paramCheck(SaveWhitedRuleRequestDTO dto, UserInfoDTO userInfo) {
+    private void paramCheck(SaveWhitedRuleRequest dto, UserInfoDTO userInfo) {
         if (Objects.isNull(userInfo)) {
             throw new RuntimeException("用户信息为空,请检查!");
         }
@@ -528,7 +530,7 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
         }
     }
 
-    private WhitedRuleConfigPO buildWhitedRuleConfigPO(WhitedRuleConfigPO whitedRuleConfigPO, SaveWhitedRuleRequestDTO dto, UserInfoDTO userInfo, String ruleConfigJson) {
+    private WhitedRuleConfigPO buildWhitedRuleConfigPO(WhitedRuleConfigPO whitedRuleConfigPO, SaveWhitedRuleRequest dto, UserInfoDTO userInfo, String ruleConfigJson) {
         whitedRuleConfigPO.setRuleName(dto.getRuleName());
         whitedRuleConfigPO.setRuleDesc(dto.getRuleDesc());
         whitedRuleConfigPO.setRuleType(dto.getRuleType());

@@ -25,7 +25,7 @@ import java.util.List;
  * Author: lz
  */
 @Data
-public class SaveWhitedRuleRequestDTO {
+public class SaveWhitedRuleRequest {
 
     /**
      * 规则id
