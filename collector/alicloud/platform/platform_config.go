@@ -75,12 +75,12 @@ import (
 func GetPlatformConfig() *schema.Platform {
 	// all region list from https://next.api.aliyun.com/product/Ecs
 	alicloudRegions := []string{
+		"cn-hangzhou",    //华东 1（杭州）
 		"cn-qingdao",     //华北 1（青岛）
 		"cn-beijing",     //华北 2（北京）
 		"cn-zhangjiakou", //华北 3（张家口）
 		"cn-huhehaote",   //华北 5（呼和浩特）
 		"cn-wulanchabu",  //华北6（乌兰察布）
-		"cn-hangzhou",    //华东 1（杭州）
 		"cn-shanghai",    //华东 2（上海）
 		"cn-nanjing",     //华东 5（南京）
 		"cn-shenzhen",    //华南 1（深圳）
