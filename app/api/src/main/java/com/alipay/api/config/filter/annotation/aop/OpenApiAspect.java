@@ -62,7 +62,7 @@ public class OpenApiAspect {
             throw new OpenAipNoAuthException(response.getMsg());
         }
         
-        String accessKey = request.getHeader(DigestSignUtils.accessKeyName);
+        String accessKey = request.getHeader(DigestSignUtils.ACCESS_KEY_NAME);
         OpenApiAuthPO openApiAuthPO = openApiAuthMapper.findByAccessKey(accessKey);
         if (openApiAuthPO != null) {
             String userId = openApiAuthPO.getUserId();

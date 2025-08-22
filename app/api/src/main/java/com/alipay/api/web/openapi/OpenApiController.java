@@ -98,7 +98,7 @@ public class OpenApiController {
     @OpenApi
     @PostMapping("/v1/queryScanResult")
     public ApiResponse<ListScrollPageVO<RuleScanResultVO>> queryScanResult(HttpServletRequest httpServletRequest, @RequestBody QueryScanResultDTO queryScanResultDTO) {
-        String accessKey = httpServletRequest.getHeader(DigestSignUtils.accessKeyName);
+        String accessKey = httpServletRequest.getHeader(DigestSignUtils.ACCESS_KEY_NAME);
         openApiService.checkAccessKey(accessKey, queryScanResultDTO.getTenantId());
         return openApiService.queryScanResult(queryScanResultDTO);
     }

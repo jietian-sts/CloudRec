@@ -147,7 +147,7 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
         }
 
         buildWhitedRuleConfigPO(whitedRuleConfigPO, dto, currentUser, ruleConfigJson);
-        whitedRuleConfigPO.setEnable(dto.getEnable());
+        whitedRuleConfigPO.setEnable(1);
         int insertResult = whitedRuleConfigMapper.insertSelective(whitedRuleConfigPO);
         if (insertResult > 0 && dto.getEnable() == 1 && WhitedRuleTypeEnum.RULE_ENGINE.name().equals(dto.getRuleType()) && !StringUtils.isEmpty(dto.getRiskRuleCode())) {
             //触发风险扫描
