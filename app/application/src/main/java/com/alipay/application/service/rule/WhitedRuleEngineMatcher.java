@@ -150,46 +150,4 @@ public class WhitedRuleEngineMatcher {
         }
         return resultMap;
     }
-
-
-//    public Map<String, String> convertObjectToMap(Object obj) {
-//        if (obj == null) {
-//            return null;
-//        }
-//
-//        // Special handling for RuleScanResultPO to extract resourceSnapshoot
-//        if (obj instanceof RuleScanResultPO) {
-//            RuleScanResultPO ruleScanResult = (RuleScanResultPO) obj;
-//            String resourceSnapshoot = ruleScanResult.getResourceSnapshoot();
-//            if (resourceSnapshoot != null && !resourceSnapshoot.trim().isEmpty()) {
-//                try {
-//                    JSONObject resourceJson = JSON.parseObject(resourceSnapshoot);
-//                    Map<String, String> resultMap = new HashMap<>();
-//                    for (Map.Entry<String, Object> entry : resourceJson.entrySet()) {
-//                        if (entry.getValue() != null) {
-//                            resultMap.put(entry.getKey(), entry.getValue().toString());
-//                        } else {
-//                            resultMap.put(entry.getKey(), null);
-//                        }
-//                    }
-//                    return resultMap;
-//                } catch (Exception e) {
-//                    // If JSON parsing fails, fall back to default behavior
-//                }
-//            }
-//        }
-//
-//        // Default behavior for other objects
-//        String jsonString = JSON.toJSONString(obj);
-//        JSONObject jsonObject = JSON.parseObject(jsonString);
-//        Map<String, String> resultMap = new HashMap<>();
-//        for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
-//            if (entry.getValue() != null) {
-//                resultMap.put(entry.getKey(), entry.getValue().toString());
-//            } else {
-//                resultMap.put(entry.getKey(), null);
-//            }
-//        }
-//        return resultMap;
-//    }
 }

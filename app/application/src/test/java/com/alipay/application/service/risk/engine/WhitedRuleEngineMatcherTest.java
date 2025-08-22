@@ -79,11 +79,11 @@ class WhitedRuleEngineMatcherTest {
      */
     @Test
     void testMultipleConditionsWithAndLogic() {
-        // Create multiple rules that should all match
+        // Create multiple rules that should all match - using resourceSnapshoot field
         List<WhitedRuleConfigDTO> rules = Arrays.asList(
-            createRuleWithId(1, "userType", WhitedRuleOperatorEnum.EQ, "premium"),
-            createRuleWithId(2, "accountStatus", WhitedRuleOperatorEnum.EQ, "active"),
-            createRuleWithId(3, "isVip", WhitedRuleOperatorEnum.EQ, "true")
+            createRuleWithId(1, "resourceSnapshoot", WhitedRuleOperatorEnum.LIKE, "premium"),
+            createRuleWithId(2, "resourceSnapshoot", WhitedRuleOperatorEnum.LIKE, "active"),
+            createRuleWithId(3, "resourceSnapshoot", WhitedRuleOperatorEnum.LIKE, "true")
         );
         
         // Use AND condition: all rules must match
@@ -91,9 +91,9 @@ class WhitedRuleEngineMatcherTest {
         
         // Test with one non-matching condition
         List<WhitedRuleConfigDTO> mixedRules = Arrays.asList(
-            createRuleWithId(1, "userType", WhitedRuleOperatorEnum.EQ, "premium"),
-            createRuleWithId(2, "accountStatus", WhitedRuleOperatorEnum.EQ, "inactive"), // This won't match
-            createRuleWithId(3, "isVip", WhitedRuleOperatorEnum.EQ, "true")
+            createRuleWithId(1, "resourceSnapshoot", WhitedRuleOperatorEnum.LIKE, "premium"),
+            createRuleWithId(2, "resourceSnapshoot", WhitedRuleOperatorEnum.LIKE, "inactive"), // This won't match
+            createRuleWithId(3, "resourceSnapshoot", WhitedRuleOperatorEnum.LIKE, "true")
         );
         
         assertFalse(matcher.matchWhitelistRule(mixedRules, "1 AND 2 AND 3", createRuleScanResult()));
@@ -269,14 +269,14 @@ class WhitedRuleEngineMatcherTest {
     @Test
     void testComplexRuleWithMultipleOperators() {
         List<WhitedRuleConfigDTO> complexRules = Arrays.asList(
-            createRuleWithId(1, "userType", WhitedRuleOperatorEnum.IN, "premium,gold,platinum"),
-            createRuleWithId(2, "accountStatus", WhitedRuleOperatorEnum.EQ, "active"),
-            createRuleWithId(3, "country", WhitedRuleOperatorEnum.NOT_IN, "RESTRICTED_COUNTRY_1,RESTRICTED_COUNTRY_2"),
-            createRuleWithId(4, "userId", WhitedRuleOperatorEnum.LIKE, "123"),
-            createRuleWithId(5, "isVip", WhitedRuleOperatorEnum.EQ, "true")
+            createRuleWithId(1, "resourceSnapshoot", WhitedRuleOperatorEnum.LIKE, "premium"),
+            createRuleWithId(2, "resourceSnapshoot", WhitedRuleOperatorEnum.LIKE, "active"),
+            createRuleWithId(3, "resourceSnapshoot", WhitedRuleOperatorEnum.LIKE, "US"),
+            createRuleWithId(4, "resourceSnapshoot", WhitedRuleOperatorEnum.LIKE, "123"),
+            createRuleWithId(5, "resourceSnapshoot", WhitedRuleOperatorEnum.LIKE, "true")
         );
         
-        assertTrue(matcher.matchWhitelistRule(complexRules, "1 AND 2 AND 3 AND 4 AND 5", createRuleScanResult()));
+        assertTrue(matcher.matchWhitelistRule(complexRules, "1&&2&&3&&4&&5", createRuleScanResult()));
     }
 
     /**
@@ -324,15 +324,15 @@ class WhitedRuleEngineMatcherTest {
     void testRuleEnginePerformance() {
         // Create a complex condition with multiple items
         List<WhitedRuleConfigDTO> performanceRules = Arrays.asList(
-            createRuleWithId(1, "userType", WhitedRuleOperatorEnum.IN, "premium,gold,platinum,diamond"),
-            createRuleWithId(2, "accountStatus", WhitedRuleOperatorEnum.NE, "suspended"),
-            createRuleWithId(3, "country", WhitedRuleOperatorEnum.NOT_LIKE, "RESTRICTED"),
-            createRuleWithId(4, "riskScore", WhitedRuleOperatorEnum.IN, "70,75,80,85,90"),
-            createRuleWithId(5, "isVip", WhitedRuleOperatorEnum.EQ, "true")
+            createRuleWithId(1, "resourceSnapshoot", WhitedRuleOperatorEnum.LIKE, "premium"),
+            createRuleWithId(2, "resourceSnapshoot", WhitedRuleOperatorEnum.NOT_LIKE, "suspended"),
+            createRuleWithId(3, "resourceSnapshoot", WhitedRuleOperatorEnum.NOT_LIKE, "RESTRICTED"),
+            createRuleWithId(4, "resourceSnapshoot", WhitedRuleOperatorEnum.LIKE, "75"),
+            createRuleWithId(5, "resourceSnapshoot", WhitedRuleOperatorEnum.LIKE, "true")
         );
         
         long startTime = System.currentTimeMillis();
-        boolean result = matcher.matchWhitelistRule(performanceRules, "1 AND 2 AND 3 AND 4 AND 5", createRuleScanResult());
+        boolean result = matcher.matchWhitelistRule(performanceRules, "1&&2&&3&&4&&5", createRuleScanResult());
         long endTime = System.currentTimeMillis();
         
         assertTrue(result);
