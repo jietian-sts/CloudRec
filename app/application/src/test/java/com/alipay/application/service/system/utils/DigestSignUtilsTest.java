@@ -53,8 +53,8 @@ class DigestSignUtilsTest {
     private MockHttpServletRequest mockRequest;
     private OpenApiAuthPO mockOpenApiAuthPO;
     
-    private static final String TEST_ACCESS_KEY = "57a817fe-fe39-4d6d-85bd-b5aae7805ee7";
-    private static final String TEST_SECRET_KEY = "3375CCB1C34D95651202F3E0CA1D9E10";
+    private static final String TEST_ACCESS_KEY = "test-access-key-12345";
+    private static final String TEST_SECRET_KEY = "test-secret-key-67890";
     private static final String TEST_TIMESTAMP = String.valueOf(Instant.now().getEpochSecond());
     private static final String INVALID_TIMESTAMP = String.valueOf(Instant.now().getEpochSecond() - 400); // 400 seconds ago
 
