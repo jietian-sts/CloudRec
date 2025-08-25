@@ -19,6 +19,7 @@ package com.alipay.api.config.handler;
 import com.alibaba.fastjson.JSON;
 import com.alipay.application.share.vo.ApiResponse;
 import com.alipay.common.exception.BizException;
+import com.alipay.common.exception.OpenAipNoAuthException;
 import com.alipay.common.exception.UserNoLoginException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -37,6 +38,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserNoLoginException.class)
     public ApiResponse<String> exceptionHandler(UserNoLoginException e) {
         return new ApiResponse<>(ApiResponse.ACCESS_DENIED, "USER_NOT_LOGIN", e.getMsg());
+    }
+
+    @ExceptionHandler(OpenAipNoAuthException.class)
+    public ApiResponse<String> exceptionHandler(OpenAipNoAuthException e) {
+        log.warn("OpenApi authentication failed: {}", e.getMsg());
+        return new ApiResponse<>(ApiResponse.ACCESS_DENIED, "OPENAPI_AUTH_FAILED", e.getMsg());
     }
 
     @ExceptionHandler(BizException.class)

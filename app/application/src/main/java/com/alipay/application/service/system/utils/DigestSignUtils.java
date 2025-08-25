@@ -16,6 +16,8 @@
  */
 package com.alipay.application.service.system.utils;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.alipay.application.share.vo.ApiResponse;
 import com.alipay.dao.mapper.OpenApiAuthMapper;
 import com.alipay.dao.po.OpenApiAuthPO;
@@ -28,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.io.BufferedReader;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -182,12 +185,15 @@ public class DigestSignUtils {
 
     /**
       * Get all request parameters from the HTTP request
+      * Supports both URL query parameters and JSON request body parameters
       *
       * @param request the HTTP servlet request
       * @return map of all request parameters
       */
      private static Map<String, String> getAllRequestParams(HttpServletRequest request) {
-         Map<String, String> params = new HashMap<>();
+         LinkedHashMap<String, String> params = new LinkedHashMap<>();
+         
+         // Get URL query parameters
          Enumeration<String> paramNames = request.getParameterNames();
          while (paramNames.hasMoreElements()) {
              String paramName = paramNames.nextElement();
@@ -198,9 +204,90 @@ public class DigestSignUtils {
                  params.put(paramName, paramValue);
              }
          }
+         
+         // Extract parameters from JSON request body for POST requests
+         if ("POST".equalsIgnoreCase(request.getMethod())) {
+             String contentType = request.getContentType();
+             if (contentType != null && contentType.toLowerCase().contains("application/json")) {
+                 Map<String, String> jsonParams = extractJsonParams(request);
+                 // Merge JSON parameters with query parameters, JSON params take precedence
+                 for (Map.Entry<String, String> entry : jsonParams.entrySet()) {
+                     String paramName = entry.getKey();
+                     String paramValue = entry.getValue();
+                     if (paramValue != null && paramValue.length() <= MAX_PARAM_LENGTH 
+                             && !ACCESS_KEY_NAME.equals(paramName) && !TIMESTAMP.equals(paramName) && !SIGN.equals(paramName)) {
+                         params.put(paramName, paramValue);
+                     }
+                 }
+             }
+         }
+         
          return params;
      }
  
+    /**
+     * Extract parameters from JSON request body
+     * Handles cases where the request body has already been read by using a cached wrapper
+     *
+     * @param request the HTTP servlet request
+     * @return map of parameters extracted from JSON body
+     */
+    private static Map<String, String> extractJsonParams(HttpServletRequest request) {
+        Map<String, String> params = new HashMap<>();
+        
+        try {
+            String jsonBody = null;
+            
+            // Check if request is already a cached wrapper
+            if (request instanceof CachedBodyHttpServletRequest) {
+                jsonBody = ((CachedBodyHttpServletRequest) request).getBody();
+            } else {
+                // Try to read from the request directly
+                // This may fail if the stream has already been consumed
+                try {
+                    StringBuilder sb = new StringBuilder();
+                    try (BufferedReader reader = request.getReader()) {
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            sb.append(line);
+                        }
+                    }
+                    jsonBody = sb.toString();
+                } catch (IllegalStateException e) {
+                    // getReader() has already been called, try to create a cached wrapper
+                    logger.warn("Request body has already been read, attempting to create cached wrapper");
+                    try {
+                        CachedBodyHttpServletRequest cachedRequest = new CachedBodyHttpServletRequest(request);
+                        jsonBody = cachedRequest.getBody();
+                    } catch (Exception ex) {
+                        logger.warn("Failed to create cached request wrapper: {}", ex.getMessage());
+                        return params; // Return empty params if we can't read the body
+                    }
+                }
+            }
+            
+            if (jsonBody != null && !jsonBody.trim().isEmpty()) {
+                try {
+                    JSONObject jsonObject = JSON.parseObject(jsonBody);
+                    for (String key : jsonObject.keySet()) {
+                        Object value = jsonObject.get(key);
+                        if (value != null) {
+                            // Convert all values to strings for consistent parameter handling
+                            params.put(key, value.toString());
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.warn("Failed to parse JSON body: {}", e.getMessage());
+                }
+            }
+            
+        } catch (Exception e) {
+            logger.warn("Failed to extract JSON parameters: {}", e.getMessage());
+        }
+        
+        return params;
+    }
+
      /**
       * Build sorted parameter string from parameter map
       *
