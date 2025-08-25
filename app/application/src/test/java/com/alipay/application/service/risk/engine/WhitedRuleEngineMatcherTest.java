@@ -87,7 +87,7 @@ class WhitedRuleEngineMatcherTest {
         );
         
         // Use AND condition: all rules must match
-        assertTrue(matcher.matchWhitelistRule(rules, "1 AND 2 AND 3", createRuleScanResult()));
+        assertTrue(matcher.matchWhitelistRule(rules, "1&&2&&3", createRuleScanResult()));
         
         // Test with one non-matching condition
         List<WhitedRuleConfigDTO> mixedRules = Arrays.asList(
@@ -96,7 +96,7 @@ class WhitedRuleEngineMatcherTest {
             createRuleWithId(3, "resourceSnapshoot", WhitedRuleOperatorEnum.LIKE, "true")
         );
         
-        assertFalse(matcher.matchWhitelistRule(mixedRules, "1 AND 2 AND 3", createRuleScanResult()));
+        assertFalse(matcher.matchWhitelistRule(mixedRules, "1&&2&&3", createRuleScanResult()));
     }
     
     private WhitedRuleConfigDTO createRule(String key, WhitedRuleOperatorEnum operator, String value) {

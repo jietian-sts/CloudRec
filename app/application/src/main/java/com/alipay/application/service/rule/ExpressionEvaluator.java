@@ -21,10 +21,6 @@ import java.util.Map;
 public class ExpressionEvaluator {
   
     public static boolean evalExpression(String condition, Map<Integer, Boolean> resultsMap) {
-        // Replace AND/OR keywords with logical operators
-        condition = condition.replaceAll("\\bAND\\b", "&&")
-                           .replaceAll("\\bOR\\b", "||")
-                           .replaceAll("\\s+", "");
         return evaluate(condition, resultsMap);
     }
 
@@ -94,12 +90,4 @@ public class ExpressionEvaluator {
             this.index = index;
         }
     }
-
-//    public static void main(String[] args) {
-//        String condition = "1 && 2";
-//        Map<Integer, Boolean> resultsMap = Map.of(1, true, 2, false, 3, true);
-//
-//        boolean result = evalExpression(condition, resultsMap);
-//        System.out.println("Result: " + result);
-//    }
 }

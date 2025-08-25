@@ -46,32 +46,6 @@ public class ConditionAssembler {
         return result;
     }
 
-    // private static JsonObject parseExpression(Map<Integer, ConditionItem> conditionItemMap, String expression) {
-    // if (expression.contains("||")) {
-    // String[] parts = expression.split("\\|\\|");
-    // JsonArray anyArray = new JsonArray();
-    // for (String part : parts) {
-    // anyArray.add(parseExpression(conditionItemMap, part.trim()));
-    // }
-    // JsonObject anyObject = new JsonObject();
-    // anyObject.add("ANY", anyArray);
-    // return anyObject;
-    // } else if (expression.contains("&&")) {
-    // String[] parts = expression.split("&&");
-    // JsonArray allArray = new JsonArray();
-    // for (String part : parts) {
-    // allArray.add(parseExpression(conditionItemMap, part.trim()));
-    // }
-    // JsonObject allObject = new JsonObject();
-    // allObject.add("ALL", allArray);
-    // return allObject;
-    // } else {
-    // int conditionId = Integer.parseInt(expression.trim());
-    // ConditionItem conditionItem = conditionItemMap.get(conditionId);
-    // return getJsonObject(conditionItem);
-    // }
-    // }
-
     private static JsonObject parseExpression(Map<Integer, ConditionItem> conditionItemMap, String expression) {
         expression = expression.trim();
         if (expression.startsWith("(") && expression.endsWith(")")) {
