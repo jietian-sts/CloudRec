@@ -449,6 +449,38 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
         return saveWhitedRuleRequest;
     }
 
+//    private TestRunWhitedRuleResultDTO runRegoWithInput(TestRunWhitedRuleRequestDTO dto) {
+//        //rego模式下且选择了风险规则
+//        if (dto.getRuleType().equals(WhitedRuleTypeEnum.REGO.name()) && !StringUtils.isEmpty(dto.getRiskRuleCode())) {
+//
+//            RuleScanResultDTO ruleScanResultDTO = RuleScanResultDTO.builder()
+//                    .status(RiskStatusManager.RiskStatus.UNREPAIRED.name())
+//                    .ruleCodeList(Collections.singletonList(dto.getRiskRuleCode()))
+//                    .build();
+//
+//            List<RuleScanResultPO> ruleScanResultList = ruleScanResultMapper.findList(ruleScanResultDTO);
+//            RuleScanResultPO ruleScanResultPO = null;
+//            if (!CollectionUtils.isEmpty(ruleScanResultList)) {
+//                ruleScanResultPO = ruleScanResultList.get(0);
+//            }
+//            WhitedScanInputDataDTO whitedExampleDataResultDTO = JSON.parseObject(dto.getInput(), WhitedScanInputDataDTO.class);
+//
+//            // 无示例数据的情况
+//            if (!areAllFieldsNull(whitedExampleDataResultDTO)) {
+//                boolean scanResult = executeRegoScan(dto, whitedExampleDataResultDTO);
+//                if (scanResult) {
+//                    return TestRunWhitedRuleResultDTO.builder()
+//                            .count(1)
+//                            .ruleScanResultList(Collections.singletonList(ruleScanResultPO))
+//                            .build();
+//                }
+//            }
+//        }
+//        return TestRunWhitedRuleResultDTO.builder()
+//                .count(0)
+//                .build();
+//    }
+
     private void testRunParamCheck(TestRunWhitedRuleRequestDTO dto) {
         if (WhitedRuleTypeEnum.REGO.name().equals(dto.getRuleType()) && StringUtils.isEmpty(dto.getRegoContent())) {
             throw new RuntimeException("REGO规则内容为空,请检查!");
@@ -463,20 +495,6 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
             if (!CollectionUtils.isEmpty(dto.getRuleConfigList()) && dto.getRuleConfigList().size() > 1 && StringUtils.isEmpty(dto.getCondition())) {
                 throw new RuntimeException("存在多个条件配置规则,请设置其逻辑关系!");
             }
-        }
-
-        Map<Integer, ConditionItem> conditionItemMap = new HashMap<>();
-        List<WhitedRuleConfigDTO> ruleConfigList = dto.getRuleConfigList();
-        if (!CollectionUtils.isEmpty(ruleConfigList)) {
-            for (WhitedRuleConfigDTO config : ruleConfigList) {
-                conditionItemMap.put(config.getId(), new ConditionItem(config.getId(), config.getKey(), Operator.valueOf(config.getOperator().name()), config.getValue()));
-            }
-        }
-        try {
-            ConditionAssembler.generateJsonCond(conditionItemMap, dto.getCondition());
-        } catch (Exception e) {
-            log.warn("ruleName: {} create condition failed, condition:{}, error:", dto.getRuleName(), dto.getCondition(), e);
-            throw new RuntimeException(dto.getRuleName() + ": condition is not valid");
         }
     }
 
