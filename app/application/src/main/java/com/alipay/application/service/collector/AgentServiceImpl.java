@@ -28,6 +28,7 @@ import com.alipay.application.service.common.Platform;
 import com.alipay.application.service.common.utils.DBDistributedLockUtil;
 import com.alipay.application.service.common.utils.ThreadPoolConfig;
 import com.alipay.application.service.resource.DelResourceService;
+import com.alipay.application.service.resource.SaveResourceService;
 import com.alipay.application.service.resource.job.ClearJob;
 import com.alipay.application.service.rule.job.AccountScanJob;
 import com.alipay.application.service.system.utils.TokenUtil;
@@ -118,6 +119,8 @@ public class AgentServiceImpl implements AgentService {
     private ThreadPoolConfig threadPoolConfig;
     @Resource
     private DBDistributedLockUtil dbDistributedLockUtil;
+    @Resource
+    private SaveResourceService saveResourceService;
 
     @Value("${collector.bucket.url}")
     private String bucketUrl;
@@ -159,35 +162,35 @@ public class AgentServiceImpl implements AgentService {
     /**
      * Query agent list with memory-based pagination
      * This method retrieves all matching agents and performs pagination in memory
-     * 
+     *
      * @param dto the agent registry query parameters
      * @return ApiResponse containing paginated agent list
      */
     @Override
     public ApiResponse<ListVO<AgentRegistryVO>> queryAgentList(AgentRegistryDTO dto) {
         ListVO<AgentRegistryVO> listVO = new ListVO<>();
-        
+
         // Get all matching agents without database pagination
         AgentRegistryDTO queryDto = new AgentRegistryDTO();
         queryDto.setPlatform(dto.getPlatform());
         queryDto.setAgentName(dto.getAgentName());
         queryDto.setRegistryValue(dto.getRegistryValue());
         queryDto.setStatus(dto.getStatus());
-        
+
         List<AgentRegistryPO> allAgents = agentRegistryMapper.findAggList(queryDto);
-        
+
         if (allAgents.isEmpty()) {
             return new ApiResponse<>(listVO);
         }
-        
+
         // Memory-based pagination using utility method
         ListUtils.PaginationResult<AgentRegistryPO> paginationResult = ListUtils.paginate(allAgents, dto.getPage(), dto.getSize());
         List<AgentRegistryPO> pagedAgents = paginationResult.getData();
         List<AgentRegistryVO> collect = pagedAgents.stream().map(AgentRegistryVO::build).toList();
-        
+
         listVO.setData(collect);
         listVO.setTotal(paginationResult.getTotal());
-        
+
         return new ApiResponse<>(listVO);
     }
 
@@ -678,6 +681,9 @@ public class AgentServiceImpl implements AgentService {
                         10,
                         TimeUnit.SECONDS
                 );
+            } else if (collectRecordInfo != null) {
+                // Modify the account asset's latest acquisition time is the current time
+                saveResourceService.refreshResourceUpdateTime(cloudAccountId);
             }
         }
     }

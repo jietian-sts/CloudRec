@@ -459,6 +459,11 @@
             #{id}
         </foreach>
     </update>
+    <update id="refreshUpdateTime">
+        UPDATE cloud_resource_instance_v1
+        SET gmt_modified = #{gmtModified}
+        WHERE cloud_account_id = #{cloudAccountId} LIMIT 1000
+    </update>
     <delete id="commitDeleteByCloudAccountId">
         DELETE
         FROM cloud_resource_instance_v1

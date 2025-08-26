@@ -125,4 +125,6 @@ public interface CloudResourceInstanceMapper {
     int deleteByResourceType(@Param("platform") String platform, @Param("resourceType") String resourceType);
 
     List<Long> findPreDeletedDataIdList(@Param("cloudAccountId") String cloudAccountId, @Param("delNum") int delNum);
+
+    int refreshUpdateTime(@Param("gmtModified") Date gmtModified, @Param("cloudAccountId") String cloudAccountId);
 }

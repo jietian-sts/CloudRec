@@ -56,7 +56,7 @@ public class SaveResourceServiceImpl implements SaveResourceService {
 
     private static final int MAX_RETRY_ATTEMPTS = 3;
     private static final int RETRY_DELAY_SECONDS = 120;
-    
+
     public void saveOrUpdateData(DataPushRequest.Data dataPushRequest) {
         saveOrUpdateDataWithRetry(dataPushRequest, 0);
     }
@@ -129,6 +129,18 @@ public class SaveResourceServiceImpl implements SaveResourceService {
         } catch (Exception e) {
             log.error("save or update resource error", e);
         }
+    }
+
+    @Override
+    public void refreshResourceUpdateTime(String cloudAccountId) {
+        while (true) {
+            int effectCount = cloudResourceInstanceMapper.refreshUpdateTime(new Date(), cloudAccountId);
+            if (effectCount == 0) {
+                break;
+            }
+        }
+
+        log.info("refresh resource update time success, cloudAccountId:{}", cloudAccountId);
     }
 
     public String parseCustomField(CloudResourceInstancePO resourceInstance) {
