@@ -28,7 +28,6 @@ import com.alipay.application.service.system.OpenApiService;
 import com.alipay.application.service.system.TenantService;
 import com.alipay.application.service.system.domain.Tenant;
 import com.alipay.application.service.system.domain.enums.Status;
-import com.alipay.application.service.system.utils.DigestSignUtils;
 import com.alipay.application.share.request.account.CreateCollectTaskRequest;
 import com.alipay.application.share.request.account.SaveCloudAccountRequest;
 import com.alipay.application.share.request.admin.SaveTenantRequest;
@@ -98,8 +97,6 @@ public class OpenApiController {
     @OpenApi
     @PostMapping("/v1/queryScanResult")
     public ApiResponse<ListScrollPageVO<RuleScanResultVO>> queryScanResult(HttpServletRequest httpServletRequest, @RequestBody QueryScanResultDTO queryScanResultDTO) {
-        String accessKey = httpServletRequest.getHeader(DigestSignUtils.ACCESS_KEY_NAME);
-        openApiService.checkAccessKey(accessKey, queryScanResultDTO.getTenantId());
         return openApiService.queryScanResult(queryScanResultDTO);
     }
 

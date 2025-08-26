@@ -343,20 +343,53 @@ func (p *Platform) handleResource(ctx context.Context, account CloudAccount, res
 		// for region chan
 		regionCh := make(chan interface{}, constant.DefaultPageSize)
 
-		// Consumer
+		// Consumer with graceful shutdown mechanism and panic recovery
+		consumerCtx, consumerCancel := context.WithTimeout(ctx, constant.TimeOut*time.Second)
 		go func() {
+			defer func() {
+				// Panic recovery mechanism to prevent program crash
+				if r := recover(); r != nil {
+					errorMsg := fmt.Sprintf("Code:[%s] Consumer goroutine recovered from panic: %v", UnknownError, r)
+					log.CtxLogger(ctx).Error(errorMsg)
+					collectorParam.CloudRecLogger.logAccountError(account.Platform, resource.ResourceType, account.CloudAccountId, account.CollectRecordId, errors.New(errorMsg))
+				}
+				
+				consumerCancel()
+				// Gracefully close channels after ensuring no more writes
+				go func() {
+					time.Sleep(100 * time.Millisecond) // Brief delay to ensure producers finish
+					close(resourceChan)
+					close(regionCh)
+				}()
+			}()
+			
 			for {
 				select {
 				case data, ok := <-regionCh:
 					if !ok {
 						return
 					}
-					marshal, _ := json.Marshal(data)
-					var d interface{}
-					err := json.Unmarshal(marshal, &d)
-					if err != nil {
-						log.CtxLogger(ctx).Error("json Unmarshal err", zap.Error(err))
+					
+					// Check if context is cancelled before processing
+					select {
+					case <-consumerCtx.Done():
+						log.CtxLogger(ctx).Warn(fmt.Sprintf("Consumer timeout after %d seconds", constant.TimeOut))
+						return
+					default:
 					}
+					
+					marshal, err := json.Marshal(data)
+					if err != nil {
+						log.CtxLogger(ctx).Error("json Marshal err", zap.Error(err))
+						continue
+					}
+					
+					var d interface{}
+					if err := json.Unmarshal(marshal, &d); err != nil {
+						log.CtxLogger(ctx).Error("json Unmarshal err", zap.Error(err))
+						continue
+					}
+					
 					// If the registration is not successful, it will be printed on the console.
 					if !collectorParam.registered {
 						if err := utils.PrettyPrintJSON(string(marshal)); err != nil {
@@ -372,12 +405,18 @@ func (p *Platform) handleResource(ctx context.Context, account CloudAccount, res
 						continue
 					}
 
-					resourceChan <- &result
-				case <-time.After(constant.TimeOut * time.Second):
-					close(resourceChan)
-					close(regionCh)
-					// Ensure that all resource been saved resourceChan
-					// time.Sleep(5 * time.Second)
+					// Safe write to resourceChan with context check
+					select {
+					case resourceChan <- &result:
+						// Successfully sent
+					case <-consumerCtx.Done():
+						log.CtxLogger(ctx).Warn("Consumer context cancelled while sending to resourceChan")
+						return
+					}
+					
+				case <-consumerCtx.Done():
+					log.CtxLogger(ctx).Warn(fmt.Sprintf("Consumer timeout after %d seconds", constant.TimeOut))
+					return
 				}
 			}
 		}()
