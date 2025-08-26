@@ -272,14 +272,29 @@ func (p *Platform) handleAccount(ctx context.Context, account CloudAccount, para
 }
 
 func (p *Platform) assessCollectionChecker(ctx context.Context, accountParam CloudAccountParam) bool {
-	tempService := p.Service.Clone()
-	// Check if collection should be performed for this account
-	resp := tempService.AssessCollectionTrigger(accountParam)
-	if !resp.EnableCollection {
-		log.CtxLogger(ctx).Info("Skipping collection - AssessCollectionTrigger returned false")
+	var resp CollectRecordInfo
+
+	// If account is from queue (TaskId > 0), construct empty response and enable collection by default
+	if accountParam.TaskId > 0 {
+		resp = CollectRecordInfo{
+			CollectRecordId:  accountParam.CollectRecordInfo.CollectRecordId,
+			EnableCollection: true,
+			CloudAccountId:   accountParam.CloudAccountId,
+			Platform:         accountParam.Platform,
+			StartTime:        time.Now().Format("2006-01-02 15:04:05"),
+			Message:          "Account from queue - enabling collection by default",
+		}
+		log.CtxLogger(ctx).Info("Account from queue - enabling collection by default")
+	} else {
+		tempService := p.Service.Clone()
+		// Check if collection should be performed for this account
+		resp = tempService.AssessCollectionTrigger(accountParam)
+		if !resp.EnableCollection {
+			log.CtxLogger(ctx).Info("Skipping collection - AssessCollectionTrigger returned false")
+		}
+		resp.CollectRecordId = accountParam.CollectRecordInfo.CollectRecordId
 	}
 
-	resp.CollectRecordId = accountParam.CollectRecordInfo.CollectRecordId
 	err := p.client.SendRunningStartSignal(resp)
 	if err != nil {
 		log.CtxLogger(ctx).Warn(fmt.Sprintf("Code:[%s] SendRunningStartSignal err %s", CollectorError, err))
@@ -353,7 +368,7 @@ func (p *Platform) handleResource(ctx context.Context, account CloudAccount, res
 					log.CtxLogger(ctx).Error(errorMsg)
 					collectorParam.CloudRecLogger.logAccountError(account.Platform, resource.ResourceType, account.CloudAccountId, account.CollectRecordId, errors.New(errorMsg))
 				}
-				
+
 				consumerCancel()
 				// Gracefully close channels after ensuring no more writes
 				go func() {
@@ -362,14 +377,14 @@ func (p *Platform) handleResource(ctx context.Context, account CloudAccount, res
 					close(regionCh)
 				}()
 			}()
-			
+
 			for {
 				select {
 				case data, ok := <-regionCh:
 					if !ok {
 						return
 					}
-					
+
 					// Check if context is cancelled before processing
 					select {
 					case <-consumerCtx.Done():
@@ -377,19 +392,19 @@ func (p *Platform) handleResource(ctx context.Context, account CloudAccount, res
 						return
 					default:
 					}
-					
+
 					marshal, err := json.Marshal(data)
 					if err != nil {
 						log.CtxLogger(ctx).Error("json Marshal err", zap.Error(err))
 						continue
 					}
-					
+
 					var d interface{}
 					if err := json.Unmarshal(marshal, &d); err != nil {
 						log.CtxLogger(ctx).Error("json Unmarshal err", zap.Error(err))
 						continue
 					}
-					
+
 					// If the registration is not successful, it will be printed on the console.
 					if !collectorParam.registered {
 						if err := utils.PrettyPrintJSON(string(marshal)); err != nil {
@@ -413,7 +428,7 @@ func (p *Platform) handleResource(ctx context.Context, account CloudAccount, res
 						log.CtxLogger(ctx).Warn("Consumer context cancelled while sending to resourceChan")
 						return
 					}
-					
+
 				case <-consumerCtx.Done():
 					log.CtxLogger(ctx).Warn(fmt.Sprintf("Consumer timeout after %d seconds", constant.TimeOut))
 					return
