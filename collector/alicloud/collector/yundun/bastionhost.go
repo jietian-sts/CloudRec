@@ -91,7 +91,13 @@ func GetBastionhostDetail(ctx context.Context, service schema.ServiceInterface, 
 	for i := 0; i < maxWorkers; i++ {
 		wg.Add(1)
 		go func() {
-			defer wg.Done()
+			defer func() {
+				if r := recover(); r != nil {
+					log.CtxLogger(ctx).Error("recover from panic", zap.Any("r", r))
+				}
+				wg.Done()
+			}()
+
 			for instance := range tasks {
 				res <- &BastionhostDetail{
 					Instance:          instance,
