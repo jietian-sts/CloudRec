@@ -24,6 +24,7 @@ interface DetailListProps {
   selectedRuleName: string;
   onBackToAggregate: () => void;
   onViewWhiteList: (record: API.BaseWhiteListRuleInfo) => void;
+  onCreateWhiteList: () => void;
 }
 
 /**
@@ -36,6 +37,7 @@ const DetailList: React.FC<DetailListProps> = ({
   selectedRuleName,
   onBackToAggregate,
   onViewWhiteList,
+  onCreateWhiteList,
 }) => {
   const intl = useIntl();
   
@@ -127,6 +129,15 @@ const DetailList: React.FC<DetailListProps> = ({
           </div>
         );
       },
+    },
+    {
+      title: intl.formatMessage({
+        id: 'tenant.module.text.tenant.name',
+      }),
+      dataIndex: 'tenantName',
+      valueType: 'text',
+      align: 'left',
+      copyable: false,
     },
     {
       title: intl.formatMessage({
@@ -340,7 +351,17 @@ const DetailList: React.FC<DetailListProps> = ({
              };
            }
         }}
-        toolBarRender={() => []}
+        toolBarRender={() => [
+          <Button
+            key="create"
+            type="primary"
+            onClick={onCreateWhiteList}
+          >
+            {intl.formatMessage({
+              id: 'rule.module.text.createWhiteList',
+            })}
+          </Button>,
+        ]}
         columns={detailColumns}
         pagination={{
           showQuickJumper: false,

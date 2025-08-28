@@ -46,7 +46,7 @@
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
-        <!-- starter-test：junit + spring-test + mockito -->
+        <!-- Spring Boot Test Starter with unified JUnit 5 support -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -149,4 +149,28 @@
             </exclusions>
         </dependency>
     </dependencies>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <!-- Maven Surefire Plugin for unified JUnit 5 testing -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M7</version>
+                <configuration>
+                    <!-- Enable JUnit Platform for JUnit 5 support -->
+                    <useJUnitPlatform>true</useJUnitPlatform>
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/*Tests.java</include>
+                    </includes>
+                    <testFailureIgnore>false</testFailureIgnore>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

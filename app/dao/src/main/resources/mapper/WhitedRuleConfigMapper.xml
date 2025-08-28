@@ -47,8 +47,11 @@
                     AND risk_rule_code = #{ruleCode,jdbcType=VARCHAR}
                 </when>
             </choose>
-            <if test="tenantId != null">
-                AND tenant_id = #{tenantId,jdbcType=VARCHAR}
+            <if test="tenantIdList != null and tenantIdList.size() > 0">
+                AND tenant_id IN
+                <foreach collection="tenantIdList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
             </if>
         </where>
     </sql>
@@ -267,9 +270,12 @@
         SELECT COUNT(*) AS count
         FROM whited_rule_config
         WHERE risk_rule_code IS NULL
-        <!--        <if test="tenantId != null">-->
-        <!--            AND tenant_id = #{tenantId}-->
-        <!--        </if>-->
+        <if test="tenantIdList != null and tenantIdList.size() > 0">
+            AND tenant_id IN
+            <foreach collection="tenantIdList" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
         GROUP BY risk_rule_code
     </select>
     <select id="findListGroupByRuleCode" resultType="com.alipay.dao.dto.GroupByRuleCodeDTO">
@@ -282,9 +288,12 @@
                 #{item}
             </foreach>
         </if>
-        <!--        <if test="tenantId != null">-->
-        <!--            AND t1.tenant_id = #{tenantId}-->
-        <!--        </if>-->
+        <if test="tenantIdList != null and tenantIdList.size() > 0">
+            AND tenant_id IN
+            <foreach collection="tenantIdList" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
         GROUP BY t1.risk_rule_code
         ORDER BY count DESC
     </select>

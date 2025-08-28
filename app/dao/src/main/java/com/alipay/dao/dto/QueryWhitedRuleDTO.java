@@ -51,9 +51,9 @@ public class QueryWhitedRuleDTO extends PageDTO  {
     private String creatorName;
 
     /**
-     * 租户id
+     * 租户id 列表
      */
-    private Long tenantId;
+    private List<Long> tenantIdList;
 
     /**
      * 规则状态

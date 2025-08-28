@@ -33,6 +33,8 @@ import com.alipay.application.service.rule.domain.repo.OpaRepository;
 import com.alipay.application.service.rule.domain.repo.RuleGroupRepository;
 import com.alipay.application.service.rule.domain.repo.RuleRepository;
 import com.alipay.application.service.rule.enums.Field;
+import com.alipay.application.service.rule.job.context.RuleScanContext;
+import com.alipay.application.service.rule.job.context.TenantWhitedConfigContext;
 import com.alipay.application.service.statistics.job.StatisticsJob;
 import com.alipay.application.service.system.domain.repo.TenantRepository;
 import com.alipay.application.share.request.rule.LinkDataParam;
@@ -120,7 +122,7 @@ public class ScanServiceImpl implements ScanService {
     private DBDistributedLockUtil dbDistributedLockUtil;
 
     @Resource
-    private WhitedConfigContext whitedConfigContext;
+    private TenantWhitedConfigContext whitedConfigContext;
 
     @Resource
     private TenantRepository tenantRepository;
@@ -357,8 +359,6 @@ public class ScanServiceImpl implements ScanService {
         try {
             // Loading rules to opa
             ruleScanContext.loadByRuleId(ruleId);
-            // Loading whitedConfigs to opa
-            whitedConfigContext.refreshWhitedConfigs();
 
             // Query the account account with this asset to optimize the speed
             List<String> cloudAccountIdList = cloudResourceInstanceMapper.findAccountList(ruleAgg.getPlatform(),
@@ -370,7 +370,6 @@ public class ScanServiceImpl implements ScanService {
                     .build();
 
             List<CloudAccountPO> cloudAccountPOS = cloudAccountMapper.findList(cloudAccountDTO);
-
 
             // Determine whether the rules are selected by the global tenant
             boolean selectedByGlobalTenant = tenantRepository.isDefaultRule(ruleAgg.getRuleCode());
@@ -394,10 +393,6 @@ public class ScanServiceImpl implements ScanService {
         } finally {
             // 改状态、释放锁
             handleScanResultFinish(ruleAgg);
-            // 确保线程池复用线程时清理旧数据
-            if (Thread.currentThread().isAlive()) {
-                whitedConfigContext.clear();
-            }
             dbDistributedLockUtil.releaseLock(localLockPrefix + ruleId);
         }
 
@@ -445,7 +440,8 @@ public class ScanServiceImpl implements ScanService {
 
     private void scanWhitedRuleConfig(RuleScanResultPO ruleScanResultPO, String ruleCode, CloudAccountPO cloudAccountPO,
                                       CloudResourceInstancePO resourceInstance) {
-        List<WhitedRuleConfigPO> whitedRuleConfigPOList = whitedConfigContext.get();
+        // Get whited rule configurations by tenant to ensure tenant isolation
+        List<WhitedRuleConfigPO> whitedRuleConfigPOList = whitedConfigContext.getByTenant(cloudAccountPO.getTenantId());
         String hitWhitedRuleName = null;
         Long hitWhitedRuleConfigId = null;
         boolean isWhited = false;

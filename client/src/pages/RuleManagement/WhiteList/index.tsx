@@ -129,6 +129,7 @@ const WhiteList: React.FC = () => {
           selectedRuleName={selectedRuleName}
           onBackToAggregate={onClickBackToAggregate}
           onViewWhiteList={onClickViewWhiteList}
+          onCreateWhiteList={() => onClickEditWhiteList({})}
         />
       )}
 
@@ -137,6 +138,7 @@ const WhiteList: React.FC = () => {
         setEditDrawerVisible={setEditDrawerVisible}
         whiteListDrawerInfo={whiteListInfoRef.current}
         tableActionRef={tableActionRef}
+        ruleCode={selectedRuleCode}
       />
     </PageContainer>
   );

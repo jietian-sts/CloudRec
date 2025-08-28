@@ -30,6 +30,7 @@ import com.alipay.application.service.rule.WhitedRuleEngineMatcher;
 import com.alipay.application.service.rule.WhitedRuleService;
 import com.alipay.application.service.rule.job.ScanService;
 import com.alipay.application.service.system.domain.User;
+import com.alipay.application.service.system.domain.repo.TenantRepository;
 import com.alipay.application.service.system.domain.repo.UserRepository;
 import com.alipay.application.share.request.rule.*;
 import com.alipay.application.share.vo.ApiResponse;
@@ -49,20 +50,20 @@ import com.alipay.dao.dto.QueryWhitedRuleDTO;
 import com.alipay.dao.dto.RuleScanResultDTO;
 import com.alipay.dao.mapper.RuleMapper;
 import com.alipay.dao.mapper.RuleScanResultMapper;
+import com.alipay.dao.mapper.TenantMapper;
 import com.alipay.dao.mapper.WhitedRuleConfigMapper;
-import com.alipay.dao.po.CloudAccountPO;
-import com.alipay.dao.po.RulePO;
-import com.alipay.dao.po.RuleScanResultPO;
-import com.alipay.dao.po.WhitedRuleConfigPO;
+import com.alipay.dao.po.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Stream;
 
 /**
  * Date: 2025/3/13
@@ -96,6 +97,9 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
     @Resource
     private ScanService scanService;
 
+    @Resource
+    private TenantRepository tenantRepository;
+
     private static final ExecutorService executorService = new ThreadPoolExecutor(
             8,
             8,
@@ -105,6 +109,8 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
             Executors.defaultThreadFactory(),
             new ThreadPoolExecutor.CallerRunsPolicy()
     );
+    @Autowired
+    private TenantMapper tenantMapper;
 
 
     @Override
@@ -172,7 +178,11 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
             }
         }
 
-        dto.setTenantId(UserInfoContext.getCurrentUser().getTenantId());
+        Long globalTenantId = tenantRepository.findGlobalTenant().getId();
+        Long userTenantId = UserInfoContext.getCurrentUser().getUserTenantId();
+        if (!globalTenantId.equals(userTenantId)) {
+            dto.setTenantIdList(Stream.of(globalTenantId, userTenantId).distinct().toList());
+        }
 
         List<WhitedRuleConfigPO> list = whitedRuleConfigMapper.list(dto);
         if (StringUtils.isNoneEmpty(dto.getSearch())) {
@@ -202,6 +212,11 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
         User user = userRepository.find(whitedRuleConfigPO.getCreator());
         if (Objects.nonNull(user)) {
             vo.setCreatorName(user.getUsername());
+        }
+
+        TenantPO tenantPO = tenantMapper.selectByPrimaryKey(whitedRuleConfigPO.getTenantId());
+        if (Objects.nonNull(tenantPO)) {
+            vo.setTenantName(tenantPO.getTenantName());
         }
 
         boolean isLockHolder = false;
@@ -376,7 +391,12 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
         ListVO<GroupByRuleCodeVO> listVO = new ListVO<>();
 
         // Tenant isolation
-        dto.setTenantId(UserInfoContext.getCurrentUser().getTenantId());
+        Long globalTenantId = tenantRepository.findGlobalTenant().getId();
+        Long userTenantId = UserInfoContext.getCurrentUser().getUserTenantId();
+        if (!globalTenantId.equals(userTenantId)) {
+            dto.setTenantIdList(Stream.of(globalTenantId, userTenantId).distinct().toList());
+        }
+
         List<GroupByRuleCodeDTO> list = whitedRuleConfigMapper.findListGroupByRuleCode(dto);
 
         if (CollectionUtils.isEmpty(dto.getRuleCodeList())) {
@@ -499,7 +519,7 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
     }
 
     private void paramCheck(SaveWhitedRuleRequest dto, UserInfoDTO userInfo) {
-        if (Objects.isNull(userInfo)) {
+        if (Objects.isNull(userInfo) || StringUtils.isEmpty(userInfo.getUserId())) {
             throw new RuntimeException("用户信息为空,请检查!");
         }
         if (!WhitedRuleTypeEnum.exist(dto.getRuleType())) {
@@ -542,7 +562,7 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
             whitedRuleConfigPO.setCreator(userInfo.getUserId());
         }
         whitedRuleConfigPO.setLockHolder(userInfo.getUserId());
-        whitedRuleConfigPO.setTenantId(userInfo.getTenantId());
+        whitedRuleConfigPO.setTenantId(userInfo.getUserTenantId());
         whitedRuleConfigPO.setRiskRuleCode(dto.getRiskRuleCode());
         return whitedRuleConfigPO;
     }

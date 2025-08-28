@@ -50,6 +50,8 @@ public class WhitedRuleConfigVO {
 
     private Long tenantId;
 
+    private String tenantName;
+
     private String creator;
 
     private String lockHolder;
