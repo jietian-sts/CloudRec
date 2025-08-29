@@ -23,11 +23,8 @@ import java.util.stream.Collectors;
 public class OpenApiClientJavaDemo {
 
     private static final String BASE_URL = "http://localhost:8080";
-    private static final String ACCESS_KEY = "57a817fe-fe39-4d6d-85bd-b5aae7805ee7";
-    private static final String SECRET_KEY = "3375CCB1C34D95651202F3E0CA1D9E10";
-    //    private static final String BASE_URL = "http://localhost:8080";
-//    private static final String ACCESS_KEY = "your-access-key";
-//    private static final String SECRET_KEY = "your-secret-key";
+    private static final String ACCESS_KEY = "your-access-key";
+    private static final String SECRET_KEY = "your-secret-key";
     private static final String DELIMITER = "|";
 
     /**
