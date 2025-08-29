@@ -180,19 +180,12 @@ const AccountList: React.FC = () => {
   // Handle pagination changes (not platform changes, as those are handled by onChange)
   useEffect((): void => {
     if (initialLoaded && (current !== DEFAULT_PAGE_NUMBER || pageSize !== DEFAULT_PAGE_SIZE)) {
-      const currentPlatformList = form.getFieldValue('platformList');
-      if (currentPlatformList && currentPlatformList.length > 0) {
-        requestCloudAccountList({
-          page: current,
-          size: pageSize,
-          platformList: currentPlatformList,
-        });
-      } else {
-        requestCloudAccountList({
-          page: current,
-          size: pageSize,
-        });
-      }
+      const formData = form.getFieldsValue();
+      requestCloudAccountList({
+        ...formData,
+        page: current,
+        size: pageSize,
+      });
     }
   }, [current, pageSize, initialLoaded]);
 
@@ -355,11 +348,6 @@ const AccountList: React.FC = () => {
               onChange={(current: number, pageSize: number): void => {
                 setCurrent(current);
                 setPageSize(pageSize);
-                requestCloudAccountList({
-                  ...form.getFieldsValue(),
-                  page: current,
-                  size: pageSize,
-                });
               }}
               current={current}
               pageSize={pageSize}
@@ -369,7 +357,7 @@ const AccountList: React.FC = () => {
               }
               total={cloudAccountData?.total || 0}
               showSizeChanger={true}
-              pageSizeOptions={[12, 24]}
+              pageSizeOptions={[12, 24, 48]}
             />
           </Flex>
         </Row>
