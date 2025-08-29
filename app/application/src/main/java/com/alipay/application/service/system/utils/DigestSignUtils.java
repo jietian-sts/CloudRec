@@ -17,6 +17,7 @@
 package com.alipay.application.service.system.utils;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.application.share.vo.ApiResponse;
 import com.alipay.dao.mapper.OpenApiAuthMapper;
@@ -228,16 +229,17 @@ public class DigestSignUtils {
     /**
      * Extract parameters from JSON request body
      * Handles cases where the request body has already been read by using a cached wrapper
+     * Uses recursive flattening to handle nested objects and arrays
      *
      * @param request the HTTP servlet request
      * @return map of parameters extracted from JSON body
      */
     private static Map<String, String> extractJsonParams(HttpServletRequest request) {
         Map<String, String> params = new HashMap<>();
-        
+
         try {
             String jsonBody = null;
-            
+
             // Check if request is already a cached wrapper
             if (request instanceof CachedBodyHttpServletRequest) {
                 jsonBody = ((CachedBodyHttpServletRequest) request).getBody();
@@ -265,27 +267,89 @@ public class DigestSignUtils {
                     }
                 }
             }
-            
+
             if (jsonBody != null && !jsonBody.trim().isEmpty()) {
                 try {
                     JSONObject jsonObject = JSON.parseObject(jsonBody);
+                    // Use recursive flattening for better handling of nested structures
+                    Map<String, Object> flattenedParams = new HashMap<>();
                     for (String key : jsonObject.keySet()) {
                         Object value = jsonObject.get(key);
-                        if (value != null) {
-                            // Convert all values to strings for consistent parameter handling
-                            params.put(key, value.toString());
-                        }
+                        processObject(flattenedParams, key, value);
+                    }
+
+                    // Convert flattened object map to string map
+                    for (Map.Entry<String, Object> entry : flattenedParams.entrySet()) {
+                        params.put(entry.getKey(), entry.getValue().toString());
                     }
                 } catch (Exception e) {
                     logger.warn("Failed to parse JSON body: {}", e.getMessage());
                 }
             }
-            
+
         } catch (Exception e) {
             logger.warn("Failed to extract JSON parameters: {}", e.getMessage());
         }
-        
+
         return params;
+    }
+
+    /**
+     * Recursively process object to flatten complex objects (Map and List) into flat key-value pairs
+     * This approach provides better handling of nested structures compared to simple normalization
+     *
+     * @param map   the original key-value collection that will be recursively updated
+     * @param key   the current processing key, which will contain nested path information as recursion deepens
+     * @param value the value corresponding to the key, can be nested Map, List or other types
+     */
+    private static void processObject(Map<String, Object> map, String key, Object value) {
+        // If value is null, no further processing needed
+        if (value == null) {
+            return;
+        }
+
+        if (key == null) {
+            key = "";
+        }
+
+        // When value is List type, iterate through each element in the List and process recursively
+        if (value instanceof List<?>) {
+            List<?> list = (List<?>) value;
+            for (int i = 0; i < list.size(); ++i) {
+                processObject(map, key + "." + (i + 1), list.get(i));
+            }
+        } else if (value instanceof Map<?, ?>) {
+            // When value is Map type, iterate through each key-value pair in the Map and process recursively
+            Map<?, ?> subMap = (Map<?, ?>) value;
+            for (Map.Entry<?, ?> entry : subMap.entrySet()) {
+                processObject(map, key + "." + entry.getKey().toString(), entry.getValue());
+            }
+        } else if (value instanceof JSONArray) {
+            // Handle JSONArray from fastjson
+            JSONArray array = (JSONArray) value;
+            for (int i = 0; i < array.size(); i++) {
+                processObject(map, key + "." + (i + 1), array.get(i));
+            }
+        } else if (value instanceof JSONObject) {
+            // Handle JSONObject from fastjson
+            JSONObject obj = (JSONObject) value;
+            for (String objKey : obj.keySet()) {
+                processObject(map, key + "." + objKey, obj.get(objKey));
+            }
+        } else {
+            // For keys starting with ".", remove the leading "." to maintain key continuity
+            if (key.startsWith(".")) {
+                key = key.substring(1);
+            }
+
+            // For byte[] type values, convert them to UTF-8 encoded strings
+            if (value instanceof byte[]) {
+                map.put(key, new String((byte[]) value, StandardCharsets.UTF_8));
+            } else {
+                // For other types of values, convert directly to string
+                map.put(key, String.valueOf(value));
+            }
+        }
     }
 
      /**
@@ -303,26 +367,6 @@ public class DigestSignUtils {
                  .map(entry -> entry.getKey() + "=" + entry.getValue())
                  .collect(Collectors.joining("&"));
      }
-
-    /**
-     * Generate SHA-256 signature using secure string concatenation
-     * 
-     * @param accessKey access key
-     * @param timeStamp timestamp
-     * @param secretKey secret key
-     * @return SHA-256 hex signature
-     */
-    private String generateSHA256Signature(String accessKey, String timeStamp, String secretKey) {
-        try {
-            String data = accessKey + DELIMITER + timeStamp + DELIMITER + secretKey;
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(data.getBytes(StandardCharsets.UTF_8));
-            return bytesToHex(hash);
-        } catch (NoSuchAlgorithmException e) {
-            logger.error("SHA-256 algorithm not available", e);
-            throw new RuntimeException("Cryptographic error", e);
-        }
-    }
 
     /**
      * Get the request header field key-value

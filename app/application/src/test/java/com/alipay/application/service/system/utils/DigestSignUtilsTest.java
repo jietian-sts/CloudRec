@@ -52,7 +52,7 @@ class DigestSignUtilsTest {
 
     private MockHttpServletRequest mockRequest;
     private OpenApiAuthPO mockOpenApiAuthPO;
-    
+
     private static final String TEST_ACCESS_KEY = "test-access-key-12345";
     private static final String TEST_SECRET_KEY = "test-secret-key-67890";
     private static final String TEST_TIMESTAMP = String.valueOf(Instant.now().getEpochSecond());
@@ -79,7 +79,7 @@ class DigestSignUtilsTest {
         mockRequest.addHeader("timestamp", TEST_TIMESTAMP);
         mockRequest.addParameter("param1", "value1");
         mockRequest.addParameter("param2", "value2");
-        
+
         // Generate signature with parameters using the same logic as generateSignatureWithParams
         String sortedParams = "param1=value1&param2=value2"; // Sorted parameters
         String data = TEST_ACCESS_KEY + "|" + TEST_TIMESTAMP + "|" + sortedParams + "|" + TEST_SECRET_KEY;
@@ -90,14 +90,14 @@ class DigestSignUtilsTest {
             sb.append(String.format("%02x", b));
         }
         String validSign = sb.toString();
-        
+
         mockRequest.addHeader("sign", validSign);
-        
+
         when(openApiAuthMapper.findByAccessKey(TEST_ACCESS_KEY)).thenReturn(mockOpenApiAuthPO);
-        
+
         // Act
         ApiResponse<String> result = digestSignUtils.isAuth(mockRequest);
-        
+
         // Assert
         assertEquals(ApiResponse.SUCCESS_CODE, result.getCode());
         assertEquals("success", result.getMsg());
@@ -112,10 +112,10 @@ class DigestSignUtilsTest {
         // Arrange
         mockRequest.addHeader("timestamp", TEST_TIMESTAMP);
         mockRequest.addHeader("sign", "some-sign");
-        
+
         // Act
         ApiResponse<String> result = digestSignUtils.isAuth(mockRequest);
-        
+
         // Assert
         assertEquals(ApiResponse.ACCESS_DENIED, result.getCode());
         assertEquals("Authentication failed", result.getMsg());
@@ -130,10 +130,10 @@ class DigestSignUtilsTest {
         // Arrange
         mockRequest.addHeader("access-key", TEST_ACCESS_KEY);
         mockRequest.addHeader("sign", "some-sign");
-        
+
         // Act
         ApiResponse<String> result = digestSignUtils.isAuth(mockRequest);
-        
+
         // Assert
         assertEquals(ApiResponse.ACCESS_DENIED, result.getCode());
         assertEquals("Authentication failed", result.getMsg());
@@ -148,10 +148,10 @@ class DigestSignUtilsTest {
         // Arrange
         mockRequest.addHeader("access-key", TEST_ACCESS_KEY);
         mockRequest.addHeader("timestamp", TEST_TIMESTAMP);
-        
+
         // Act
         ApiResponse<String> result = digestSignUtils.isAuth(mockRequest);
-        
+
         // Assert
         assertEquals(ApiResponse.ACCESS_DENIED, result.getCode());
         assertEquals("Authentication failed", result.getMsg());
@@ -167,10 +167,10 @@ class DigestSignUtilsTest {
         mockRequest.addHeader("access-key", TEST_ACCESS_KEY);
         mockRequest.addHeader("timestamp", INVALID_TIMESTAMP);
         mockRequest.addHeader("sign", "some-sign");
-        
+
         // Act
         ApiResponse<String> result = digestSignUtils.isAuth(mockRequest);
-        
+
         // Assert
         assertEquals(ApiResponse.ACCESS_DENIED, result.getCode());
         assertEquals("Authentication failed", result.getMsg());
@@ -186,12 +186,12 @@ class DigestSignUtilsTest {
         mockRequest.addHeader("access-key", "non-existent-key");
         mockRequest.addHeader("timestamp", TEST_TIMESTAMP);
         mockRequest.addHeader("sign", "some-sign");
-        
+
         when(openApiAuthMapper.findByAccessKey("non-existent-key")).thenReturn(null);
-        
+
         // Act
         ApiResponse<String> result = digestSignUtils.isAuth(mockRequest);
-        
+
         // Assert
         assertEquals(ApiResponse.ACCESS_DENIED, result.getCode());
         assertEquals("Authentication failed", result.getMsg());
@@ -207,12 +207,12 @@ class DigestSignUtilsTest {
         mockRequest.addHeader("access-key", TEST_ACCESS_KEY);
         mockRequest.addHeader("timestamp", TEST_TIMESTAMP);
         mockRequest.addHeader("sign", "invalid-signature");
-        
+
         when(openApiAuthMapper.findByAccessKey(TEST_ACCESS_KEY)).thenReturn(mockOpenApiAuthPO);
-        
+
         // Act
         ApiResponse<String> result = digestSignUtils.isAuth(mockRequest);
-        
+
         // Assert
         assertEquals(ApiResponse.ACCESS_DENIED, result.getCode());
         assertEquals("Authentication failed", result.getMsg());
@@ -229,7 +229,7 @@ class DigestSignUtilsTest {
         mockRequest.addHeader("timestamp", TEST_TIMESTAMP);
         mockRequest.addParameter("param1", "value1");
         mockRequest.addParameter("param2", "value2");
-        
+
         // Generate signature with parameters using the same logic as generateSignatureWithParams
         String sortedParams = "param1=value1&param2=value2"; // Sorted parameters
         String data = TEST_ACCESS_KEY + "|" + TEST_TIMESTAMP + "|" + sortedParams + "|" + TEST_SECRET_KEY;
@@ -240,14 +240,14 @@ class DigestSignUtilsTest {
             sb.append(String.format("%02x", b));
         }
         String validSign = sb.toString();
-        
+
         mockRequest.addHeader("sign", validSign);
-        
+
         when(openApiAuthMapper.findByAccessKey(TEST_ACCESS_KEY)).thenReturn(mockOpenApiAuthPO);
-        
+
         // Act
         ApiResponse<String> result = digestSignUtils.isAuth(mockRequest);
-        
+
         // Assert
         assertEquals(ApiResponse.SUCCESS_CODE, result.getCode());
         assertEquals("success", result.getMsg());
@@ -263,15 +263,15 @@ class DigestSignUtilsTest {
         mockRequest.addHeader("access-key", TEST_ACCESS_KEY);
         mockRequest.addHeader("timestamp", TEST_TIMESTAMP);
         mockRequest.addParameter("longParam", longValue);
-        
+
         String validSign = generateTestSignature(TEST_ACCESS_KEY, TEST_TIMESTAMP, TEST_SECRET_KEY);
         mockRequest.addHeader("sign", validSign);
-        
+
         when(openApiAuthMapper.findByAccessKey(TEST_ACCESS_KEY)).thenReturn(mockOpenApiAuthPO);
-        
+
         // Act
         ApiResponse<String> result = digestSignUtils.isAuth(mockRequest);
-        
+
         // Assert
         assertEquals(ApiResponse.SUCCESS_CODE, result.getCode()); // Should succeed as oversized params are filtered out
     }
@@ -283,10 +283,10 @@ class DigestSignUtilsTest {
     void testGenerateKey_ValidInput() throws NoSuchAlgorithmException {
         // Arrange
         String input = "test-input";
-        
+
         // Act
         String result = DigestSignUtils.generateKey(input);
-        
+
         // Assert
         assertNotNull(result);
         assertEquals(32, result.length()); // MD5 produces 32-character hex string
@@ -300,10 +300,10 @@ class DigestSignUtilsTest {
     void testGenerateKey_EmptyInput() throws NoSuchAlgorithmException {
         // Arrange
         String input = "";
-        
+
         // Act
         String result = DigestSignUtils.generateKey(input);
-        
+
         // Assert
         assertNotNull(result);
         assertEquals(32, result.length());
@@ -326,17 +326,17 @@ class DigestSignUtilsTest {
     @Test
     void testIsValidInput() throws Exception {
         // Arrange
-        Method method = DigestSignUtils.class.getDeclaredMethod("isValidInput", 
+        Method method = DigestSignUtils.class.getDeclaredMethod("isValidInput",
                 String.class, String.class, String.class);
         method.setAccessible(true);
-        
+
         // Act & Assert
         assertTrue((Boolean) method.invoke(digestSignUtils, TEST_TIMESTAMP, TEST_ACCESS_KEY, "valid-sign"));
         assertFalse((Boolean) method.invoke(digestSignUtils, null, TEST_ACCESS_KEY, "valid-sign"));
         assertFalse((Boolean) method.invoke(digestSignUtils, TEST_TIMESTAMP, null, "valid-sign"));
         assertFalse((Boolean) method.invoke(digestSignUtils, TEST_TIMESTAMP, TEST_ACCESS_KEY, null));
         assertFalse((Boolean) method.invoke(digestSignUtils, "", TEST_ACCESS_KEY, "valid-sign"));
-        
+
         // Test with oversized parameters
         String longString = "a".repeat(300);
         assertFalse((Boolean) method.invoke(digestSignUtils, longString, TEST_ACCESS_KEY, "valid-sign"));
@@ -352,11 +352,11 @@ class DigestSignUtilsTest {
         // Arrange
         Method method = DigestSignUtils.class.getDeclaredMethod("isValidTimestamp", String.class);
         method.setAccessible(true);
-        
+
         String currentTimestamp = String.valueOf(Instant.now().getEpochSecond());
         String expiredTimestamp = String.valueOf(Instant.now().getEpochSecond() - 400);
         String futureTimestamp = String.valueOf(Instant.now().getEpochSecond() + 100);
-        
+
         // Act & Assert
         assertTrue((Boolean) method.invoke(digestSignUtils, currentTimestamp));
         assertFalse((Boolean) method.invoke(digestSignUtils, expiredTimestamp));
@@ -372,17 +372,17 @@ class DigestSignUtilsTest {
         // Arrange
         Method method = DigestSignUtils.class.getDeclaredMethod("getAllRequestParams", HttpServletRequest.class);
         method.setAccessible(true);
-        
+
         mockRequest.addParameter("param1", "value1");
         mockRequest.addParameter("param2", "value2");
         mockRequest.addParameter("access-key", TEST_ACCESS_KEY); // Should be excluded
         mockRequest.addParameter("timestamp", TEST_TIMESTAMP); // Should be excluded
         mockRequest.addParameter("sign", "some-sign"); // Should be excluded
-        
+
         // Act
         @SuppressWarnings("unchecked")
         Map<String, String> result = (Map<String, String>) method.invoke(null, mockRequest);
-        
+
         // Assert
         assertEquals(2, result.size());
         assertEquals("value1", result.get("param1"));
@@ -400,15 +400,15 @@ class DigestSignUtilsTest {
         // Arrange
         Method method = DigestSignUtils.class.getDeclaredMethod("buildSortedParamString", Map.class);
         method.setAccessible(true);
-        
+
         Map<String, String> params = new HashMap<>();
         params.put("zebra", "last");
         params.put("alpha", "first");
         params.put("beta", "second");
-        
+
         // Act
         String result = (String) method.invoke(null, params);
-        
+
         // Assert
         assertEquals("alpha=first&beta=second&zebra=last", result);
     }
@@ -421,12 +421,12 @@ class DigestSignUtilsTest {
         // Arrange
         Method method = DigestSignUtils.class.getDeclaredMethod("buildSortedParamString", Map.class);
         method.setAccessible(true);
-        
+
         Map<String, String> emptyParams = new HashMap<>();
-        
+
         // Act
         String result = (String) method.invoke(null, emptyParams);
-        
+
         // Assert
         assertEquals("", result);
     }
@@ -437,14 +437,14 @@ class DigestSignUtilsTest {
     @Test
     void testGenerateSHA256Signature() throws Exception {
         // Arrange
-        Method method = DigestSignUtils.class.getDeclaredMethod("generateSHA256Signature", 
+        Method method = DigestSignUtils.class.getDeclaredMethod("generateSHA256Signature",
                 String.class, String.class, String.class);
         method.setAccessible(true);
-        
+
         // Act
         String result1 = (String) method.invoke(digestSignUtils, TEST_ACCESS_KEY, TEST_TIMESTAMP, TEST_SECRET_KEY);
         String result2 = (String) method.invoke(digestSignUtils, TEST_ACCESS_KEY, TEST_TIMESTAMP, TEST_SECRET_KEY);
-        
+
         // Assert
         assertNotNull(result1);
         assertEquals(64, result1.length()); // SHA-256 produces 64-character hex string
@@ -461,16 +461,16 @@ class DigestSignUtilsTest {
         String accessKey = "test-key";
         String timestamp = "1234567890";
         String secretKey = "test-secret";
-        
+
         // Create a mock request without parameters
         MockHttpServletRequest emptyRequest = new MockHttpServletRequest();
-        
+
         // Act - Get signature from generateSignatureWithParams with empty request
-        Method generateWithParamsMethod = DigestSignUtils.class.getDeclaredMethod("generateSignatureWithParams", 
+        Method generateWithParamsMethod = DigestSignUtils.class.getDeclaredMethod("generateSignatureWithParams",
                 HttpServletRequest.class, String.class, String.class, String.class);
         generateWithParamsMethod.setAccessible(true);
         String signatureWithParams = (String) generateWithParamsMethod.invoke(null, emptyRequest, accessKey, timestamp, secretKey);
-        
+
         // Generate expected signature using the same format as generateSignatureWithParams
         // Format: accessKey|timestamp|sortedParams|secretKey (empty sortedParams for no parameters)
         String data = accessKey + "|" + timestamp + "|" + "" + "|" + secretKey;
@@ -481,7 +481,7 @@ class DigestSignUtilsTest {
             sb.append(String.format("%02x", b));
         }
         String expectedSignature = sb.toString();
-        
+
         // Assert
         assertNotNull(signatureWithParams);
         assertNotNull(expectedSignature);
