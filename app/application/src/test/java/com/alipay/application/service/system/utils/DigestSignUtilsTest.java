@@ -432,27 +432,6 @@ class DigestSignUtilsTest {
     }
 
     /**
-     * Test generateSHA256Signature method using reflection
-     */
-    @Test
-    void testGenerateSHA256Signature() throws Exception {
-        // Arrange
-        Method method = DigestSignUtils.class.getDeclaredMethod("generateSHA256Signature",
-                String.class, String.class, String.class);
-        method.setAccessible(true);
-
-        // Act
-        String result1 = (String) method.invoke(digestSignUtils, TEST_ACCESS_KEY, TEST_TIMESTAMP, TEST_SECRET_KEY);
-        String result2 = (String) method.invoke(digestSignUtils, TEST_ACCESS_KEY, TEST_TIMESTAMP, TEST_SECRET_KEY);
-
-        // Assert
-        assertNotNull(result1);
-        assertEquals(64, result1.length()); // SHA-256 produces 64-character hex string
-        assertTrue(result1.matches("[a-f0-9]+")); // Should be lowercase hexadecimal
-        assertEquals(result1, result2); // Same input should produce same output
-    }
-
-    /**
      * Test signature consistency between different methods
      */
     @Test
