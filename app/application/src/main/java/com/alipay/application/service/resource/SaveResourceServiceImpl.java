@@ -37,11 +37,10 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.concurrent.CompletableFuture;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -56,7 +55,7 @@ public class SaveResourceServiceImpl implements SaveResourceService {
 
     @Resource
     private CloudResourceInstanceMapper cloudResourceInstanceMapper;
-    
+
     @Resource
     private AsyncTaskMonitorService asyncTaskMonitorService;
 
@@ -130,66 +129,71 @@ public class SaveResourceServiceImpl implements SaveResourceService {
         String data = dataReq.getData();
         DataPushRequest.Data parseObject = JSON.parseObject(data, DataPushRequest.Data.class);
 
-        // Process data asynchronously to improve response time
-        saveOrUpdateDataAsync(parseObject);
-        
-        log.info("Resource data accepted for async processing, cloudAccountId: {}, resourceType: {}, platform: {}", 
+        try {
+            // Process data asynchronously to improve response time
+            saveOrUpdateDataAsync(parseObject);
+        } catch (Exception e) {
+            log.error("acceptResourceData error", e);
+            return;
+        }
+
+        log.info("Resource data accepted for async processing, cloudAccountId: {}, resourceType: {}, platform: {}",
                 parseObject.getCloudAccountId(), parseObject.getResourceType(), parseObject.getPlatform());
     }
-    
+
     /**
      * Asynchronously process resource data to improve API response time
      * Uses dedicated thread pool for resource data processing with monitoring
-     * 
+     *
      * @param dataPushRequest the data to be processed
      * @return CompletableFuture for async operation tracking
      */
     @Async("resourceDataTaskExecutor")
     public CompletableFuture<Void> saveOrUpdateDataAsync(DataPushRequest.Data dataPushRequest) {
         String taskId = generateTaskId(dataPushRequest);
-        
+
         // Record task submission for monitoring
-        asyncTaskMonitorService.recordTaskSubmission(taskId, 
-                dataPushRequest.getCloudAccountId(), 
-                dataPushRequest.getResourceType(), 
+        asyncTaskMonitorService.recordTaskSubmission(taskId,
+                dataPushRequest.getCloudAccountId(),
+                dataPushRequest.getResourceType(),
                 dataPushRequest.getPlatform());
-        
+
         try {
-            log.info("Starting async processing [{}] for cloudAccountId: {}, resourceType: {}, platform: {}", 
+            log.info("Starting async processing [{}] for cloudAccountId: {}, resourceType: {}, platform: {}",
                     taskId, dataPushRequest.getCloudAccountId(), dataPushRequest.getResourceType(), dataPushRequest.getPlatform());
-            
+
             this.saveOrUpdateData(dataPushRequest);
-            
+
             // Record successful completion
             asyncTaskMonitorService.recordTaskCompletion(taskId);
-            
-            log.info("Completed async processing [{}] for cloudAccountId: {}, resourceType: {}, platform: {}", 
+
+            log.info("Completed async processing [{}] for cloudAccountId: {}, resourceType: {}, platform: {}",
                     taskId, dataPushRequest.getCloudAccountId(), dataPushRequest.getResourceType(), dataPushRequest.getPlatform());
-            
+
             return CompletableFuture.completedFuture(null);
         } catch (Exception e) {
             // Record task failure
             asyncTaskMonitorService.recordTaskFailure(taskId, e);
-            
-            log.error("Async processing failed [{}] for cloudAccountId: {}, resourceType: {}, platform: {}", 
+
+            log.error("Async processing failed [{}] for cloudAccountId: {}, resourceType: {}, platform: {}",
                     taskId, dataPushRequest.getCloudAccountId(), dataPushRequest.getResourceType(), dataPushRequest.getPlatform(), e);
-            
+
             // Return completed future even on error to prevent blocking
             return CompletableFuture.completedFuture(null);
         }
     }
-    
+
     /**
      * Generate unique task ID for monitoring purposes
-     * 
+     *
      * @param dataPushRequest the data request
      * @return unique task identifier
      */
     private String generateTaskId(DataPushRequest.Data dataPushRequest) {
-        return String.format("%s-%s-%s-%d", 
-                dataPushRequest.getCloudAccountId(), 
-                dataPushRequest.getResourceType(), 
-                dataPushRequest.getPlatform(), 
+        return String.format("%s-%s-%s-%d",
+                dataPushRequest.getCloudAccountId(),
+                dataPushRequest.getResourceType(),
+                dataPushRequest.getPlatform(),
                 System.currentTimeMillis());
     }
 

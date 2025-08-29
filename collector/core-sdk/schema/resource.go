@@ -271,7 +271,7 @@ func Submit(client *Client, account CloudAccount, resource Resource, res chan *R
 
 				log.GetWLogger().Warn(fmt.Sprintf("Failed to send resource batch (retry %d/%d): %s", retry+1, maxRetries, err.Error()))
 				if retry < maxRetries-1 {
-					time.Sleep(time.Duration(retry+1) * time.Second)
+					time.Sleep(time.Duration(retry+1) * 3 * time.Second)
 				}
 			}
 
