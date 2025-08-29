@@ -117,15 +117,11 @@ const DetailList: React.FC<DetailListProps> = ({
       valueType: 'text',
       align: 'left',
       hideInSearch: true,
-      render: (_, record: API.UserInfo) => {
+      render: (_, record) => {
         return (
           <div>
-            <section style={{ color: '#999' }}>
-              {dayjs(record?.gmtCreate).format('YYYY-MM-DD 18:00:00') || '-'}
-            </section>
-            <section style={{ color: '#999' }}>
-              {dayjs(record?.gmtModified).format('YYYY-MM-DD 18:00:00') || '-'}
-            </section>
+            <section>{record?.gmtCreate || '-'}</section>
+            <section>{record?.gmtModified || '-'}</section>
           </div>
         );
       },
