@@ -678,12 +678,20 @@ public class AgentServiceImpl implements AgentService {
                                 log.error("Delete historical version data or scan failed, cloudAccountId:{}", cloudAccountId, e);
                             }
                         },
-                        10,
+                        60,
                         TimeUnit.SECONDS
                 );
             } else if (collectRecordInfo != null) {
                 // Modify the account asset's latest acquisition time is the current time
-                saveResourceService.refreshResourceUpdateTime(cloudAccountId);
+                // TODO There is database lock contention, which makes it prone to timeouts
+//                SchedulerManager.getScheduler().schedule(
+//                        () ->
+//                        {
+//                            saveResourceService.refreshResourceUpdateTime(cloudAccountId);
+//                        },
+//                        10,
+//                        TimeUnit.SECONDS
+//                );
             }
         }
     }
