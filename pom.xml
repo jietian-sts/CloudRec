@@ -6,7 +6,7 @@
 
     <groupId>com.alipay</groupId>
     <artifactId>cloudrec</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.2.1-SNAPSHOT</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -17,11 +17,11 @@
 
     <packaging>pom</packaging>
     <modules>
-        <module>app/api</module>
-        <module>app/dao</module>
         <module>app/common</module>
-        <module>app/bootstrap</module>
+        <module>app/dao</module>
         <module>app/application</module>
+        <module>app/api</module>
+        <module>app/bootstrap</module>
     </modules>
 
     <properties>

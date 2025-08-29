@@ -5,11 +5,11 @@
     <parent>
         <artifactId>cloudrec</artifactId>
         <groupId>com.alipay</groupId>
-        <version>0.2.0-SNAPSHOT</version>
+        <version>0.2.1-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>common</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.2.1-SNAPSHOT</version>
     <name>common</name>
     <description>common</description>
     <url/>
@@ -98,10 +98,6 @@
     
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
             <!-- Maven Surefire Plugin for unified JUnit 5 testing -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
