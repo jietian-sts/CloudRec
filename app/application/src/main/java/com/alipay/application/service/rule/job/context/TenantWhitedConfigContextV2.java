@@ -115,7 +115,7 @@ public class TenantWhitedConfigContextV2 {
             try {
                 List<WhitedRuleConfigPO> configs = tenantConfigCache.get(tenantId, this::queryTenantConfigs);
                 
-                if (configs != null) {
+                if (configs != null && !configs.isEmpty()) {
                     return configs;
                 }
                 
