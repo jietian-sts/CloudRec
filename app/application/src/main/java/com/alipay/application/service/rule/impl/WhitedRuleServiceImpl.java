@@ -29,6 +29,7 @@ import com.alipay.application.service.rule.WhitedRegoMatcher;
 import com.alipay.application.service.rule.WhitedRuleEngineMatcher;
 import com.alipay.application.service.rule.WhitedRuleService;
 import com.alipay.application.service.rule.job.ScanService;
+import com.alipay.application.service.rule.job.context.TenantWhitedConfigContextV2;
 import com.alipay.application.service.system.domain.User;
 import com.alipay.application.service.system.domain.repo.TenantRepository;
 import com.alipay.application.service.system.domain.repo.UserRepository;
@@ -101,6 +102,9 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
     @Resource
     private TenantRepository tenantRepository;
 
+    @Resource
+    private TenantWhitedConfigContextV2 tenantWhitedConfigContextV2;
+
     private static final ExecutorService executorService = new ThreadPoolExecutor(
             8,
             8,
@@ -144,6 +148,8 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
                     log.error("save whitedRuleConfig error, lockHolder and current user different， whitedRuleId: {} , lockHolder:{}， currentUser:{} ", whitedRuleConfigPO.getId(), whitedRuleConfigPO.getLockHolder(), currentUser.getUserId());
                     throw new RuntimeException("The current whitelist has been locked by other users, please grab the lock and try again!");
                 }
+
+                tenantWhitedConfigContextV2.clearAllCache();
                 //更新数据
                 buildWhitedRuleConfigPO(whitedRuleConfigPO, dto, currentUser, ruleConfigJson);
                 whitedRuleConfigPO.setGmtModified(new Date());
@@ -154,6 +160,7 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
             }
         }
 
+        tenantWhitedConfigContextV2.clearAllCache();
         buildWhitedRuleConfigPO(whitedRuleConfigPO, dto, currentUser, ruleConfigJson);
         whitedRuleConfigPO.setEnable(1);
         int insertResult = whitedRuleConfigMapper.insertSelective(whitedRuleConfigPO);
@@ -254,6 +261,7 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
             log.error("deleteById whitedRuleConfig error, lockHolder and current user different， whitedRuleid: {} , lockHolder:{}， currentUser:{} ", whitedRuleConfigPO.getId(), whitedRuleConfigPO.getLockHolder(), currentUser.getUserId());
             throw new RuntimeException("The current whitelist has been locked by other users, please grab the lock and try again!");
         }
+        tenantWhitedConfigContextV2.clearAllCache();
         return whitedRuleConfigMapper.deleteByPrimaryKey(id);
     }
 
@@ -269,6 +277,7 @@ public class WhitedRuleServiceImpl implements WhitedRuleService {
             }
             whitedRuleConfigPO.setEnable(enable);
             whitedRuleConfigPO.setGmtModified(new Date());
+            tenantWhitedConfigContextV2.clearAllCache();
             whitedRuleConfigMapper.updateByPrimaryKeySelective(whitedRuleConfigPO);
         } else {
             throw new RuntimeException("whitedRuleConfigPO id: " + id + "Does not exist");

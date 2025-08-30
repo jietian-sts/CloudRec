@@ -34,7 +34,7 @@ public class TenantWhitedConfigProperties {
 
     /**
      * Cache expiration time in milliseconds
-     * Default: 5 minutes (300,000 ms)
+     * Default: 5 min
      */
     private Long cacheExpirationTimeMs = 5 * 60 * 1000L;
 
@@ -42,7 +42,7 @@ public class TenantWhitedConfigProperties {
      * Maximum number of entries in cache
      * Default: 100 entries
      */
-    private Integer maxCacheSize = 100;
+    private Integer maxCacheSize = 10000;
 
     /**
      * Page size for database queries

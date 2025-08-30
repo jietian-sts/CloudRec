@@ -34,7 +34,7 @@ import com.alipay.application.service.rule.domain.repo.RuleGroupRepository;
 import com.alipay.application.service.rule.domain.repo.RuleRepository;
 import com.alipay.application.service.rule.enums.Field;
 import com.alipay.application.service.rule.job.context.RuleScanContext;
-import com.alipay.application.service.rule.job.context.TenantWhitedConfigContext;
+import com.alipay.application.service.rule.job.context.TenantWhitedConfigContextV2;
 import com.alipay.application.service.statistics.job.StatisticsJob;
 import com.alipay.application.service.system.domain.repo.TenantRepository;
 import com.alipay.application.share.request.rule.LinkDataParam;
@@ -122,7 +122,7 @@ public class ScanServiceImpl implements ScanService {
     private DBDistributedLockUtil dbDistributedLockUtil;
 
     @Resource
-    private TenantWhitedConfigContext whitedConfigContext;
+    private TenantWhitedConfigContextV2 whitedConfigContext;
 
     @Resource
     private TenantRepository tenantRepository;

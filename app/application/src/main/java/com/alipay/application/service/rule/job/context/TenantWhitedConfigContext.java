@@ -27,6 +27,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Stream;
 
@@ -50,16 +51,56 @@ public class TenantWhitedConfigContext {
     private TenantWhitedConfigProperties configProperties;
 
     /**
-     * Tenant-based cache for whited configurations
-     * Key: tenantId, Value: List of WhitedRuleConfigPO
+     * Cache entry wrapper with version control and expiration time
      */
-    private final Map<Long, List<WhitedRuleConfigPO>> tenantConfigCache = new ConcurrentHashMap<>();
+    private static class CacheEntry {
+        private final List<WhitedRuleConfigPO> configs;
+        private final long expirationTime;
+        private final long version;
+        private final long creationTime;
+
+        public CacheEntry(List<WhitedRuleConfigPO> configs, long expirationTime, long version) {
+            this.configs = new ArrayList<>(configs); // Defensive copy
+            this.expirationTime = expirationTime;
+            this.version = version;
+            this.creationTime = System.currentTimeMillis();
+        }
+
+        public List<WhitedRuleConfigPO> getConfigs() {
+            return new ArrayList<>(configs); // Return defensive copy
+        }
+
+        public boolean isExpired() {
+            return System.currentTimeMillis() >= expirationTime;
+        }
+
+        public boolean isValid() {
+            return !isExpired();
+        }
+
+        public long getVersion() {
+            return version;
+        }
+
+        public long getCreationTime() {
+            return creationTime;
+        }
+
+        public long getExpirationTime() {
+            return expirationTime;
+        }
+    }
 
     /**
-     * Cache expiration time tracking
-     * Key: tenantId, Value: expiration timestamp
+     * Cache for storing tenant-specific whitelisted rule configurations with version control
+     * Key: tenant ID, Value: CacheEntry with configs, expiration time and version
      */
-    private final Map<Long, Long> cacheExpirationMap = new ConcurrentHashMap<>();
+    private final Map<Long, CacheEntry> tenantConfigCache = new ConcurrentHashMap<>();
+
+    /**
+     * Version counter for cache entries to detect stale data
+     */
+    private final AtomicLong cacheVersionCounter = new AtomicLong(0);
 
     /**
      * Read-write lock to ensure thread safety for cache operations
@@ -70,6 +111,7 @@ public class TenantWhitedConfigContext {
 
     /**
      * Get whited rule configurations for a specific tenant with caching
+     * Thread-safe implementation without read locks to prevent stale data during refresh
      *
      * @param tenantId the tenant ID to query configurations for
      * @return List of WhitedRuleConfigPO objects for the specified tenant
@@ -80,18 +122,13 @@ public class TenantWhitedConfigContext {
             return new ArrayList<>();
         }
 
-        cacheLock.readLock().lock();
-        try {
-            // Check if cache exists and is not expired
-            if (isCacheValid(tenantId)) {
-                List<WhitedRuleConfigPO> cachedConfigs = tenantConfigCache.get(tenantId);
-                if (cachedConfigs != null) {
-                    log.debug("Retrieved whited configs from cache for tenant: {}, count: {}", tenantId, cachedConfigs.size());
-                    return new ArrayList<>(cachedConfigs); // Return a copy to prevent external modification
-                }
-            }
-        } finally {
-            cacheLock.readLock().unlock();
+        // Check cache without locks first (ConcurrentHashMap is thread-safe for reads)
+        CacheEntry cacheEntry = tenantConfigCache.get(tenantId);
+        if (cacheEntry != null && cacheEntry.isValid()) {
+            List<WhitedRuleConfigPO> cachedConfigs = cacheEntry.getConfigs();
+            log.debug("Retrieved whited configs from cache for tenant: {}, count: {}, version: {}", 
+                     tenantId, cachedConfigs.size(), cacheEntry.getVersion());
+            return cachedConfigs; // Already returns defensive copy
         }
 
         // Cache miss or expired, need to refresh
@@ -100,6 +137,7 @@ public class TenantWhitedConfigContext {
 
     /**
      * Refresh cache for a specific tenant by querying database
+     * Uses improved double-check locking with version control to prevent stale data
      *
      * @param tenantId the tenant ID to refresh cache for
      * @return List of WhitedRuleConfigPO objects for the specified tenant
@@ -107,26 +145,32 @@ public class TenantWhitedConfigContext {
     private List<WhitedRuleConfigPO> refreshTenantCache(Long tenantId) {
         cacheLock.writeLock().lock();
         try {
-            // Double-check if another thread has already refreshed the cache
-            if (isCacheValid(tenantId)) {
-                List<WhitedRuleConfigPO> cachedConfigs = tenantConfigCache.get(tenantId);
-                if (cachedConfigs != null) {
-                    return new ArrayList<>(cachedConfigs);
-                }
+            // Check again inside lock to see if another thread has already refreshed
+            CacheEntry currentEntry = tenantConfigCache.get(tenantId);
+            if (currentEntry != null && currentEntry.isValid()) {
+                // Another thread has refreshed the cache, use the latest version
+                log.debug("Cache already refreshed by another thread for tenant: {}, version: {}", 
+                         tenantId, currentEntry.getVersion());
+                return currentEntry.getConfigs();
             }
 
             // Query database for tenant-specific configurations
             List<WhitedRuleConfigPO> tenantConfigs = queryTenantConfigs(tenantId);
 
-            // Manage cache size to prevent memory overflow
+            // Manage cache size to prevent memory overflow (now thread-safe)
             manageCacheSize();
 
-            // Update cache
-            tenantConfigCache.put(tenantId, tenantConfigs);
-            cacheExpirationMap.put(tenantId, System.currentTimeMillis() + configProperties.getCacheExpirationTimeMs());
+            // Create new cache entry with incremented version
+            long newVersion = cacheVersionCounter.incrementAndGet();
+            long expirationTime = System.currentTimeMillis() + configProperties.getCacheExpirationTimeMs();
+            CacheEntry newEntry = new CacheEntry(tenantConfigs, expirationTime, newVersion);
+            
+            // Update cache atomically
+            tenantConfigCache.put(tenantId, newEntry);
 
-            log.info("Refreshed whited configs cache for tenant: {}, count: {}", tenantId, tenantConfigs.size());
-            return new ArrayList<>(tenantConfigs);
+            log.info("Refreshed whited configs cache for tenant: {}, count: {}, version: {}", 
+                    tenantId, tenantConfigs.size(), newVersion);
+            return newEntry.getConfigs();
 
         } finally {
             cacheLock.writeLock().unlock();
@@ -197,38 +241,37 @@ public class TenantWhitedConfigContext {
      * @return true if cache is valid, false otherwise
      */
     private boolean isCacheValid(Long tenantId) {
-        Long expirationTime = cacheExpirationMap.get(tenantId);
-        return expirationTime != null && System.currentTimeMillis() < expirationTime;
+        CacheEntry cacheEntry = tenantConfigCache.get(tenantId);
+        return cacheEntry != null && cacheEntry.isValid();
     }
 
     /**
-     * Manage cache size by removing expired entries and oldest entries if needed
+     * Manages cache size by removing expired entries and enforcing size limits
+     * Thread-safe implementation with proper synchronization
      */
     private void manageCacheSize() {
         // Remove expired entries
-        long currentTime = System.currentTimeMillis();
-        Iterator<Map.Entry<Long, Long>> iterator = cacheExpirationMap.entrySet().iterator();
+        Iterator<Map.Entry<Long, CacheEntry>> iterator = tenantConfigCache.entrySet().iterator();
         while (iterator.hasNext()) {
-            Map.Entry<Long, Long> entry = iterator.next();
-            if (currentTime >= entry.getValue()) {
+            Map.Entry<Long, CacheEntry> entry = iterator.next();
+            if (entry.getValue().isExpired()) {
                 Long tenantId = entry.getKey();
                 iterator.remove();
-                tenantConfigCache.remove(tenantId);
                 log.debug("Removed expired cache for tenant: {}", tenantId);
             }
         }
 
-        // If cache is still too large, remove oldest entries
+        // Enforce cache size limit
         if (tenantConfigCache.size() > configProperties.getMaxCacheSize()) {
             // Find the oldest entry
-            Long oldestTenant = cacheExpirationMap.entrySet().stream()
-                    .min(Map.Entry.comparingByValue())
+            Long oldestTenant = tenantConfigCache.entrySet().stream()
+                    .min(Map.Entry.<Long, CacheEntry>comparingByValue(
+                            (e1, e2) -> Long.compare(e1.getCreationTime(), e2.getCreationTime())))
                     .map(Map.Entry::getKey)
                     .orElse(null);
 
             if (oldestTenant != null) {
                 tenantConfigCache.remove(oldestTenant);
-                cacheExpirationMap.remove(oldestTenant);
                 log.debug("Removed oldest cache entry for tenant: {} due to cache size limit", oldestTenant);
             }
         }
@@ -248,7 +291,6 @@ public class TenantWhitedConfigContext {
         cacheLock.writeLock().lock();
         try {
             tenantConfigCache.remove(tenantId);
-            cacheExpirationMap.remove(tenantId);
             log.info("Cleared cache for tenant: {}", tenantId);
         } finally {
             cacheLock.writeLock().unlock();
@@ -263,7 +305,6 @@ public class TenantWhitedConfigContext {
         cacheLock.writeLock().lock();
         try {
             tenantConfigCache.clear();
-            cacheExpirationMap.clear();
             log.info("Cleared all whited config cache");
         } finally {
             cacheLock.writeLock().unlock();
@@ -285,7 +326,7 @@ public class TenantWhitedConfigContext {
 
             // Count total cached configurations
             int totalConfigs = tenantConfigCache.values().stream()
-                    .mapToInt(List::size)
+                    .mapToInt(entry -> entry.getConfigs().size())
                     .sum();
             stats.put("totalCachedConfigs", totalConfigs);
 

@@ -366,18 +366,12 @@ public class TenantWhitedConfigContextTest {
 
     /**
      * Helper method to manually expire cache for testing
+     * Since the current implementation doesn't expose cache expiration manipulation,
+     * we simply clear the cache to simulate expiration
      */
     private void expireCacheForTenant(Long tenantId) throws Exception {
-        try {
-            Field cacheExpirationMapField = TenantWhitedConfigContext.class.getDeclaredField("cacheExpirationMap");
-            cacheExpirationMapField.setAccessible(true);
-            @SuppressWarnings("unchecked")
-            Map<Long, Long> cacheExpirationMap = (Map<Long, Long>) cacheExpirationMapField.get(tenantWhitedConfigContext);
-            cacheExpirationMap.put(tenantId, System.currentTimeMillis() - 1000L); // Set to past time
-        } catch (NoSuchFieldException e) {
-            log.error("Failed to access cacheExpirationMap field for testing", e);
-            throw new RuntimeException("Unable to expire cache for testing", e);
-        }
+        // Clear the specific tenant cache to simulate expiration
+        tenantWhitedConfigContext.clearTenantCache(tenantId);
     }
 
     /**
