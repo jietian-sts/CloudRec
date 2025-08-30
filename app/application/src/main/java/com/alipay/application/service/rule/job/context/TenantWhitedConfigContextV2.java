@@ -16,7 +16,9 @@
  */
 package com.alipay.application.service.rule.job.context;
 
+import com.alipay.application.service.rule.domain.repo.OpaRepository;
 import com.alipay.application.service.system.domain.repo.TenantRepository;
+import com.alipay.common.enums.WhitedRuleTypeEnum;
 import com.alipay.dao.dto.QueryWhitedRuleDTO;
 import com.alipay.dao.mapper.WhitedRuleConfigMapper;
 import com.alipay.dao.po.WhitedRuleConfigPO;
@@ -56,6 +58,9 @@ public class TenantWhitedConfigContextV2 {
     @Resource
     private TenantWhitedConfigProperties configProperties;
 
+    @Resource
+    private OpaRepository opaRepository;
+
     /**
      * Caffeine cache for storing tenant-specific whitelisted rule configurations
      * Key: tenant ID, Value: List of WhitedRuleConfigPO objects
@@ -74,8 +79,8 @@ public class TenantWhitedConfigContextV2 {
                 .expireAfterWrite(Duration.ofMillis(configProperties.getCacheExpirationTimeMs()))
                 .recordStats() // Enable statistics for monitoring
                 .build();
-        
-        log.info("Initialized Caffeine cache with maxSize: {}, expiration: {}ms", 
+
+        log.info("Initialized Caffeine cache with maxSize: {}, expiration: {}ms",
                 configProperties.getMaxCacheSize(), configProperties.getCacheExpirationTimeMs());
     }
 
@@ -95,7 +100,7 @@ public class TenantWhitedConfigContextV2 {
 
         // Use Caffeine's get method with loader function for automatic cache population
         List<WhitedRuleConfigPO> configs = getConfigsWithRetry(tenantId);
-        
+
         log.debug("Retrieved whited configs for tenant: {}, count: {}", tenantId, configs.size());
         return new ArrayList<>(configs); // Return defensive copy
     }
@@ -110,22 +115,29 @@ public class TenantWhitedConfigContextV2 {
     private List<WhitedRuleConfigPO> getConfigsWithRetry(Long tenantId) {
         final int maxRetries = 3;
         final long baseDelayMs = 1000; // Base delay of 1000ms
-        
+
         for (int attempt = 1; attempt <= maxRetries; attempt++) {
             try {
                 List<WhitedRuleConfigPO> configs = tenantConfigCache.get(tenantId, this::queryTenantConfigs);
-                
                 if (configs != null && !configs.isEmpty()) {
+                    for (WhitedRuleConfigPO whitedRuleConfigPO : configs) {
+                        if (WhitedRuleTypeEnum.REGO.name().equals(whitedRuleConfigPO.getRuleType())) {
+                            String regoContent = whitedRuleConfigPO.getRegoContent();
+                            String regoPath = opaRepository.findWhitedConfigPackage(regoContent, whitedRuleConfigPO.getId().toString());
+                            String newRegoPolicy = regoContent.replaceFirst("(?<=package )\\S+", regoPath);
+                            opaRepository.createOrUpdatePolicy(regoPath, newRegoPolicy);
+                        }
+                    }
                     return configs;
                 }
-                
+
                 log.warn("Retrieved null configs for tenant: {} on attempt {}/{}", tenantId, attempt, maxRetries);
-                
+
                 // If this is not the last attempt, wait with exponential backoff
                 if (attempt < maxRetries) {
                     long delayMs = baseDelayMs * (1L << (attempt - 1)); // Exponential backoff: 100ms, 200ms, 400ms
                     log.info("Retrying after {}ms for tenant: {}", delayMs, tenantId);
-                    
+
                     try {
                         TimeUnit.MILLISECONDS.sleep(delayMs);
                     } catch (InterruptedException e) {
@@ -136,12 +148,12 @@ public class TenantWhitedConfigContextV2 {
                 }
             } catch (Exception e) {
                 log.error("Error retrieving configs for tenant: {} on attempt {}/{}", tenantId, attempt, maxRetries, e);
-                
+
                 // If this is the last attempt, throw the exception
                 if (attempt == maxRetries) {
                     throw e;
                 }
-                
+
                 // Wait with exponential backoff before retrying
                 long delayMs = baseDelayMs * (1L << (attempt - 1));
                 try {
@@ -153,11 +165,10 @@ public class TenantWhitedConfigContextV2 {
                 }
             }
         }
-        
+
         log.error("Failed to retrieve configs for tenant: {} after {} attempts, returning empty list", tenantId, maxRetries);
         return new ArrayList<>();
     }
-
 
 
     /**
@@ -173,7 +184,7 @@ public class TenantWhitedConfigContextV2 {
         QueryWhitedRuleDTO queryDto = QueryWhitedRuleDTO.builder()
                 .enable(1)
                 .build();
-        
+
         // Set tenant ID list using reflection method call (temporary workaround for Lombok issue)
         try {
             Long globalTenantId = tenantRepository.findGlobalTenant().getId();
@@ -198,10 +209,10 @@ public class TenantWhitedConfigContextV2 {
 
             allConfigs.addAll(pageData);
             page++;
-            
+
             // Prevent infinite loops by limiting max pages
             if (page > configProperties.getMaxQueryPages()) {
-                log.warn("Reached maximum query pages limit ({}) for tenant: {}, stopping pagination", 
+                log.warn("Reached maximum query pages limit ({}) for tenant: {}, stopping pagination",
                         configProperties.getMaxQueryPages(), tenantId);
                 break;
             }
@@ -252,7 +263,7 @@ public class TenantWhitedConfigContextV2 {
         result.put("evictionCount", stats.evictionCount());
         result.put("loadCount", stats.loadCount());
         result.put("averageLoadPenalty", stats.averageLoadPenalty());
-        
+
         return result;
     }
 
