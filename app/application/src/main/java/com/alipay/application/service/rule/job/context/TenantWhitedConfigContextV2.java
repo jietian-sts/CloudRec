@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 /**
@@ -81,6 +82,7 @@ public class TenantWhitedConfigContextV2 {
     /**
      * Get whited rule configurations for a specific tenant with caching
      * Uses Caffeine cache for high-performance caching with automatic expiration
+     * Implements exponential backoff retry mechanism to handle concurrent access issues
      *
      * @param tenantId the tenant ID to query configurations for
      * @return List of WhitedRuleConfigPO objects for the specified tenant
@@ -92,10 +94,68 @@ public class TenantWhitedConfigContextV2 {
         }
 
         // Use Caffeine's get method with loader function for automatic cache population
-        List<WhitedRuleConfigPO> configs = tenantConfigCache.get(tenantId, this::queryTenantConfigs);
+        List<WhitedRuleConfigPO> configs = getConfigsWithRetry(tenantId);
         
         log.debug("Retrieved whited configs for tenant: {}, count: {}", tenantId, configs.size());
         return new ArrayList<>(configs); // Return defensive copy
+    }
+
+    /**
+     * Get configurations with exponential backoff retry mechanism
+     * Retries up to 3 times with exponential backoff to handle concurrent access issues
+     *
+     * @param tenantId the tenant ID to query configurations for
+     * @return List of WhitedRuleConfigPO objects, never null
+     */
+    private List<WhitedRuleConfigPO> getConfigsWithRetry(Long tenantId) {
+        final int maxRetries = 3;
+        final long baseDelayMs = 1000; // Base delay of 1000ms
+        
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                List<WhitedRuleConfigPO> configs = tenantConfigCache.get(tenantId, this::queryTenantConfigs);
+                
+                if (configs != null) {
+                    return configs;
+                }
+                
+                log.warn("Retrieved null configs for tenant: {} on attempt {}/{}", tenantId, attempt, maxRetries);
+                
+                // If this is not the last attempt, wait with exponential backoff
+                if (attempt < maxRetries) {
+                    long delayMs = baseDelayMs * (1L << (attempt - 1)); // Exponential backoff: 100ms, 200ms, 400ms
+                    log.info("Retrying after {}ms for tenant: {}", delayMs, tenantId);
+                    
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(delayMs);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        log.warn("Retry interrupted for tenant: {}", tenantId);
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Error retrieving configs for tenant: {} on attempt {}/{}", tenantId, attempt, maxRetries, e);
+                
+                // If this is the last attempt, throw the exception
+                if (attempt == maxRetries) {
+                    throw e;
+                }
+                
+                // Wait with exponential backoff before retrying
+                long delayMs = baseDelayMs * (1L << (attempt - 1));
+                try {
+                    TimeUnit.MILLISECONDS.sleep(delayMs);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    log.warn("Retry interrupted for tenant: {}", tenantId);
+                    break;
+                }
+            }
+        }
+        
+        log.error("Failed to retrieve configs for tenant: {} after {} attempts, returning empty list", tenantId, maxRetries);
+        return new ArrayList<>();
     }
 
 
