@@ -24,6 +24,7 @@ import com.alipay.dao.mapper.OpenApiAuthMapper;
 import com.alipay.dao.po.OpenApiAuthPO;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -69,13 +70,75 @@ public class DigestSignUtils {
     // Delimiter for secure string concatenation
     private static final String DELIMITER = "|";
 
+
+    /**
+     * Authenticate API request with version compatibility
+     * Automatically selects V1 or V2 authentication based on header content
+     *
+     * @param request HTTP request containing authentication headers
+     * @return ApiResponse indicating authentication result
+     */
+    public ApiResponse<String> isAuth(HttpServletRequest request) {
+        Map<String, String> headerMap = getHeadersInfo(request);
+
+        // Check if header key "version" has value "V1" or "v1" to determine version
+        boolean useV1 = headerMap.entrySet().stream()
+                .anyMatch(entry -> 
+                    "version".equalsIgnoreCase(entry.getKey()) && 
+                    ("V1".equals(entry.getValue()) || "v1".equals(entry.getValue()))
+                );
+
+        if (useV1) {
+            logger.info("Using V1 authentication based on header content");
+            return isAuthV1(request);
+        } else {
+            logger.info("Using V2 authentication as default");
+            return isAuthV2(request);
+        }
+    }
+
+    public ApiResponse<String> isAuthV1(HttpServletRequest request) {
+        Map<String, String> headerMap = getHeadersInfo(request);
+        if (headerMap.isEmpty()) {
+            return new ApiResponse<>(ApiResponse.ACCESS_DENIED, "header param is empty");
+        }
+
+        String timeStamp = MapUtils.getString(headerMap, TIMESTAMP);
+        String accessKey = MapUtils.getString(headerMap, ACCESS_KEY_NAME);
+        String appSign = MapUtils.getString(headerMap, SIGN);
+        if (StringUtils.isEmpty(timeStamp) || StringUtils.isEmpty(accessKey) || StringUtils.isEmpty(appSign)) {
+            return new ApiResponse<>(ApiResponse.ACCESS_DENIED, "Timestamp or access-key or sign is empty");
+        }
+
+        OpenApiAuthPO openApiAuthPO = openApiAuthMapper.findByAccessKey(accessKey);
+        if (Objects.isNull(openApiAuthPO)) {
+            return new ApiResponse<>(ApiResponse.ACCESS_DENIED, "accessKey does not exist");
+        }
+
+        if (Strings.isBlank(openApiAuthPO.getSecretKey())) {
+            return new ApiResponse<>(ApiResponse.ACCESS_DENIED, "secret-key is empty");
+        }
+
+        //accessKey+timestamp+local secretkey generates sign
+        //Get systemSecretKey from the database based on accessKey
+        String systemSecretKey = openApiAuthPO.getSecretKey();
+        String realAppSign = DigestUtils.md5Hex(accessKey + timeStamp + systemSecretKey);
+
+        //If the comparison is successful, it will be released.
+        if (StringUtils.equals(appSign, realAppSign)) {
+            return ApiResponse.SUCCESS;
+        }
+
+        return ApiResponse.FAIL;
+    }
+
     /**
      * Authenticate API request using signature verification
      * 
      * @param request HTTP request containing authentication headers
      * @return ApiResponse indicating authentication result
      */
-    public ApiResponse<String> isAuth(HttpServletRequest request) {
+    public ApiResponse<String> isAuthV2(HttpServletRequest request) {
         try {
             Map<String, String> headerMap = getHeadersInfo(request);
             if (headerMap.isEmpty()) {
