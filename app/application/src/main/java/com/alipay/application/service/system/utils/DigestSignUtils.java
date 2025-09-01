@@ -82,18 +82,17 @@ public class DigestSignUtils {
         Map<String, String> headerMap = getHeadersInfo(request);
 
         // Check if header key "version" has value "V1" or "v1" to determine version
-        boolean useV1 = headerMap.entrySet().stream()
+        boolean useV2 = headerMap.entrySet().stream()
                 .anyMatch(entry -> 
                     "version".equalsIgnoreCase(entry.getKey()) && 
-                    ("V1".equals(entry.getValue()) || "v1".equals(entry.getValue()))
+                    ("V2".equals(entry.getValue()) || "v2".equals(entry.getValue()))
                 );
-
-        if (useV1) {
-            logger.info("Using V1 authentication based on header content");
-            return isAuthV1(request);
-        } else {
+        if (useV2) {
             logger.info("Using V2 authentication as default");
             return isAuthV2(request);
+        } else {
+            logger.info("Using V1 authentication based on header content");
+            return isAuthV1(request);
         }
     }
 
