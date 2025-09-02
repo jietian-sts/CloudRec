@@ -47,9 +47,10 @@ require (
 	github.com/alibabacloud-go/darabonba-array v0.1.0 // indirect
 	github.com/alibabacloud-go/darabonba-encode-util v0.0.2 // indirect
 	github.com/alibabacloud-go/darabonba-map v0.0.2 // indirect
-	github.com/alibabacloud-go/darabonba-openapi/v2 v2.1.9 // indirect
+	github.com/alibabacloud-go/darabonba-openapi/v2 v2.1.11 // indirect
 	github.com/alibabacloud-go/darabonba-signature-util v0.0.7 // indirect
 	github.com/alibabacloud-go/darabonba-string v1.0.2 // indirect
+	github.com/alibabacloud-go/das-20200116/v3 v3.8.1 // indirect
 	github.com/alibabacloud-go/ddoscoo-20200101/v3 v3.6.0 // indirect
 	github.com/alibabacloud-go/dds-20151201/v8 v8.0.0 // indirect
 	github.com/alibabacloud-go/debug v1.0.1 // indirect
@@ -82,7 +83,7 @@ require (
 	github.com/alibabacloud-go/sls-20201230/v6 v6.9.2 // indirect
 	github.com/alibabacloud-go/swas-open-20200601/v3 v3.0.0 // indirect
 	github.com/alibabacloud-go/tablestore-20201209 v1.0.1 // indirect
-	github.com/alibabacloud-go/tea v1.3.10 // indirect
+	github.com/alibabacloud-go/tea v1.3.11 // indirect
 	github.com/alibabacloud-go/tea-fileform v1.1.1 // indirect
 	github.com/alibabacloud-go/tea-oss-sdk v1.1.3 // indirect
 	github.com/alibabacloud-go/tea-oss-utils v1.1.0 // indirect

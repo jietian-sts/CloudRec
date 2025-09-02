@@ -34,6 +34,7 @@ import (
 	cr20181201 "github.com/alibabacloud-go/cr-20181201/v2/client"
 	cs20151215 "github.com/alibabacloud-go/cs-20151215/v5/client"
 	openapi "github.com/alibabacloud-go/darabonba-openapi/v2/client"
+	das20200116 "github.com/alibabacloud-go/das-20200116/v3/client"
 	ddoscoo20200101 "github.com/alibabacloud-go/ddoscoo-20200101/v3/client"
 	dds20151201 "github.com/alibabacloud-go/dds-20151201/v8/client"
 	dms_enterprise20181101 "github.com/alibabacloud-go/dms-enterprise-20181101/client"
@@ -192,6 +193,7 @@ type Services struct {
 	VOD             *vod.Client
 	SGW             *sgw.Client
 	Live            *live.Client
+	DAS             *das20200116.Client
 }
 
 // Clone creates a new instance of Services with copied configuration
@@ -338,6 +340,10 @@ func (s *Services) InitServices(cloudAccountParam schema.CloudAccountParam) (err
 		s.RDS, err = createRDSClient(param.Region, s.Config)
 		if err != nil {
 			log.CtxLogger(ctx).Warn("init rds client failed", zap.Error(err))
+		}
+		s.DAS, err = createDasClient(param.Region, s.Config)
+		if err != nil {
+			log.CtxLogger(ctx).Warn("init das client failed", zap.Error(err))
 		}
 	case PolarDB:
 		s.Polardb, err = createPolarDBClient(param.Region, s.Config)
@@ -1115,5 +1121,12 @@ func createActiontrailClient(regionId string, config *openapi.Config) (_result *
 	config.Endpoint = tea.String("actiontrail." + regionId + ".aliyuncs.com")
 	_result = &actiontrail20200706.Client{}
 	_result, _err = actiontrail20200706.NewClient(config)
+	return _result, _err
+}
+
+func createDasClient(regionId string, config *openapi.Config) (_result *das20200116.Client, _err error) {
+	config.Endpoint = tea.String("das." + regionId + ".aliyuncs.com")
+	_result = &das20200116.Client{}
+	_result, _err = das20200116.NewClient(config)
 	return _result, _err
 }

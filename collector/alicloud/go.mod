@@ -17,7 +17,8 @@ require (
 	github.com/alibabacloud-go/cloudfw-20171207/v7 v7.0.4
 	github.com/alibabacloud-go/cr-20181201/v2 v2.5.0
 	github.com/alibabacloud-go/cs-20151215/v5 v5.7.10
-	github.com/alibabacloud-go/darabonba-openapi/v2 v2.1.9
+	github.com/alibabacloud-go/darabonba-openapi/v2 v2.1.11
+	github.com/alibabacloud-go/das-20200116/v3 v3.8.1
 	github.com/alibabacloud-go/ddoscoo-20200101/v3 v3.6.0
 	github.com/alibabacloud-go/dds-20151201/v8 v8.0.0
 	github.com/alibabacloud-go/dms-enterprise-20181101 v1.63.0
@@ -46,7 +47,7 @@ require (
 	github.com/alibabacloud-go/sls-20201230/v6 v6.9.2
 	github.com/alibabacloud-go/swas-open-20200601/v3 v3.0.0
 	github.com/alibabacloud-go/tablestore-20201209 v1.0.1
-	github.com/alibabacloud-go/tea v1.3.10
+	github.com/alibabacloud-go/tea v1.3.11
 	github.com/alibabacloud-go/tea-utils/v2 v2.0.7
 	github.com/alibabacloud-go/waf-openapi-20211001/v4 v4.6.0
 	github.com/alibabacloud-go/yundun-bastionhost-20191209/v2 v2.3.0
