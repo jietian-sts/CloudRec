@@ -272,14 +272,29 @@ func (p *Platform) handleAccount(ctx context.Context, account CloudAccount, para
 }
 
 func (p *Platform) assessCollectionChecker(ctx context.Context, accountParam CloudAccountParam) bool {
-	tempService := p.Service.Clone()
-	// Check if collection should be performed for this account
-	resp := tempService.AssessCollectionTrigger(accountParam)
-	if !resp.EnableCollection {
-		log.CtxLogger(ctx).Info("Skipping collection - AssessCollectionTrigger returned false")
+	var resp CollectRecordInfo
+
+	// If account is from queue (TaskId > 0), construct empty response and enable collection by default
+	if accountParam.TaskId > 0 {
+		resp = CollectRecordInfo{
+			CollectRecordId:  accountParam.CollectRecordInfo.CollectRecordId,
+			EnableCollection: true,
+			CloudAccountId:   accountParam.CloudAccountId,
+			Platform:         accountParam.Platform,
+			StartTime:        time.Now().Format("2006-01-02 15:04:05"),
+			Message:          "Account from queue - enabling collection by default",
+		}
+		log.CtxLogger(ctx).Info("Account from queue - enabling collection by default")
+	} else {
+		tempService := p.Service.Clone()
+		// Check if collection should be performed for this account
+		resp = tempService.AssessCollectionTrigger(accountParam)
+		if !resp.EnableCollection {
+			log.CtxLogger(ctx).Info("Skipping collection - AssessCollectionTrigger returned false")
+		}
+		resp.CollectRecordId = accountParam.CollectRecordInfo.CollectRecordId
 	}
 
-	resp.CollectRecordId = accountParam.CollectRecordInfo.CollectRecordId
 	err := p.client.SendRunningStartSignal(resp)
 	if err != nil {
 		log.CtxLogger(ctx).Warn(fmt.Sprintf("Code:[%s] SendRunningStartSignal err %s", CollectorError, err))
@@ -345,6 +360,14 @@ func (p *Platform) handleResource(ctx context.Context, account CloudAccount, res
 
 		// Consumer
 		go func() {
+			defer func() {
+				// Panic recovery mechanism to prevent program crash
+				if r := recover(); r != nil {
+					errorMsg := fmt.Sprintf("Code:[%s] Consumer goroutine recovered from panic: %v", UnknownError, r)
+					log.CtxLogger(ctx).Error(errorMsg)
+					collectorParam.CloudRecLogger.logAccountError(account.Platform, resource.ResourceType, account.CloudAccountId, account.CollectRecordId, errors.New(errorMsg))
+				}
+			}()
 			for {
 				select {
 				case data, ok := <-regionCh:
@@ -376,8 +399,6 @@ func (p *Platform) handleResource(ctx context.Context, account CloudAccount, res
 				case <-time.After(constant.TimeOut * time.Second):
 					close(resourceChan)
 					close(regionCh)
-					// Ensure that all resource been saved resourceChan
-					// time.Sleep(5 * time.Second)
 				}
 			}
 		}()

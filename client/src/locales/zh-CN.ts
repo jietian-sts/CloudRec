@@ -38,6 +38,9 @@ export default {
     'button.text.last7.days': '近7天',
     'button.text.within.a.month': '一个月内',
     'button.text.Within.three.months': '三个月内',
+    'text.detailed.view': '详细视图',
+    'text.simple.view': '简单视图',
+    'text.current':'当前',
     'button.text.Within.six.months': '六个月内',
     'button.text.delete.confirm': '确定要删除吗?',
     'text.add': '添加',
@@ -104,7 +107,9 @@ export default {
     'message.text.no.permission.title':'无权限',
     'message.text.no.permission.subtitle':'您无权限访问此页面',
     'message.text.delete.failed': '删除失败',
-    'message.text.edit.failed': '编辑失败'
+    'message.text.edit.failed': '编辑失败',
+    'text.count':'数量',
+    'button.text.back':'返回'
   },
   layout: {
     'routes.title.home': '指标大盘',
@@ -194,6 +199,9 @@ export default {
     'module.text.risk.information': '风险信息',
     'module.text.identity': '身份',
     'input.text.placeholder.access.key': '请输入Access Key，支持输入多个',
+    'polymerize.aggregationType.tooltip':'聚合方式',
+    'polymerize.aggregationType.resourceType': '资产类型',
+    'polymerize.aggregationType.cloudAccount': '云账号',
   },
   cloudAccount: {
     'form.credential': '凭证',
@@ -337,6 +345,7 @@ export default {
     'module.text.batch.remove':'批量移出自选',
     'module.text.batch.add.to.favorites':'批量自选',
     'extend.placeholder.input': '请输入资产ID',
+    'text.global.config.whitelist':"全局加白"
   },
   risk: {
     'module.text.not.fixed': '未修复',
@@ -401,7 +410,7 @@ export default {
     'module.title.user.inquiry': '用户查询',
     'module.title.user.name': '用户名称',
     'module.title.user.id': '用户ID',
-    'module.title.user.role': '用户权限',
+    'module.title.user.role': '平台权限',
     'module.title.user.status': '用户状态',
     'module.title.user.password': '用户密码',
     'title.user.status': '用户状态',
@@ -415,6 +424,7 @@ export default {
     'extend.text.tenant': '租户',
   },
   tenant: {
+    'module.title.user.role':'租户权限',
     'module.text.tenant.inquiry': '租户查询',
     'module.text.tenant.name': '租户名称',
     'module.text.tenant.description': '租户描述',

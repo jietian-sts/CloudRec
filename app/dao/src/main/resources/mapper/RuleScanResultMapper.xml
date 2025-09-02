@@ -403,6 +403,12 @@
         <if test="resourceType != null and resourceType != ''">
             AND rsr.resource_type = #{resourceType}
         </if>
+        <if test="resourceTypeList != null and resourceTypeList.size() > 0">
+            AND rsr.resource_type IN
+            <foreach collection="resourceTypeList" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
         <if test="platform != null and platform != ''">
             AND rsr.platform = #{platform}
         </if>
@@ -517,6 +523,142 @@
                 <foreach collection="riskLevelList" item="item" open="(" separator="," close=")">
                     #{item}
                 </foreach>
+            </if>
+            <if test="ruleGroupIdList != null and ruleGroupIdList.size > 0">
+                AND EXISTS
+                (SELECT rg.id
+                FROM rule_group_rel rgr
+                INNER JOIN rule_group rg ON rgr.rule_group_id = rg.id
+                WHERE rgr.rule_id = r.id and rg.id IN
+                <foreach collection="ruleGroupIdList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+                )
+            </if>
+            <if test="ruleTypeIdList != null and ruleTypeIdList.size() > 0">
+                AND EXISTS
+                (SELECT rt.id
+                FROM rule_type_rel rtr
+                INNER JOIN rule_type rt ON rtr.rule_type_id = rt.id
+                WHERE rtr.rule_id = r.id and rt.id IN
+                <foreach collection="ruleTypeIdList" item="ruleTypeId" open="(" separator="," close=")">
+                    #{ruleTypeId}
+                </foreach>
+                )
+            </if>
+            <if test="gmtCreateStart != null and gmtCreateEnd != null">
+                AND (rsr.gmt_create &gt;= #{gmtCreateStart} AND rsr.gmt_create &lt;= #{gmtCreateEnd})
+            </if>
+            <if test="gmtModifiedStart != null and gmtModifiedEnd != null">
+                AND (rsr.gmt_modified &gt;= #{gmtModifiedStart} AND rsr.gmt_modified &lt;= #{gmtModifiedEnd})
+            </if>
+            <if test="resourceStatus != null and resourceStatus != ''">
+                AND rsr.resource_status = #{resourceStatus}
+            </if>
+        </where>
+    </sql>
+
+
+    <sql id="findListWhereV2">
+        <where>
+            rsr.rule_id IN (
+            SELECT id
+            FROM rule
+            WHERE
+            platform
+            IN
+            <foreach collection="platformList" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            <if test="riskLevelList != null and riskLevelList.size() > 0">
+                AND risk_level IN
+                <foreach collection="riskLevelList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            AND status = 'valid'
+            )
+            <if test="cloudAccountIdList != null and cloudAccountIdList.size() > 0">
+                AND rsr.cloud_account_id IN
+                <foreach collection="cloudAccountIdList" item="cloudAccountId" open="(" separator="," close=")">
+                    #{cloudAccountId}
+                </foreach>
+            </if>
+            <if test="cloudAccountId != null and cloudAccountId != ''">
+                AND rsr.cloud_account_id = #{cloudAccountId}
+            </if>
+            <if test="ruleId != null">
+                AND rsr.rule_id = #{ruleId,jdbcType=BIGINT}
+            </if>
+            <if test="ruleIdList != null and ruleIdList.size > 0">
+                AND rsr.rule_id IN
+                <foreach collection="ruleIdList" item="ruleId" open="(" separator="," close=")">
+                    #{ruleId}
+                </foreach>
+            </if>
+            <if test="version != null">
+                AND rsr.version = #{version}
+            </if>
+            <if test="resourceId != null">
+                AND rsr.resource_id = #{resourceId,jdbcType=VARCHAR}
+            </if>
+            <if test="resourceName != null and resourceName != ''">
+                AND rsr.resource_name LIKE CONCAT('%',#{resourceName},'%')
+            </if>
+            <if test="platform != null and platform != ''">
+                AND rsr.platform = #{platform,jdbcType=VARCHAR}
+            </if>
+            <if test="platformList != null and platformList.size() > 0">
+                AND rsr.platform IN
+                <foreach collection="platformList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="resourceType != null and resourceType != ''">
+                AND rsr.resource_type = #{resourceType,jdbcType=VARCHAR}
+            </if>
+            <if test="resourceTypeList != null and resourceTypeList.size() > 0">
+                AND rsr.resource_type IN
+                <foreach collection="resourceTypeList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="region != null and region != ''">
+                AND rsr.region = #{region,jdbcType=VARCHAR}
+            </if>
+            <if test="tenantId != null">
+                AND rsr.tenant_id = #{tenantId,jdbcType=BIGINT}
+            </if>
+            <if test="status != null and status != ''">
+                AND rsr.status = #{status,jdbcType=VARCHAR}
+            </if>
+            <if test="statusList != null and statusList.size() > 0 ">
+                AND rsr.status IN
+                <foreach collection="statusList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="isNew != null">
+                AND rsr.is_new = #{isNew,jdbcType=VARCHAR}
+            </if>
+            <if test="ignoreReasonType != null and ignoreReasonType != ''">
+                AND rsr.ignore_reason_type = #{ignoreReasonType,jdbcType=VARCHAR}
+            </if>
+            <if test="ignoreReasonTypeList != null and ignoreReasonTypeList.size() > 0">
+                AND rsr.ignore_reason_type IN
+                <foreach collection="ignoreReasonTypeList" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="ignoreReason != null and ignoreReason != ''">
+                AND rsr.ignore_reason = #{ignoreReason,jdbcType=VARCHAR}
+            </if>
+            <if test="ruleName != null and ruleName != ''">
+                AND r.rule_name LIKE CONCAT('%', #{ruleName}, '%')
+            </if>
+            <if test="ruleCodeList != null and ruleCodeList.size > 0">
+                AND r.rule_code IN
+                <foreach collection="ruleCodeList" item="item" open="(" separator="," close=")">#{item}</foreach>
             </if>
             <if test="ruleGroupIdList != null and ruleGroupIdList.size > 0">
                 AND EXISTS
@@ -702,6 +844,19 @@
         </where>
         ORDER BY id ASC
         limit #{limit}
+    </select>
+    <select id="findCountV2" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM rule_scan_result rsr
+        <include refid="findListWhereV2"></include>
+    </select>
+    <select id="findListV2" resultMap="ResultMapWithBLOBs">
+        SELECT
+        rsr.*
+        FROM rule_scan_result rsr
+        <include refid="findListWhereV2"></include>
+        ORDER BY rsr.id DESC
+        <include refid="com.alipay.dao.mapper.RuleMapper.getListLimit"></include>
     </select>
 
 

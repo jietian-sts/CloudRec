@@ -10,7 +10,7 @@ import {
 import { useIntl } from '@umijs/max';
 import { Button, Descriptions, Popconfirm, Select, Space, Switch, Typography, message, Tooltip } from 'antd';
 import { UserDeleteOutlined, UserOutlined, CrownOutlined } from '@ant-design/icons';
-import React, { Dispatch, SetStateAction, useRef, useState } from 'react';
+import React, { Dispatch, SetStateAction, useRef, useState, useEffect } from 'react';
 import AddMemberModal from './AddMemberModal'
 
 const { Title } = Typography;
@@ -39,6 +39,16 @@ const TenantDetailDrawer: React.FC<ITenantDetailDrawerProps> = (props) => {
 
   // Component Props
   const { drawerVisible, setDrawerVisible, tenantInfo } = props;
+
+  /**
+   * Refresh member list when drawer opens
+   */
+  useEffect(() => {
+    if (drawerVisible && tenantInfo?.id) {
+      // Trigger table refresh when drawer opens
+      tableActionRef.current?.reload?.();
+    }
+  }, [drawerVisible, tenantInfo?.id]);
 
   /**
    * Close drawer and reset state
@@ -137,7 +147,7 @@ const TenantDetailDrawer: React.FC<ITenantDetailDrawerProps> = (props) => {
     },
     {
       title: intl.formatMessage({
-        id: 'user.module.title.user.role',
+        id: 'tenant.module.title.user.role',
       }),
       dataIndex: 'roleName',
       hideInSearch: true,

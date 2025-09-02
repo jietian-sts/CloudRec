@@ -2,6 +2,7 @@
 package com.alipay.application.service.risk.domain.repo;
 
 
+import com.alipay.dao.mapper.CollectorRecordMapper;
 import com.alipay.dao.mapper.RuleScanResultMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -21,17 +22,23 @@ public class RiskRepositoryImpl implements RiskRepository {
     @Resource
     private RuleScanResultMapper ruleScanResultMapper;
 
+    @Resource
+    private CollectorRecordMapper collectorRecordMapper;
+
     @Override
-    public void remove(String cloudCountId) {
+    public void remove(String cloudAccountId) {
         try {
             while (true) {
-                int i = ruleScanResultMapper.deleteByCloudAccountId(cloudCountId);
+                int i = ruleScanResultMapper.deleteByCloudAccountId(cloudAccountId);
                 if (i == 0) {
                     break;
                 }
             }
         } catch (Exception e) {
-            log.error("{} del risk error", cloudCountId, e);
+            log.error("{} del risk error", cloudAccountId, e);
         }
+
+        // Delete the collection record
+        collectorRecordMapper.deleteByCloudAccountId(cloudAccountId);
     }
 }

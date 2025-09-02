@@ -80,6 +80,9 @@ type CloudAccountParam struct {
 	// proxy configuration,json format,such as:schema://user:password@host:port
 	ProxyConfig string
 
+	// task id
+	TaskId int64
+
 	// common cloud account auth info
 	CommonCloudAccountParam CommonCloudAccountAuthParam
 
@@ -142,6 +145,7 @@ func getCloudAccountParam(cloudAccount CloudAccount, region string, resourceType
 		ResourceType:      resourceType,
 		ProxyConfig:       cloudAccount.ProxyConfig,
 		CollectRecordInfo: cloudAccount.CollectRecordInfo,
+		TaskId:            cloudAccount.TaskId,
 	}
 
 	switch cloudAccount.Platform {

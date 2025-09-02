@@ -1,24 +1,14 @@
-import styles from '@/components/Common/index.less';
-import Disposition from '@/components/Disposition';
+import AggregateList from '@/pages/RuleManagement/WhiteList/components/AggregateList';
+import DetailList from '@/pages/RuleManagement/WhiteList/components/DetailList';
 import EditDrawerForm from '@/pages/RuleManagement/WhiteList/components/EditDrawerForm';
-import { WhiteListRuleTypeList } from '@/pages/RuleManagement/WhiteList/const';
-import {
-  queryChangeWhiteListRuleStatus,
-  queryDeleteWhiteListRuleById,
-  queryWhiteRuleGrabLock,
-  queryWhiteRuleList,
-} from '@/services/rule/RuleController';
-import { valueListAsValueEnum } from '@/utils/shared';
+import { queryAllRuleList } from '@/services/rule/RuleController';
 import {
   ActionType,
   PageContainer,
-  ProColumns,
-  ProTable,
 } from '@ant-design/pro-components';
-import { useIntl } from '@umijs/max';
-import { Button, Divider, message, Popconfirm, Switch, Tooltip } from 'antd';
-import dayjs from 'dayjs';
-import React, { useRef, useState } from 'react';
+import { useIntl, useSearchParams, history } from '@umijs/max';
+import { message } from 'antd';
+import React, { useRef, useState, useEffect } from 'react';
 
 const WhiteList: React.FC = () => {
   // Table Action
@@ -29,25 +19,61 @@ const WhiteList: React.FC = () => {
   const [messageApi, contextHolder] = message.useMessage();
   // Edit Form Visible
   const [editDrawerVisible, setEditDrawerVisible] = useState<boolean>(false);
-  // White List InWfo
+  // White List Info
   const whiteListInfoRef = useRef<API.BaseWhiteListRuleInfo>({});
+  // URL search params
+  const [searchParams, setSearchParams] = useSearchParams();
+  // Current selected rule code for detail view
+  const [selectedRuleCode, setSelectedRuleCode] = useState<string>('');
+  // Current selected rule name for breadcrumb
+  const [selectedRuleName, setSelectedRuleName] = useState<string>('');
+  // All rules list for mapping ruleCode to ruleName
+  const [allRules, setAllRules] = useState<any[]>([]);
 
-  // Grab Lock
-  const onClickObtainLock = async (record: API.BaseWhiteListRuleInfo) => {
-    const postBody = { id: record.id };
-    const r = await queryWhiteRuleGrabLock(postBody);
-    if (r.code === 200) {
-      messageApi.success(
-        intl.formatMessage({
-          id: 'common.message.text.edit.success',
-        }),
-      );
-      // @ts-ignore
-      tableActionRef.current?.reloadAndRest();
-    }
+  /**
+   * Get rule name by rule code from cached rules list
+   * @param ruleCode - The rule code to look up
+   * @returns The corresponding rule name or ruleCode as fallback
+   */
+  const getRuleNameByCode = (ruleCode: string): string => {
+    const rule = allRules.find((r: any) => r.ruleCode === ruleCode);
+    return rule ? rule.ruleName : ruleCode;
   };
 
-// Edit white list
+  /**
+   * Load all rules on component mount for efficient rule name mapping
+   */
+  useEffect(() => {
+    queryAllRuleList().then((response: any) => {
+      if (response?.content) {
+        setAllRules(response.content);
+      }
+    }).catch((error) => {
+      console.error('Failed to load rules list:', error);
+    });
+  }, []);
+
+  /**
+   * Update selected rule info when URL parameters change
+   */
+  useEffect(() => {
+    const ruleCodeFromUrl = searchParams.get('ruleCode');
+    if (ruleCodeFromUrl) {
+      setSelectedRuleCode(ruleCodeFromUrl);
+      // Only set rule name if allRules is loaded to ensure we get the actual ruleName
+      if (allRules.length > 0) {
+        const ruleName = getRuleNameByCode(ruleCodeFromUrl);
+        setSelectedRuleName(ruleName);
+      }
+    }
+  }, [searchParams, allRules]);
+
+  // Determine view mode based on URL parameters
+  const currentViewMode = searchParams.get('ruleCode') ? 'detail' : 'aggregate';
+
+
+
+  // Edit white list
   const onClickEditWhiteList = (record: API.BaseWhiteListRuleInfo) => {
     setEditDrawerVisible(true);
     whiteListInfoRef.current = record;
@@ -61,270 +87,58 @@ const WhiteList: React.FC = () => {
     whiteListInfoRef.current = { ...record, isEditMode } as any;
   };
 
-  // Update white rule status
-  const onClickChangeStatus = async (record: API.BaseWhiteListRuleInfo) => {
-    // 检查锁状态
-    if (!(record as any).isLockHolder) {
-      messageApi.warning(
-        intl.formatMessage({ id: 'rule.message.not.holding.lock' }) 
-      );
-      return;
-    }
-    
-    const postBody = {
-      id: record?.id,
-      enable: record?.enable === 1 ? 0 : 1,
-    };
-    const res: API.Result_T_ = await queryChangeWhiteListRuleStatus(
-      postBody as any,
-    );
-    if (res.code === 200) {
-      messageApi.success(
-        intl.formatMessage({ id: 'common.message.text.edit.success' }),
-      );
-      tableActionRef.current?.reloadAndRest?.();
-    }
+  /**
+   * Enter detail view for specific rule code
+   * Updates URL parameters to allow sharing of direct links
+   */
+  const onClickEnterDetailView = (ruleCode: string, ruleName: string) => {
+    // Update URL parameters for shareable links
+    const newSearchParams = new URLSearchParams();
+    newSearchParams.set('ruleCode', ruleCode);
+    setSearchParams(newSearchParams);
   };
 
-  // Delete white list
-  const onClickDeleteWhiteList = async (record: API.BaseWhiteListRuleInfo) => {
-    if (!(record as any).isLockHolder) {
-      messageApi.warning(
-        intl.formatMessage({ id: 'rule.message.not.holding.lock' })
-      );
-      return;
-    }
+  /**
+   * Return to aggregate view and clear URL parameters
+   */
+  const onClickBackToAggregate = () => {
+    // Clear URL parameters to return to aggregate view
+    setSearchParams({});
     
-    const postBody = {
-      id: record?.id,
-    };
-    const r = await queryDeleteWhiteListRuleById(postBody);
-    if (r.code === 200) {
-      messageApi.success(
-        intl.formatMessage({ id: 'common.message.text.delete.success' }),
-      );
-      tableActionRef.current?.reloadAndRest?.();
-    }
+    // Reload table data when returning to aggregate view
+    tableActionRef.current?.reloadAndRest?.();
   };
 
-  const columns: ProColumns<API.BaseWhiteListRuleInfo, 'text'>[] = [
-    {
-      title: intl.formatMessage({
-        id: 'cloudAccount.extend.title.createAndUpdateTime',
-      }),
-      dataIndex: 'gmtCreated',
-      valueType: 'text',
-      align: 'left',
-      hideInSearch: true,
-      render: (_, record: API.UserInfo) => {
-        return (
-          <div>
-            <section style={{ color: '#999' }}>
-              {dayjs(record?.gmtCreate).format('YYYY-MM-DD 18:00:00') || '-'}
-            </section>
-            <section style={{ color: '#999' }}>
-              {dayjs(record?.gmtModified).format('YYYY-MM-DD 18:00:00') || '-'}
-            </section>
-          </div>
-        );
-      },
-    },
-    {
-      title: intl.formatMessage({
-        id: 'rule.extend.text.whiteList.title',
-      }),
-      dataIndex: 'ruleName',
-      valueType: 'text',
-      align: 'left',
-      copyable: true,
-    },
-    {
-      title: intl.formatMessage({
-        id: 'rule.extend.text.whiteList.describe',
-      }),
-      dataIndex: 'ruleDesc',
-      valueType: 'text',
-      align: 'left',
-      hideInSearch: true,
-      render: (_, record) => (
-        <Disposition
-          text={record?.ruleDesc || '-'}
-          maxWidth={240}
-          rows={1}
-          style={{
-            color: 'rgb(51, 51, 51)',
-          }}
-          placement={'topLeft'}
-        />
-      ),
-    },
-    {
-      title: intl.formatMessage({
-        id: 'rule.table.columns.text.type',
-      }),
-      dataIndex: 'ruleType',
-      valueType: 'select',
-      valueEnum: valueListAsValueEnum(WhiteListRuleTypeList),
-      align: 'center',
-    },
-    {
-      title: intl.formatMessage({
-        id: 'rule.table.columns.text.creator',
-      }),
-      dataIndex: 'creatorName',
-      valueType: 'text',
-      align: 'center',
-      copyable: true,
-    },
-    {
-      title: intl.formatMessage({
-        id: 'rule.table.columns.text.config',
-      }),
-      dataIndex: 'search',
-      valueType: 'text',
-      align: 'center',
-      hideInTable:true
-    },
-    {
-      title: intl.formatMessage({
-        id: 'rule.table.columns.text.lockor',
-      }),
-      dataIndex: 'lockHolderName',
-      valueType: 'text',
-      align: 'center',
-      hideInSearch: true,
-    },
-    {
-      title: intl.formatMessage({
-        id: 'cloudAccount.extend.title.cloud.operate',
-      }),
-      dataIndex: 'option',
-      valueType: 'option',
-      align: 'center',
-      fixed: 'right',
-      render: (_, record: API.BaseWhiteListRuleInfo) => (
-        <>
-          <Button
-            size={'small'}
-            type={'link'}
-            onClick={(): void => onClickViewWhiteList(record)}
-          >
-            {intl.formatMessage({
-              id: 'common.button.text.view',
-            })}
-          </Button>
-          <Divider type={'vertical'} style={{ margin: '0 8px 0 0' }} />
-          <Tooltip
-            title={!(record as any).isLockHolder ? 'please grab the lock first' : ''}
-            placement="top"
-          >
-            <Switch
-              disabled={!record?.isLockHolder}
-              checkedChildren={intl.formatMessage({
-                id: 'common.button.text.enable',
-              })}
-              unCheckedChildren={intl.formatMessage({
-                id: 'common.button.text.disable',
-              })}
-              checked={record?.enable === 1}
-              onClick={() => onClickChangeStatus(record)}
-            />
-          </Tooltip>
-          <Divider type="vertical" style={{ margin: '0 0 0 8px' }} />
 
-          <Divider type={'vertical'} />
-          <Tooltip
-            title={!(record as any).isLockHolder ? 'please grab the lock first' : ''}
-            placement="top"
-          >
-            <Popconfirm
-              title={intl.formatMessage({
-                id: 'common.button.text.delete.confirm',
-              })}
-              onConfirm={() => onClickDeleteWhiteList(record)}
-              okText={intl.formatMessage({
-                id: 'common.button.text.ok',
-              })}
-              cancelText={intl.formatMessage({
-                id: 'common.button.text.cancel',
-              })}
-            >
-              <Button
-                type="link"
-                danger
-                size={'small'}
-                disabled={!record?.isLockHolder}
-              >
-                {intl.formatMessage({
-                  id: 'common.button.text.delete',
-                })}
-              </Button>
-            </Popconfirm>
-          </Tooltip>
-        </>
-      ),
-    },
-  ];
+
+
 
   return (
     <PageContainer ghost title={false} breadcrumbRender={false}>
       {contextHolder}
-      <ProTable<API.BaseWhiteListRuleInfo>
-        headerTitle={
-          <div className={styles['customTitle']}>
-            {intl.formatMessage({
-              id: 'rule.module.text.whiteList.inquiry',
-            })}
-          </div>
-        }
-        scroll={{ x: 'max-content' }}
-        actionRef={tableActionRef}
-        search={{
-          span: 6,
-          defaultCollapsed: false, // Default Expand
-          collapseRender: false, // Hide expand/close button
-          labelWidth: 0,
-        }}
-        rowKey="id"
-        request={async (params) => {
-          const { pageSize, current, ...reset } = params;
-          const postBody: API.BaseWhiteListRuleInfo = {
-            ...reset,
-            page: current!,
-            size: pageSize!,
-          };
-          const { content, code } = await queryWhiteRuleList(postBody);
-          return {
-            data: content?.data || [],
-            total: content?.total || 0,
-            success: code === 200 || false,
-          };
-        }}
-        toolBarRender={() => [
-          <Button
-            key="create"
-            type="primary"
-            onClick={() => onClickEditWhiteList({})}
-          >
-            {intl.formatMessage({
-              id: 'rule.module.text.createWhiteList',
-            })}
-          </Button>,
-        ]}
-        columns={columns}
-        pagination={{
-          showQuickJumper: false,
-          showSizeChanger: true,
-          defaultPageSize: 10,
-          defaultCurrent: 1,
-        }}
-      />
+      {currentViewMode === 'aggregate' ? (
+        <AggregateList
+          tableActionRef={tableActionRef}
+          onEnterDetailView={onClickEnterDetailView}
+          onCreateWhiteList={() => onClickEditWhiteList({})}
+        />
+      ) : (
+        <DetailList
+          tableActionRef={tableActionRef}
+          selectedRuleCode={selectedRuleCode}
+          selectedRuleName={selectedRuleName}
+          onBackToAggregate={onClickBackToAggregate}
+          onViewWhiteList={onClickViewWhiteList}
+          onCreateWhiteList={() => onClickEditWhiteList({})}
+        />
+      )}
 
       <EditDrawerForm
         editDrawerVisible={editDrawerVisible}
         setEditDrawerVisible={setEditDrawerVisible}
         whiteListDrawerInfo={whiteListInfoRef.current}
         tableActionRef={tableActionRef}
+        ruleCode={selectedRuleCode}
       />
     </PageContainer>
   );

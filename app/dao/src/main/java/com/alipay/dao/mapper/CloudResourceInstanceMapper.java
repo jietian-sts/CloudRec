@@ -69,6 +69,20 @@ public interface CloudResourceInstanceMapper {
     List<ResourceAggByInstanceTypeDTO> findAggregateAssetsList(ResourceDTO resourceDTO);
 
     /**
+     * Find aggregate assets count by cloud account
+     * @param resourceDTO query parameters
+     * @return count of aggregated assets by cloud account
+     */
+    int findAggregateAssetsByCloudAccountCount(ResourceDTO resourceDTO);
+
+    /**
+     * Find aggregate assets list by cloud account
+     * @param resourceDTO query parameters
+     * @return list of aggregated assets by cloud account
+     */
+    List<ResourceAggByInstanceTypeDTO> findAggregateAssetsByCloudAccountList(ResourceDTO resourceDTO);
+
+    /**
      * 根据条件查询最新的资源实例
      *
      * @param resourceDTO dto
@@ -111,4 +125,6 @@ public interface CloudResourceInstanceMapper {
     int deleteByResourceType(@Param("platform") String platform, @Param("resourceType") String resourceType);
 
     List<Long> findPreDeletedDataIdList(@Param("cloudAccountId") String cloudAccountId, @Param("delNum") int delNum);
+
+    int refreshUpdateTime(@Param("gmtModified") Date gmtModified, @Param("cloudAccountId") String cloudAccountId);
 }

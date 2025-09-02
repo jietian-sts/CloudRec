@@ -606,3 +606,21 @@ export async function batchAddTenantSelectRule(
     ...(options || {}),
   });
 }
+
+/** Query white list aggregated by rule code: POST /api/whitedRule/listGroupByRuleCode */
+export async function listGroupByRuleCode(
+  body?: API.BaseWhiteListRuleInfo,
+  options?: { [key: string]: any },
+) {
+  return request<API.Result>(
+    `${BASE_URL}/api/whitedRule/listGroupByRuleCode`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: body,
+      ...(options || {}),
+    },
+  );
+}

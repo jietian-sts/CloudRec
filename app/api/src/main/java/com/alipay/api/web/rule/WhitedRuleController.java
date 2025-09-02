@@ -20,7 +20,9 @@ import com.alipay.api.config.filter.annotation.aop.AuthenticateToken;
 import com.alipay.application.service.rule.WhitedRuleService;
 import com.alipay.application.share.request.rule.*;
 import com.alipay.application.share.vo.ApiResponse;
+import com.alipay.application.share.vo.EffectData;
 import com.alipay.application.share.vo.ListVO;
+import com.alipay.application.share.vo.whited.GroupByRuleCodeVO;
 import com.alipay.application.share.vo.whited.WhitedConfigVO;
 import com.alipay.application.share.vo.whited.WhitedRuleConfigVO;
 import com.alipay.common.enums.WhitedRuleOperatorEnum;
@@ -64,18 +66,20 @@ public class WhitedRuleController {
     /**
      * 保存白名单
      *
-     * @param requestDTO
+     * @param request
      * @return
      * @throws IOException
      */
     @AuthenticateToken
     @PostMapping("/save")
-    public ApiResponse<String> save(@RequestBody SaveWhitedRuleRequestDTO requestDTO) throws IOException {
-        if (!WhitedRuleTypeEnum.exist(requestDTO.getRuleType())) {
+    public ApiResponse<EffectData> save(@RequestBody SaveWhitedRuleRequest request) throws IOException {
+        if (!WhitedRuleTypeEnum.exist(request.getRuleType())) {
             throw new RuntimeException("ruleType must be RULE_ENGINE or REGO");
         }
-        whitedRuleService.save(requestDTO);
-        return ApiResponse.SUCCESS;
+
+        EffectData effectData = new EffectData();
+        effectData.setEffectId(whitedRuleService.save(request));
+        return new ApiResponse<>(effectData);
     }
 
     /**
@@ -91,6 +95,16 @@ public class WhitedRuleController {
         QueryWhitedRuleDTO dto = QueryWhitedRuleDTO.builder().build();
         BeanUtils.copyProperties(request, dto);
         ListVO<WhitedRuleConfigVO> listVO = whitedRuleService.getList(dto);
+        return new ApiResponse<>(listVO);
+    }
+
+
+    @AuthenticateToken
+    @PostMapping("/listGroupByRuleCode")
+    public ApiResponse<ListVO<GroupByRuleCodeVO>> listGroupByRuleCode(@RequestBody QueryWhitedRuleRequest request) {
+        QueryWhitedRuleDTO dto = QueryWhitedRuleDTO.builder().build();
+        BeanUtils.copyProperties(request, dto);
+        ListVO<GroupByRuleCodeVO> listVO = whitedRuleService.getListGroupByRuleCode(dto);
         return new ApiResponse<>(listVO);
     }
 
@@ -130,7 +144,7 @@ public class WhitedRuleController {
      */
     @AuthenticateToken
     @PostMapping("/changeStatus")
-    public ApiResponse<String> changeStatus(@RequestBody SaveWhitedRuleRequestDTO requestDTO) {
+    public ApiResponse<String> changeStatus(@RequestBody SaveWhitedRuleRequest requestDTO) {
         whitedRuleService.changeStatus(requestDTO.getId(), requestDTO.getEnable());
         return ApiResponse.SUCCESS;
     }
@@ -185,9 +199,9 @@ public class WhitedRuleController {
      */
     @AuthenticateToken
     @PostMapping("/queryWhitedContentByRisk/{riskId}")
-    public ApiResponse<SaveWhitedRuleRequestDTO> queryWhitedContentByRisk(@PathVariable Long riskId) throws IOException {
-        SaveWhitedRuleRequestDTO saveWhitedRuleRequestDTO = whitedRuleService.queryWhitedContentByRisk(riskId);
-        return new ApiResponse<>(saveWhitedRuleRequestDTO);
+    public ApiResponse<SaveWhitedRuleRequest> queryWhitedContentByRisk(@PathVariable Long riskId) throws IOException {
+        SaveWhitedRuleRequest saveWhitedRuleRequest = whitedRuleService.queryWhitedContentByRisk(riskId);
+        return new ApiResponse<>(saveWhitedRuleRequest);
     }
 
 }

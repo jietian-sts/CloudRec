@@ -33,6 +33,11 @@
         from collector_record
         where id = #{id,jdbcType=BIGINT}
     </delete>
+    <delete id="deleteByCloudAccountId">
+        delete
+        from collector_record
+        where cloud_account_id = #{cloudAccountId,jdbcType=VARCHAR}
+    </delete>
 
     <insert id="insertSelective" parameterType="com.alipay.dao.po.CollectorRecordPO" useGeneratedKeys="true"
             keyProperty="id">

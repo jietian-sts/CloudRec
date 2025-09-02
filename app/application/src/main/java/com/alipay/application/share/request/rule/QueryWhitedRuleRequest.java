@@ -20,6 +20,8 @@ import com.alipay.application.share.request.base.BaseRequest;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 /**
  * Date: 2025/3/17
  * Author: lz
@@ -57,5 +59,12 @@ public class QueryWhitedRuleRequest extends BaseRequest {
      */
     private String search;
 
+    /**
+     * 规则code
+     */
+    private String ruleCode;
+
+
+    private List<String> ruleCodeList;
 
 }

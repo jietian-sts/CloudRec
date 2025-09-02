@@ -5,6 +5,7 @@ import {
   queryExportRuleList,
   loadRuleFromGithub,
 } from '@/services/rule/RuleController';
+import { usePlatformDefaultSelection } from '@/hooks/usePlatformDefaultSelection';
 import { RiskLevelList } from '@/utils/const';
 import {
   BlobExportZIPFn,
@@ -166,6 +167,18 @@ const RuleProject: React.FC = () => {
     checkNewRules();
   }, [groupIdQuery, ruleCodeQuery, platformQuery]);
 
+  // Use custom hook for default platform selection
+  usePlatformDefaultSelection({
+    platformList,
+    form,
+    requestResourceTypeList: (platformList) => {
+      setResourceTypeList([]);
+      requestResourceTypeList(platformList);
+    },
+    platformFieldName: 'platformList',
+    resourceTypeFieldName: 'resourceTypeList'
+  });
+
 
   return (
     <PageContainer
@@ -192,9 +205,14 @@ const RuleProject: React.FC = () => {
                 <Checkbox.Group
                   options={valueListAddIcon(platformList)}
                   onChange={(checkedValue): void => {
+                    const selectedPlatforms = (checkedValue as string[]) || [];
+                    // Reset resource type list
                     form.setFieldValue('resourceTypeList', null);
                     setResourceTypeList([]);
-                    requestResourceTypeList(checkedValue as any);
+                    // Update resource type list for the selected platforms
+                    requestResourceTypeList(selectedPlatforms);
+                    // Immediately trigger data refresh for both tabs
+                    setQueryTrigger(prev => prev + 1);
                   }}
                 />
               </Form.Item>

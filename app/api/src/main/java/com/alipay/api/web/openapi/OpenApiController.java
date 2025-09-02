@@ -23,16 +23,18 @@ import com.alipay.application.service.account.CloudAccountService;
 import com.alipay.application.service.account.utils.PlatformUtils;
 import com.alipay.application.service.common.Platform;
 import com.alipay.application.service.resource.IQueryResource;
+import com.alipay.application.service.rule.WhitedRuleService;
 import com.alipay.application.service.system.OpenApiService;
 import com.alipay.application.service.system.TenantService;
 import com.alipay.application.service.system.domain.Tenant;
 import com.alipay.application.service.system.domain.enums.Status;
-import com.alipay.application.service.system.utils.DigestSignUtils;
 import com.alipay.application.share.request.account.CreateCollectTaskRequest;
 import com.alipay.application.share.request.account.SaveCloudAccountRequest;
 import com.alipay.application.share.request.admin.SaveTenantRequest;
 import com.alipay.application.share.request.openapi.QueryResourceRequest;
+import com.alipay.application.share.request.rule.SaveWhitedRuleRequest;
 import com.alipay.application.share.vo.ApiResponse;
+import com.alipay.application.share.vo.EffectData;
 import com.alipay.application.share.vo.ListScrollPageVO;
 import com.alipay.application.share.vo.ListVO;
 import com.alipay.application.share.vo.account.CloudAccountVO;
@@ -40,6 +42,7 @@ import com.alipay.application.share.vo.resource.ResourceInstanceVO;
 import com.alipay.application.share.vo.rule.RuleScanResultVO;
 import com.alipay.application.share.vo.rule.RuleVO;
 import com.alipay.application.share.vo.system.TenantVO;
+import com.alipay.common.enums.WhitedRuleTypeEnum;
 import com.alipay.common.utils.ListUtils;
 import com.alipay.dao.dto.CloudAccountDTO;
 import com.alipay.dao.dto.QueryScanResultDTO;
@@ -55,6 +58,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
@@ -66,7 +70,7 @@ import java.util.Objects;
  *@create 2025/1/6 11:22
  */
 @RestController
-@RequestMapping("/api/open/v1")
+@RequestMapping("/api/open")
 public class OpenApiController {
     @Resource
     private OpenApiService openApiService;
@@ -80,6 +84,8 @@ public class OpenApiController {
     private CloudAccountService cloudAccountService;
     @Resource
     private CloudAccountMapper cloudAccountMapper;
+    @Resource
+    private WhitedRuleService whitedRuleService;
 
     /**
      * 查询扫描结果
@@ -89,10 +95,8 @@ public class OpenApiController {
      * @return 扫描结果列表
      */
     @OpenApi
-    @PostMapping("/queryScanResult")
+    @PostMapping("/v1/queryScanResult")
     public ApiResponse<ListScrollPageVO<RuleScanResultVO>> queryScanResult(HttpServletRequest httpServletRequest, @RequestBody QueryScanResultDTO queryScanResultDTO) {
-        String accessKey = httpServletRequest.getHeader(DigestSignUtils.accessKeyName);
-        openApiService.checkAccessKey(accessKey, queryScanResultDTO.getTenantId());
         return openApiService.queryScanResult(queryScanResultDTO);
     }
 
@@ -103,7 +107,7 @@ public class OpenApiController {
      * @return 资源列表
      */
     @OpenApi
-    @RequestMapping(value = "/queryResourceList", method = RequestMethod.POST)
+    @RequestMapping(value = "/v1/queryResourceList", method = RequestMethod.POST)
     public ApiResponse<ListScrollPageVO<ResourceInstanceVO>> queryResourceList(HttpServletRequest request, @Valid @RequestBody QueryResourceRequest req) {
         return openApiService.queryResourceList(req);
     }
@@ -114,7 +118,7 @@ public class OpenApiController {
      * @param ruleCode 规则CODE
      * @return 规则详情
      */
-    @GetMapping("/queryRuleDetail")
+    @GetMapping("/v1/queryRuleDetail")
     public ApiResponse<RuleVO> queryRuleDetail(@RequestParam("ruleCode") String ruleCode) {
         return openApiService.queryRuleDetail(ruleCode);
     }
@@ -125,7 +129,7 @@ public class OpenApiController {
      * @param platform 平台标识 eg:ALI_CLOUD
      * @return 云账号列表
      */
-    @GetMapping("/queryCloudAccountList")
+    @GetMapping("/v1/queryCloudAccountList")
     public ApiResponse<List<CloudAccountVO>> queryCloudAccountList(String platform) {
         return openApiService.queryCloudAccountList(platform);
     }
@@ -133,7 +137,7 @@ public class OpenApiController {
     /**
      * Get platform type list interface
      */
-    @GetMapping("/listPlatform")
+    @GetMapping("/v1/listPlatform")
     public ApiResponse<List<PlatformPO>> queryPlatformList() {
         return new ApiResponse<>(platform.queryPlatformList());
     }
@@ -144,7 +148,7 @@ public class OpenApiController {
      * @param platform 平台
      * @return 资源类型列表
      */
-    @GetMapping("/listResourceType")
+    @GetMapping("/v1/listResourceType")
     public ApiResponse<List<ResourcePO>> queryTypeList(@RequestParam(required = false) String platform) {
         return iQueryResource.queryTypeList(platform);
     }
@@ -154,7 +158,7 @@ public class OpenApiController {
      *
      * @return 租户列表
      */
-    @GetMapping("/listTenant")
+    @GetMapping("/v1/listTenant")
     public ApiResponse<ListVO<TenantVO>> listAddedTenants() {
         TenantDTO tenantDTO = new TenantDTO();
         ListVO<TenantVO> list = tenantService.findList(tenantDTO);
@@ -162,14 +166,14 @@ public class OpenApiController {
     }
 
     @OpenApi
-    @PostMapping("/createCollectTask")
+    @PostMapping("/v1/createCollectTask")
     public ApiResponse<String> createCollectTask(@RequestBody CreateCollectTaskRequest request) {
         cloudAccountService.createCollectTask(request);
         return ApiResponse.SUCCESS;
     }
 
     @OpenApi
-    @PostMapping("/saveCloudAccount")
+    @PostMapping("/v1/saveCloudAccount")
     public ApiResponse<String> saveCloudAccount(HttpServletRequest httpServletRequest,
                                                 @Validated @RequestBody SaveCloudAccountRequest request, BindingResult result) {
         if (result.hasErrors()) {
@@ -201,7 +205,7 @@ public class OpenApiController {
     }
 
     @OpenApi
-    @GetMapping("/queryAllTenantList")
+    @GetMapping("/v1/queryAllTenantList")
     public ApiResponse<ListVO<TenantVO>> queryAllTenantList() {
         ListVO<TenantVO> listVO = tenantService.findAll();
         return new ApiResponse<>(listVO);
@@ -211,7 +215,7 @@ public class OpenApiController {
      * Save tenant information
      */
     @OpenApi
-    @PostMapping("/saveTenant")
+    @PostMapping("/v1/saveTenant")
     public ApiResponse<String> saveTenant(@Validated @RequestBody SaveTenantRequest req,
                                           BindingResult error) {
         if (error.hasErrors()) {
@@ -223,5 +227,17 @@ public class OpenApiController {
         tenantService.saveTenant(tenant);
 
         return ApiResponse.SUCCESS;
+    }
+
+    @OpenApi
+    @PostMapping("/v1/saveWhitelistRule")
+    public ApiResponse<EffectData> saveWhitelistRule(@RequestBody SaveWhitedRuleRequest request) throws IOException {
+        if (!WhitedRuleTypeEnum.exist(request.getRuleType())) {
+            throw new RuntimeException("ruleType must be RULE_ENGINE or REGO");
+        }
+
+        EffectData effectData = new EffectData();
+        effectData.setEffectId(whitedRuleService.save(request));
+        return new ApiResponse<>(effectData);
     }
 }

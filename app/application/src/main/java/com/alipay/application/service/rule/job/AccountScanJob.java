@@ -49,8 +49,6 @@ public class AccountScanJob {
     @Resource
     private RuleRepository ruleRepository;
     @Resource
-    private WhitedConfigContext whitedConfigContext;
-    @Resource
     private TenantRepository tenantRepository;
 
     private final Cache<String, List<RuleAgg>> ruleCache = CacheBuilder.newBuilder()
@@ -74,8 +72,6 @@ public class AccountScanJob {
                 // load rule from db
                 ruleAggList = ruleRepository.findAll(cloudAccountPO.getPlatform());
                 ruleCache.put(cloudAccountPO.getPlatform(), ruleAggList);
-                // load whited config
-                whitedConfigContext.refreshWhitedConfigs();
             }
         }
 
@@ -94,9 +90,6 @@ public class AccountScanJob {
             log.info("scanByCloudAccountId end, cloudAccountId:{}, platform:{} end, spend time:{}", cloudAccountId, cloudAccountPO.getPlatform(), System.currentTimeMillis() - startTime);
         } catch (Exception e) {
             log.error("scanByCloudAccountId error, cloudAccountId:{}", cloudAccountId, e);
-        } finally {
-            // clear whited config cache
-            whitedConfigContext.clear();
         }
     }
 }

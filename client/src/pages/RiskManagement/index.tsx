@@ -23,6 +23,7 @@ import {
   queryRiskList,
 } from '@/services/risk/RiskController';
 import { queryAllTenantSelectRuleList } from '@/services/rule/RuleController';
+import { usePlatformDefaultSelection } from '@/hooks/usePlatformDefaultSelection';
 import { RangePresets, RiskLevelList } from '@/utils/const';
 import {
   BlobExportXLSXFn,
@@ -233,6 +234,26 @@ const RiskManagement: React.FC = () => {
       },
     },
   );
+
+  // Use custom hook for default platform selection
+  usePlatformDefaultSelection({
+    platformList,
+    form,
+    requestResourceTypeList: (platformList) => {
+      setResourceTypeList([]);
+      requestResourceTypeList(platformList);
+    },
+    requestCloudAccountBaseInfoList,
+    platformFieldName: 'platformList',
+    resourceTypeFieldName: 'resourceTypeList'
+  });
+
+  // Set default risk level selection to the first option (High)
+  useEffect(() => {
+    if (RiskLevelList.length > 0 && !form.getFieldValue('riskLevelList')) {
+      form.setFieldValue('riskLevelList', [RiskLevelList[0].value]);
+    }
+  }, [form]);
 
   // Cloud account list filtering
   const debounceFetcher = useMemo(() => {
@@ -533,6 +554,35 @@ const RiskManagement: React.FC = () => {
       colSize: 2, // Rule name takes half width (12/24)
       fieldProps: {
         mode: 'multiple',
+        showSearch: true,
+        filterOption: (input: string, option: any) => {
+          // Filter by ruleName and ruleCode for better search experience
+          
+          const searchText = input.toLowerCase();
+          const value = option?.value?.toString().toLowerCase() || '';
+          
+          // Find the original data item to get ruleName and ruleCode
+          const originalItem = tenantRuleList?.find(
+            (item: any) => item.ruleCode === option?.value
+          );
+          
+          if (originalItem) {
+            // Search in both ruleName and ruleCode from the original data
+            const ruleName = originalItem.ruleName?.toLowerCase() || '';
+            const ruleCode = originalItem.ruleCode?.toLowerCase() || '';
+            
+            // Simple case-insensitive search
+            const result = ruleName.includes(searchText) || 
+                          ruleCode.includes(searchText) || 
+                          value.includes(searchText);
+            
+            return result;
+          }
+          
+          // Fallback to value search if original item not found
+          const fallbackResult = value.includes(searchText);
+          return fallbackResult;
+        },
       },
     },
     {
@@ -1076,12 +1126,18 @@ const RiskManagement: React.FC = () => {
                         <Checkbox.Group
                           options={valueListAddIcon(platformList)}
                           onChange={(checkedValue): void => {
+                            const selectedPlatforms = (checkedValue as string[]) || [];
+                            // Reset resource type list and cloud account list
                             form.setFieldValue('resourceTypeList', null);
                             setResourceTypeList([]);
-                            requestResourceTypeList(checkedValue as any);
+                            // Update resource type list for the selected platforms
+                            requestResourceTypeList(selectedPlatforms);
+                            // Update cloud account base info list for dropdown
                             requestCloudAccountBaseInfoList({
-                              platformList: (checkedValue as string[]) || [],
+                              platformList: selectedPlatforms,
                             });
+                            // Immediately trigger table reload with new platform filter
+                            tableActionRef.current?.reload();
                           }}
                         />
                       </Form.Item>
@@ -1096,6 +1152,10 @@ const RiskManagement: React.FC = () => {
                       >
                         <Checkbox.Group
                           options={valueListAddTag(RiskLevelList)}
+                          onChange={(checkedValue): void => {
+                            // Immediately trigger table reload with new risk level filter
+                            tableActionRef.current?.reload();
+                          }}
                         />
                       </Form.Item>
                     </Col>

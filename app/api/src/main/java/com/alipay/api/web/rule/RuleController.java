@@ -17,6 +17,7 @@
 package com.alipay.api.web.rule;
 
 import com.alipay.api.config.filter.annotation.aop.AuthenticateToken;
+import com.alipay.api.config.filter.annotation.aop.RateLimit;
 import com.alipay.api.utils.ZipUtil;
 import com.alipay.application.service.rule.RuleService;
 import com.alipay.application.service.rule.exposed.InitRuleService;
@@ -94,6 +95,8 @@ public class RuleController {
     /**
      * Query risk rule list
      */
+    @RateLimit(maxRequests = 10, timeWindowSeconds = 60, keyStrategy = RateLimit.KeyStrategy.IP,
+            message = "Too many requests for rules query. Please try again later.")
     @AuthenticateToken
     @PostMapping("/queryRuleList")
     public ApiResponse<ListVO<RuleVO>> queryRuleList(@RequestBody ListRuleRequest req) {
@@ -273,6 +276,8 @@ public class RuleController {
     /**
      * Query tenant select rule list
      */
+    @RateLimit(maxRequests = 10, timeWindowSeconds = 60, keyStrategy = RateLimit.KeyStrategy.IP,
+            message = "Too many requests for rules query. Please try again later.")
     @AuthenticateToken
     @PostMapping("/queryEffectRuleList")
     public ApiResponse<ListVO<RuleVO>> queryEffectRuleList(@RequestBody ListRuleRequest req) {

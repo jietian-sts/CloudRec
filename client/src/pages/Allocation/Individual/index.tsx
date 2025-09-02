@@ -1,7 +1,6 @@
 import SMILE from '@/assets/images/SMILE.svg';
 import AuthenList from '@/pages/Allocation/Individual/components/AuthenList';
 import EditModalForm from '@/pages/Allocation/Individual/components/EditModalForm';
-import TenantList from '@/pages/Allocation/Individual/components/TenantList';
 import { UserTypeList } from '@/utils/const';
 import { obtainTimeOfDay } from '@/utils/shared';
 import { EditOutlined, UserOutlined, CrownOutlined } from '@ant-design/icons';
@@ -151,19 +150,6 @@ const Individual: React.FC = () => {
         </ProCard>
 
         <AuthenList />
-        
-        <ProCard
-          title={
-            <div className="customTitle">
-              {intl.formatMessage({
-                id: 'individual.module.text.my.tenants',
-              })}
-            </div>
-          }
-          style={{ marginTop: 16 }}
-        >
-          <TenantList />
-        </ProCard>
       </ConfigProvider>
 
       <EditModalForm
