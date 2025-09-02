@@ -70,6 +70,7 @@ import (
 	"github.com/cloudrec/alicloud/collector/redis"
 	"github.com/cloudrec/alicloud/collector/resourcecenter"
 	"github.com/cloudrec/alicloud/collector/rocketmq"
+	"github.com/cloudrec/alicloud/collector/sls"
 	"github.com/cloudrec/alicloud/collector/sms"
 	"github.com/cloudrec/alicloud/collector/swas"
 	"github.com/cloudrec/alicloud/collector/tablestore"
