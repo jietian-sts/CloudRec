@@ -37,6 +37,7 @@ import (
 	ddoscoo20200101 "github.com/alibabacloud-go/ddoscoo-20200101/v3/client"
 	dds20151201 "github.com/alibabacloud-go/dds-20151201/v8/client"
 	dms_enterprise20181101 "github.com/alibabacloud-go/dms-enterprise-20181101/client"
+	eds_aic20230930 "github.com/alibabacloud-go/eds-aic-20230930/v4/client"
 	elasticsearch20170613 "github.com/alibabacloud-go/elasticsearch-20170613/v3/client"
 	ess20220222 "github.com/alibabacloud-go/ess-20220222/v2/client"
 	fc20230330 "github.com/alibabacloud-go/fc-20230330/v4/client"
@@ -59,6 +60,7 @@ import (
 	selectdb20230522 "github.com/alibabacloud-go/selectdb-20230522/v3/client"
 	slb20140515 "github.com/alibabacloud-go/slb-20140515/v4/client"
 	sls20201230 "github.com/alibabacloud-go/sls-20201230/v6/client"
+	swas_open20200601 "github.com/alibabacloud-go/swas-open-20200601/v3/client"
 	tablestore20201209 "github.com/alibabacloud-go/tablestore-20201209/client"
 	util "github.com/alibabacloud-go/tea-utils/v2/service"
 	"github.com/alibabacloud-go/tea/tea"
@@ -69,14 +71,21 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/alikafka"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/cdn"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/clickhouse"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/dcdn"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/dts"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/dysmsapi"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/eci"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-  "github.com/aliyun/alibaba-cloud-sdk-go/services/eflo"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/eflo"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/eflo-controller"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ens"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ga"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/hbase"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/live"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/ons"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ram"
-	"github.com/aliyun/alibaba-cloud-sdk-go/services/swas-open"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/sgw"
+	"github.com/aliyun/alibaba-cloud-sdk-go/services/vod"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/vpc"
 	"github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss"
 	ossCredentials "github.com/aliyun/alibabacloud-oss-go-sdk-v2/oss/credentials"
@@ -171,18 +180,24 @@ type Services struct {
 	APIG            *apig20240327.Client
 	ResourceCenter  *resourcecenter20221201.Client
 	DTS             *dts.Client
+	Dysmsapi        *dysmsapi.Client
 	ECI             *eci.Client
+	ECP             *eds_aic20230930.Client
 	Eflo            *eflo.Client
-	SWAS            *swas_open.Client
-
+	EfloController  *eflo_controller.Client
+	SWAS            *swas_open20200601.Client
+	Ons             *ons.Client
+	GA              *ga.Client
+	DCDN            *dcdn.Client
+	VOD             *vod.Client
+	SGW             *sgw.Client
+	Live            *live.Client
 }
 
 // Clone creates a new instance of Services with copied configuration
 func (s *Services) Clone() schema.ServiceInterface {
 	return &Services{}
 }
-
-
 
 func (s *Services) InitServices(cloudAccountParam schema.CloudAccountParam) (err error) {
 	param := cloudAccountParam.CommonCloudAccountParam
@@ -421,12 +436,12 @@ func (s *Services) InitServices(cloudAccountParam schema.CloudAccountParam) (err
 		if err != nil {
 			log.CtxLogger(ctx).Warn("init cen client failed", zap.Error(err))
 		}
-	case CloudAPI, APIGateway:
+	case CloudAPI, APIGateway, APIGatewayApp:
 		s.CloudAPI, err = CreateCloudAPIClient(param.Region, s.Config)
 		if err != nil {
 			log.CtxLogger(ctx).Warn("init cloudAPI client failed", zap.Error(err))
 		}
-	case TraceApp, GrafanaWorkspace:
+	case TraceApp, GrafanaWorkspace, ARMSPrometheus:
 		s.ARMS, err = CreateARMSClient(param.Region, s.Config)
 		if err != nil {
 			log.CtxLogger(ctx).Warn("init arms client failed", zap.Error(err))
@@ -482,14 +497,64 @@ func (s *Services) InitServices(cloudAccountParam schema.CloudAccountParam) (err
 			log.CtxLogger(ctx).Warn("init eci client failed", zap.Error(err))
 		}
 	case SWAS:
-		s.SWAS, err = swas_open.NewClientWithAccessKey(param.Region, param.AK, param.SK)
+		s.SWAS, err = createSWASClient(param.Region, s.Config)
 		if err != nil {
 			log.CtxLogger(ctx).Warn("init swas client failed", zap.Error(err))
 		}
-
+	case ECPInstance:
+		s.ECP, err = createECPClient(param.Region, s.Config)
+		if err != nil {
+			log.CtxLogger(ctx).Warn("init ecp client failed", zap.Error(err))
+		}
+	case ONS_INSTANCE:
+		s.Ons, err = ons.NewClientWithAccessKey(param.Region, param.AK, param.SK)
+		if err != nil {
+			log.CtxLogger(ctx).Warn("init ons client failed", zap.Error(err))
+		}
+	case EfloNode:
+		s.EfloController, err = eflo_controller.NewClientWithAccessKey(param.Region, param.AK, param.SK)
+		if err != nil {
+			log.CtxLogger(ctx).Warn("init eflo controller client failed", zap.Error(err))
+		}
+	case GAAccelerator:
+		s.GA, err = ga.NewClientWithAccessKey(param.Region, param.AK, param.SK)
+		if err != nil {
+			log.CtxLogger(ctx).Warn("init ga client failed", zap.Error(err))
+		}
+	case DCDNDomain, DCDNIpaDomain:
+		s.DCDN, err = dcdn.NewClientWithAccessKey(param.Region, param.AK, param.SK)
+		if err != nil {
+			log.CtxLogger(ctx).Warn("init dcdn client failed", zap.Error(err))
+		}
+	case LiveDomain:
+		s.Live, err = live.NewClientWithAccessKey(param.Region, param.AK, param.SK)
+		if err != nil {
+			log.CtxLogger(ctx).Warn("init live client failed", zap.Error(err))
+		}
+	case VODDomain:
+		s.VOD, err = vod.NewClientWithAccessKey(param.Region, param.AK, param.SK)
+		if err != nil {
+			log.CtxLogger(ctx).Warn("init vod client failed", zap.Error(err))
+		}
+	case SMSTemplate:
+		s.Dysmsapi, err = dysmsapi.NewClientWithAccessKey(param.Region, param.AK, param.SK)
+		if err != nil {
+			log.CtxLogger(ctx).Warn("init dysmsapi client failed", zap.Error(err))
+		}
+	case CloudStorageGateway, CloudStorageGatewayStorageBundle:
+		s.SGW, err = sgw.NewClientWithAccessKey(param.Region, param.AK, param.SK)
+		if err != nil {
+			log.CtxLogger(ctx).Warn("init sgw client failed", zap.Error(err))
+		}
 	}
 
 	return nil
+}
+
+func createSWASClient(region string, config *openapi.Config) (client *swas_open20200601.Client, err error) {
+	config.Endpoint = tea.String("swas." + region + ".aliyuncs.com")
+	client, err = swas_open20200601.NewClient(config)
+	return client, err
 }
 
 func createVPCClient(region string, config *openapi.Config) (client *vpc.Client, err error) {
@@ -974,6 +1039,15 @@ func createRocketMQClient(regionId string, config *openapi.Config) (_result *roc
 	config.Endpoint = tea.String("rocketmq." + regionId + ".aliyuncs.com")
 	_result = &rocketmq20220801.Client{}
 	_result, _err = rocketmq20220801.NewClient(config)
+	_result.RegionId = tea.String(regionId)
+	return _result, _err
+}
+
+// createECPClient returns the service connection for Elastic Cloud Phone (ECP)
+func createECPClient(regionId string, config *openapi.Config) (_result *eds_aic20230930.Client, _err error) {
+	config.Endpoint = tea.String("eds-aic." + regionId + ".aliyuncs.com")
+	_result = &eds_aic20230930.Client{}
+	_result, _err = eds_aic20230930.NewClient(config)
 	_result.RegionId = tea.String(regionId)
 	return _result, _err
 }
