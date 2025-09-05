@@ -221,6 +221,7 @@ public class DigestSignUtils {
     
     /**
      * Generate SHA-256 signature including request parameters
+     * Modified to support long parameters and maintain compatibility with client-side signature generation
      *
      * @param request the HTTP servlet request
      * @param accessKey the access key
@@ -230,8 +231,8 @@ public class DigestSignUtils {
      */
     private static String generateSignatureWithParams(HttpServletRequest request, String accessKey, String timeStamp, String secretKey) {
          try {
-             // Get all request parameters and build sorted parameter string
-             Map<String, String> allParams = getAllRequestParams(request);
+             // Get all request parameters without length filtering to support long parameters
+             Map<String, String> allParams = getAllRequestParamsWithoutLengthFilter(request);
              String sortedParamString = buildSortedParamString(allParams);
              
              // Use secure string concatenation with delimiter: accessKey|timestamp|sortedParams|secretKey
@@ -279,6 +280,49 @@ public class DigestSignUtils {
                      String paramValue = entry.getValue();
                      if (paramValue != null && paramValue.length() <= MAX_PARAM_LENGTH 
                              && !ACCESS_KEY_NAME.equals(paramName) && !TIMESTAMP.equals(paramName) && !SIGN.equals(paramName)) {
+                         params.put(paramName, paramValue);
+                     }
+                 }
+             }
+         }
+         
+         return params;
+     }
+
+    /**
+      * Get all request parameters from the HTTP request without length filtering
+      * Supports both URL query parameters and JSON request body parameters
+      * This method is used for signature generation to support long parameters
+      *
+      * @param request the HTTP servlet request
+      * @return map of all request parameters without length restrictions
+      */
+     private static Map<String, String> getAllRequestParamsWithoutLengthFilter(HttpServletRequest request) {
+         LinkedHashMap<String, String> params = new LinkedHashMap<>();
+         
+         // Get URL query parameters without length filtering
+         Enumeration<String> paramNames = request.getParameterNames();
+         while (paramNames.hasMoreElements()) {
+             String paramName = paramNames.nextElement();
+             String paramValue = request.getParameter(paramName);
+             // Only exclude authentication-related parameters, no length validation
+              if (paramValue != null && !ACCESS_KEY_NAME.equals(paramName) 
+                      && !TIMESTAMP.equals(paramName) && !SIGN.equals(paramName)) {
+                 params.put(paramName, paramValue);
+             }
+         }
+         
+         // Extract parameters from JSON request body for POST requests without length filtering
+         if ("POST".equalsIgnoreCase(request.getMethod())) {
+             String contentType = request.getContentType();
+             if (contentType != null && contentType.toLowerCase().contains("application/json")) {
+                 Map<String, String> jsonParams = extractJsonParamsWithoutLengthFilter(request);
+                 // Merge JSON parameters with query parameters, JSON params take precedence
+                 for (Map.Entry<String, String> entry : jsonParams.entrySet()) {
+                     String paramName = entry.getKey();
+                     String paramValue = entry.getValue();
+                     if (paramValue != null && !ACCESS_KEY_NAME.equals(paramName) 
+                             && !TIMESTAMP.equals(paramName) && !SIGN.equals(paramName)) {
                          params.put(paramName, paramValue);
                      }
                  }
@@ -341,6 +385,74 @@ public class DigestSignUtils {
                     }
 
                     // Convert flattened object map to string map
+                    for (Map.Entry<String, Object> entry : flattenedParams.entrySet()) {
+                        params.put(entry.getKey(), entry.getValue().toString());
+                    }
+                } catch (Exception e) {
+                    logger.warn("Failed to parse JSON body: {}", e.getMessage());
+                }
+            }
+
+        } catch (Exception e) {
+            logger.warn("Failed to extract JSON parameters: {}", e.getMessage());
+        }
+
+        return params;
+    }
+
+    /**
+     * Extract parameters from JSON request body without length filtering
+     * Supports nested JSON structures through recursive flattening
+     * This method is used for signature generation to support long parameters
+     *
+     * @param request the HTTP servlet request
+     * @return map of parameters extracted from JSON body without length restrictions
+     */
+    private static Map<String, String> extractJsonParamsWithoutLengthFilter(HttpServletRequest request) {
+        Map<String, String> params = new HashMap<>();
+
+        try {
+            String jsonBody = null;
+
+            // Check if request is already a cached wrapper
+            if (request instanceof CachedBodyHttpServletRequest) {
+                jsonBody = ((CachedBodyHttpServletRequest) request).getBody();
+            } else {
+                // Try to read from the request directly
+                // This may fail if the stream has already been consumed
+                try {
+                    StringBuilder sb = new StringBuilder();
+                    try (BufferedReader reader = request.getReader()) {
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            sb.append(line);
+                        }
+                    }
+                    jsonBody = sb.toString();
+                } catch (IllegalStateException e) {
+                    // getReader() has already been called, try to create a cached wrapper
+                    logger.warn("Request body has already been read, attempting to create cached wrapper");
+                    try {
+                        CachedBodyHttpServletRequest cachedRequest = new CachedBodyHttpServletRequest(request);
+                        jsonBody = cachedRequest.getBody();
+                    } catch (Exception ex) {
+                        logger.warn("Failed to create cached request wrapper: {}", ex.getMessage());
+                        return params; // Return empty params if we can't read the body
+                    }
+                }
+            }
+
+            if (jsonBody != null && !jsonBody.trim().isEmpty()) {
+                try {
+                    JSONObject jsonObject = JSON.parseObject(jsonBody);
+                    // Use recursive flattening for better handling of nested structures
+                    Map<String, Object> flattenedParams = new HashMap<>();
+                    for (String key : jsonObject.keySet()) {
+                        Object value = jsonObject.get(key);
+                        processObject(flattenedParams, key, value);
+                    }
+
+                    // Convert flattened object map to string map without length filtering
                     for (Map.Entry<String, Object> entry : flattenedParams.entrySet()) {
                         params.put(entry.getKey(), entry.getValue().toString());
                     }

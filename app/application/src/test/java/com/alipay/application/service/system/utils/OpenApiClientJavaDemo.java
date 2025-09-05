@@ -211,6 +211,7 @@ public class OpenApiClientJavaDemo {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
+                .header("version", "v2")
                 .header("access-key", ACCESS_KEY)
                 .header("timestamp", timestamp)
                 .header("sign", signature)
